@@ -17,8 +17,6 @@ import {
   IconBolt,
   IconMessage2,
   IconRobot,
-  IconCurrencyDollar,
-  IconPencil,
   IconLogout,
   IconLogin,
   IconHome,
@@ -31,19 +29,6 @@ type Navlink = {
   icon?: React.ReactNode | any;
   isExternal?: boolean;
 };
-
-const freeTools = [
-  {
-    href: "https://lab.spaceai.jp/tools/llm-pricing",
-    label: "LLM Pricing Comparison",
-    icon: IconCurrencyDollar,
-  },
-  {
-    href: "https://lab.spaceai.jp/tools/ai-app-generator",
-    label: "AI App Generator",
-    icon: IconRobot,
-  },
-];
 
 const navlinks = [
   { href: "/apps/audio/app", label: "Audio AI", icon: IconMicrophone },
@@ -162,7 +147,6 @@ const Navigation = React.memo(
       <div className="flex flex-col space-y-1 my-10 relative z-40">
         {renderLinks(navlinks, "Demo apps")}
         {renderLinks(landingPages, "Landing pages", true)}
-        {renderLinks(freeTools, "Free tools", true)}
         {renderLinks(otherLinks, "Other", true)}
       </div>
     );
