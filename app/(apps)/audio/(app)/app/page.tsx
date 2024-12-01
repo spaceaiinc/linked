@@ -2,7 +2,6 @@ import { createClient } from "@/lib/utils/supabase/server";
 import RecordVoicePage from "@/components/audio/RecordAudio";
 import PaymentModal from "@/components/paywall/Payment";
 import { toolConfig } from "../../toolConfig";
-import { redirect } from "next/navigation";
 import AudioInfo from "@/components/audio/AudioInfo";
 import YourFiles from "@/components/audio/YourFiles";
 import Login from "@/components/input/login";
