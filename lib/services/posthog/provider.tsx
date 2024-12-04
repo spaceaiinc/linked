@@ -8,10 +8,10 @@ if (
   process.env.NEXT_PUBLIC_POSTHOG_KEY &&
   process.env.NEXT_PUBLIC_POSTHOG_HOST
 ) {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-    capture_pageview: true,
-  });
+  // posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+  //   api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+  //   capture_pageview: true,
+  // });
 }
 
 export function PHProvider({ children }: { children: React.ReactNode }) {
