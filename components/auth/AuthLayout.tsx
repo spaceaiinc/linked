@@ -51,11 +51,11 @@ export default function AuthComponent() {
               )}
               <div>
                 <h1 className="text-xl font-medium mt-8 text-base-content">
-                  Learn Japanese With V Tuber!
+                  Welcome to Space AI Lab
                 </h1>
-                {/* <p className="mt-4 text-sm text-base-content">
+                <p className="mt-4 text-sm text-base-content">
                   Please login or sign up to continue.
-                </p> */}
+                </p>
                 <div className="py-4">
                   <div className="relative group">
                     <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg filter group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 "></div>
