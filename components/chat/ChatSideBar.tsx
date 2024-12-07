@@ -5,7 +5,6 @@ import ChatHistory from "@/components/chat/ChatHistory";
 import { MenuIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "@/components/Logo";
-import { Button } from "@/components/ui/button";
 import Login from "@/components/input/login";
 
 const SidebarWrapper = ({ user }: { user: any }) => {
