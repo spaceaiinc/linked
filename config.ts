@@ -25,6 +25,7 @@ export const companyConfig = {
 };
 
 /// Core Website config
+const productionUrl = process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://lab.spaceai.jp";
 export const companyName = "Space AI";
 export const defaultTitle =
   "Lab - Platform that helps your business grow";
@@ -46,8 +47,7 @@ export const authImage = "/hero.webp";
 // Inside routing
 export const homePage = "/home";
 const getRedirectUrl = () => {
-  const baseUrl = process.env.PRODUCTION_URL || "http://localhost:3000";
-  return `${baseUrl}/auth/confirm?next=/home`;
+  return `${productionUrl}/auth/confirm?next=/home`
 };
 
 export const redirectTo = getRedirectUrl();
