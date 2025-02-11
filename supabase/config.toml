@@ -127,7 +127,7 @@ max_frequency = "1s"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
-enable_signup = true
+enable_signup = false
 # If enabled, users need to confirm their phone number before signing in.
 enable_confirmations = false
 # Template for sending OTP to users
@@ -164,9 +164,9 @@ auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 # `twitter`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.google]
 enabled = true
-client_id = "128992208182-o79ntberponpsqelsf6vhtlgutepvseh.apps.googleusercontent.com""
+client_id = "128992208182-1tvqqnqkjfu0ae1dhe8ut91m88rgunt6.apps.googleusercontent.com"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "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"
+secret = "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"
 # Overrides the default auth redirectUrl.
 redirect_uri = ""
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
