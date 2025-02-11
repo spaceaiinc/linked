@@ -245,6 +245,24 @@ CREATE TABLE public.transcripts (
 
 ALTER TABLE ONLY public.transcripts FORCE ROW LEVEL SECURITY;
 
+--
+-- Name: sender; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.providers (
+    id UUID DEFAULT extensions.UUID_generate_v4() NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('UTC', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('UTC', NOW()),
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+    user_id UUID NOT NULL,
+    type SMALLINT NOT NULL,
+    status SMALLINT NOT NULL,
+    service_id TEXT NOT NULL,
+    name TEXT
+);
+
+-- ALTER TABLE ONLY public.sender FORCE ROW LEVEL SECURITY;
+
 
 --
 -- Name: conversations conversations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
@@ -333,6 +351,13 @@ ALTER TABLE ONLY public.summaries
 ALTER TABLE ONLY public.transcripts
     ADD CONSTRAINT transcripts_pkey PRIMARY KEY (id);
 
+--
+-- Name: providers_ providers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.providers_
+    ADD CONSTRAINT providers__pkey PRIMARY KEY (id);
+
 
 --
 -- Name: conversations conversations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -397,6 +422,13 @@ ALTER TABLE ONLY public.summaries
 ALTER TABLE ONLY public.transcripts
     ADD CONSTRAINT transcripts_recording_id_fkey FOREIGN KEY (recording_id) REFERENCES public.recordings(id) ON DELETE CASCADE;
 
+
+--
+-- Name: providers providers_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.providers
+    ADD CONSTRAINT providers_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- Name: generations AI responses are public and readable by anyone.; Type: POLICY; Schema: public; Owner: -
@@ -571,6 +603,12 @@ CREATE POLICY "Users can select their own transcripts" ON public.transcripts FOR
 
 
 --
+-- Name: providers Users can select their own providers; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can select their own providers" ON public.providers FOR SELECT USING ((auth.uid() = user_id));
+
+--
 -- Name: profiles Users can update own profile.; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -666,6 +704,16 @@ ALTER TABLE public.summaries ENABLE ROW LEVEL SECURITY;
 --
 
 ALTER TABLE public.transcripts ENABLE ROW LEVEL SECURITY;
+
+
+
+--
+-- Name: providers; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.providers ENABLE ROW LEVEL SECURITY;
+
+--
 
 --
 -- PostgreSQL database dump complete

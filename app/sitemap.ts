@@ -1,4 +1,4 @@
-import { allPosts } from "contentlayer/generated";
+import { allPosts } from "@/generated";
 import { type MetadataRoute } from "next";
 import { companyConfig } from "@/config";
 
