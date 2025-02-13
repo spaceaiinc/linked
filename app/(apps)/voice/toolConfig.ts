@@ -24,8 +24,8 @@ export const toolConfig: ToolConfig = {
     title: "Text to speech AI wrapper demo app | Space AI",
     description:
       "Build your own text-to-speech app using ElevenLabsIO! Convert text to speech in 26+ languages and choose over 1000 voices!",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/voice",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/voice",
   },
 
   ////// Paywall

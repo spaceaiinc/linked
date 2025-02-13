@@ -33,35 +33,35 @@ type Navlink = {
 
 const navlinks = [
   { href: "/apps/linkedin/app", label: "LinkedIn", icon: LinkedInLogoIcon },
-  { href: "/apps/audio/app", label: "Audio AI", icon: IconMicrophone },
-  { href: "/apps/llama/app", label: "Groq Llama", icon: IconBolt },
-  { href: "/apps/gpt/app", label: "OpenAI GPT", icon: IconMessage },
-  { href: "/apps/dalle/app", label: "DALL-E", icon: IconPhoto },
-  { href: "/apps/vision/app", label: "Vision AI", icon: IconEye },
-  {
-    href: "/apps/sdxl/app",
-    label: "Stable Diffusion XL",
-    icon: IconPhoto,
-  },
-  {
-    href: "/apps/chat",
-    label: "Chat AI",
-    icon: IconMessage2,
-    isExternal: true,
-  },
-  { href: "/apps/claude", label: "Claude AI", icon: IconRobot },
-  { href: "/apps/pdf", label: "PDF AI", icon: IconFileText },
-  { href: "/apps/voice", label: "Voice AI", icon: IconMicrophone },
+  // { href: "/apps/audio/app", label: "Audio AI", icon: IconMicrophone },
+  // { href: "/apps/llama/app", label: "Groq Llama", icon: IconBolt },
+  // { href: "/apps/gpt/app", label: "OpenAI GPT", icon: IconMessage },
+  // { href: "/apps/dalle/app", label: "DALL-E", icon: IconPhoto },
+  // { href: "/apps/vision/app", label: "Vision AI", icon: IconEye },
+  // {
+  //   href: "/apps/sdxl/app",
+  //   label: "Stable Diffusion XL",
+  //   icon: IconPhoto,
+  // },
+  // {
+  //   href: "/apps/chat",
+  //   label: "Chat AI",
+  //   icon: IconMessage2,
+  //   isExternal: true,
+  // },
+  // { href: "/apps/claude", label: "Claude AI", icon: IconRobot },
+  // { href: "/apps/pdf", label: "PDF AI", icon: IconFileText },
+  // { href: "/apps/voice", label: "Voice AI", icon: IconMicrophone },
 ];
 
-const landingPages = [
-  { href: "/apps/audio", label: "Audio AI", icon: IconMicrophone },
-  { href: "/apps/llama", label: "Groq Llama", icon: IconBolt },
-  { href: "/apps/gpt", label: "OpenAI GPT", icon: IconMessage },
-  { href: "/apps/dalle", label: "DALL-E", icon: IconPhoto },
-  { href: "/apps/vision", label: "Vision AI", icon: IconEye },
-  { href: "/apps/sdxl", label: "Stable Diffusion XL", icon: IconPhoto },
-];
+// const landingPages = [
+//   { href: "/apps/audio", label: "Audio AI", icon: IconMicrophone },
+//   { href: "/apps/llama", label: "Groq Llama", icon: IconBolt },
+//   { href: "/apps/gpt", label: "OpenAI GPT", icon: IconMessage },
+//   { href: "/apps/dalle", label: "DALL-E", icon: IconPhoto },
+//   { href: "/apps/vision", label: "Vision AI", icon: IconEye },
+//   { href: "/apps/sdxl", label: "Stable Diffusion XL", icon: IconPhoto },
+// ];
 
 const Navigation = React.memo(
   ({
@@ -85,16 +85,16 @@ const Navigation = React.memo(
       //   label: "Documentation",
       //   icon: IconFileText,
       // },
-      {
-        href: "https://spaceai.jp",
-        label: "Organization",
-        icon: IconFileText,
-      },
-      {
-        href: "https://github.com/spaceaiinc",
-        label: "GitHub",
-        icon: GitHubLogoIcon,
-      },
+      // {
+      //   href: "https://spaceai.jp",
+      //   label: "Organization",
+      //   icon: IconFileText,
+      // },
+      // {
+      //   href: "https://github.com/spaceaiinc",
+      //   label: "GitHub",
+      //   icon: GitHubLogoIcon,
+      // },
       // {
       //   href: "https://spaceai.lemonsqueezy.com/affiliates",
       //   label: "Affiliates Program",
@@ -158,7 +158,7 @@ const Navigation = React.memo(
     return (
       <div className="flex flex-col space-y-1 my-10 relative z-40">
         {renderLinks(navlinks, "Demo apps")}
-        {renderLinks(landingPages, "Landing pages", true)}
+        {/* {renderLinks(landingPages, "Landing pages", true)} */}
         {renderLinks(otherLinks, "Other", true)}
       </div>
     );

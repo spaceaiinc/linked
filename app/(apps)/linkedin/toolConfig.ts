@@ -21,8 +21,8 @@ export const toolConfig: ToolConfig = {
   metadata: {
     title: 'LinkedIn Automation | Space AI',
     description: 'LinkedIn Automation',
-    og_image: 'https://lab.spaceai.jp/og.png',
-    canonical: 'https://lab.spaceai.jp/apps/linkedin/app',
+    og_image: 'https://linked.spaceai.jp/og.png',
+    canonical: 'https://linked.spaceai.jp/apps/linkedin/app',
   },
 
   ////// Paywall

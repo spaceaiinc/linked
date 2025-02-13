@@ -23,8 +23,8 @@ export const toolConfig: ToolConfig = {
     title: "GPT-4o mini AI wrapper demo app | Space AI",
     description:
       "Build your own GPT-4o Mini AI wrapper in minutes with this demo app that uses OpenAI, LangChain & Supabase.",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/gpt",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/gpt",
   },
 
   ////// Paywall

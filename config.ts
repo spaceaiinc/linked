@@ -4,10 +4,10 @@ export const companyConfig = {
   company: {
     name: "Space AI",
     theme: "default",
-    homeUrl: "https://lab.spaceai.jp",
+    homeUrl: "https://linked.spaceai.jp",
     appUrl: "/",
-    description: "Lab is a platform that helps your business grow.",
-    logo: "/logo.png",
+    description: "Linked is a platform that helps your business grow.",
+    // logo: "/",
     navbarLinks: [],
   },
 
@@ -25,12 +25,12 @@ export const companyConfig = {
 };
 
 /// Core Website config
-const productionUrl = process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://lab.spaceai.jp";
+const productionUrl = process.env.NEXT_PUBLIC_PRODUCTION_URL || "https://linked.spaceai.jp";
 export const companyName = "Space AI";
 export const defaultTitle =
-  "Lab - Platform that helps your business grow";
+  "Linked - Platform that helps your business grow";
 export const defaultDescription =
-  "Lab is a platform that helps your business grow.";
+  "Linked is a platform that helps your business grow.";
 export const defaultKeywords =
   "openai, gpt-3, ai app, ai, artificial intelligence, machine learning, deep learning, nlp, natural language processing, text generation, text completion, text classification, text summarization, text translation, text to speech, speech recognition, image recognition, image generation, image editing, image classification, image segmentation, image enhancement, image compression, image super-resolution, image synthesis, image-to-image translation, image captioning, image colorization, image denoising, image inpainting, image restoration, image style transfer, image watermarking, image recognition, image generation, image editing, image classification, image segmentation, image enhancement, image compression, image super-resolution, image synthesis, image-to-image translation, image captioning, image colorization, image denoising, image inpainting, image restoration, image style transfer, image watermarking";
 export const defaultOgImage = "/og.png";
@@ -38,7 +38,7 @@ export const favicon = "/favicon.ico";
 
 // LEGAL STUFF
 export const privacyPolicyUrl = "https://spaceai.jp/privacy-policy";
-export const tosUrl = "https://spaceai.jp/lab/tos";
+export const tosUrl = "https://spaceai.jp/linked/tos";
 export const securityUrl = "https://spaceai.jp/security";
 
 // Auth

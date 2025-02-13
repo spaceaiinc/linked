@@ -24,8 +24,8 @@ export const toolConfig: ToolConfig = {
     title: "Voice to notes AI wrapper | Space AI",
     description:
       "Build an AI wrapper that generates transcripts from your voice recordings using Whisper on Replicate and summarize them using Llama 3 from Groq.",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/audio",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/audio",
   },
 
   ////// Paywall

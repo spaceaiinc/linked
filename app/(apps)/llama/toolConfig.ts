@@ -23,8 +23,8 @@ export const toolConfig: ToolConfig = {
     title: "Llama 3 AI wrapper demo app | Space AI",
     description:
       "Build your own Llama 3 AI wrapper in minutes with this demo app that uses Groq, LangChain & Supabase.",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/groq/llama",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/groq/llama",
   },
 
   ////// Paywall

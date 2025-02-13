@@ -24,8 +24,8 @@ export const toolConfig: ToolConfig = {
     title: "GPT-4o vision AI wrapper demo application | Space AI",
     description:
       "Build your own GPT-4o vision AI wrapper in minutes with this demo app that uses OpenAI, Cloudflare R2 & Supabase.",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/vision",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/vision",
   },
 
   ////// Paywall

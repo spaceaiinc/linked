@@ -27,7 +27,7 @@ export const toolConfig: ToolConfig = {
     description:
       "Build your own Dalle 3 AI wrapper logo generator in minutes with this demo app that uses OpenAI, Cloudflare R2 & Supabase.",
     og_image: "https://indielogs.com/og-image.png",
-    canonical: "https://lab.spaceai.jp/apps/dalle",
+    canonical: "https://linked.spaceai.jp/apps/dalle",
   },
 
   ////// Payments
