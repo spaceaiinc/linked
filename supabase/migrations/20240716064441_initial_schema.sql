@@ -246,7 +246,7 @@ CREATE TABLE public.transcripts (
 ALTER TABLE ONLY public.transcripts FORCE ROW LEVEL SECURITY;
 
 --
--- Name: sender; Type: TABLE; Schema: public; Owner: -
+-- Name: providers; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.providers (
@@ -257,11 +257,43 @@ CREATE TABLE public.providers (
     user_id UUID NOT NULL,
     type SMALLINT NOT NULL,
     status SMALLINT NOT NULL,
-    service_id TEXT NOT NULL,
-    name TEXT
+    account_id TEXT NOT NULL,
+    public_identifier TEXT,
+    first_name TEXT,
+    last_name TEXT,
+    invitation_message TEXT,
+    keywords TEXT,
+    industry TEXT,
+    location TEXT,
+    profile_language TEXT,
+    network_distance SMALLINT,
+    company TEXT,
+    past_company TEXT,
+    school TEXT,
+    service TEXT,
+    connections_of TEXT,
+    followers_of TEXT,
+    open_to TEXT,
+    advanced_keywords JSONB,
+    invite_hours SMALLINT NOT NULL DEFAULT 18,
+    like_target_account_ids TEXT,
+    like_target_account_hours SMALLINT NOT NULL DEFAULT 18,
+    check_reaction_hours SMALLINT NOT NULL DEFAULT 18,
+    daily_invite_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_invite_usage SMALLINT NOT NULL DEFAULT 0,
+    daily_invite_with_message_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_invite_with_message_usage SMALLINT NOT NULL DEFAULT 0,
+    daily_send_message_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_send_message_usage SMALLINT NOT NULL DEFAULT 0,
+    daily_retrieve_profile_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_retrieve_profile_usage SMALLINT NOT NULL DEFAULT 0,
+    daily_retrieve_post_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_retrieve_post_usage SMALLINT NOT NULL DEFAULT 0,
+    daily_retrieve_company_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_retrieve_company_usage SMALLINT NOT NULL DEFAULT 0
 );
 
--- ALTER TABLE ONLY public.sender FORCE ROW LEVEL SECURITY;
+-- ALTER TABLE ONLY public.providers FORCE ROW LEVEL SECURITY;
 
 
 --
@@ -355,8 +387,8 @@ ALTER TABLE ONLY public.transcripts
 -- Name: providers_ providers_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.providers_
-    ADD CONSTRAINT providers__pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.providers
+    ADD CONSTRAINT providers_pkey PRIMARY KEY (id);
 
 
 --

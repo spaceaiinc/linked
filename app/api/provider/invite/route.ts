@@ -1,13 +1,45 @@
 import { env } from '@/lib/env'
-import { unipileClient } from '@/lib/unipile'
+import { convertJsonToCsv, unipileClient } from '@/lib/unipile'
 import { createClient } from '@/lib/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { UserProfileApiResponse } from 'unipile-node-sdk/dist/types/users/user-profile.types'
+
+// request param
+export type ProviderInvitePostParam = {
+  account_id: string
+  target_account_urls?: string[]
+  export_profile?: boolean
+  limit?: number
+  keywords?: string
+  message?: string
+  industry?: string[]
+  location?: string[]
+  profile_language?: string[]
+  network_distance?: number[]
+  company?: string[]
+  past_company?: string[]
+  school?: string[]
+  service?: string[]
+  connections_of?: string[]
+  followers_of?: string[]
+  open_to?: string[]
+  advanced_keywords?: {
+    first_name?: string
+    last_name?: string
+    title?: string
+    company?: string
+    school?: string
+  }
+}
 
 export async function POST(req: Request) {
   try {
     const {
       account_id,
+      target_account_urls,
+      export_profile,
       keywords,
+      limit,
       message,
       industry,
       location,
@@ -21,33 +53,11 @@ export async function POST(req: Request) {
       followers_of,
       open_to,
       advanced_keywords,
-    }: {
-      account_id: string
-      keywords: string
-      message: string
-      industry?: string[]
-      location?: string[]
-      profile_language?: string[]
-      network_distance?: number[]
-      company?: string[]
-      past_company?: string[]
-      school?: string[]
-      service?: string[]
-      connections_of?: string[]
-      followers_of?: string[]
-      open_to?: string[]
-      advanced_keywords?: {
-        first_name?: string
-        last_name?: string
-        title?: string
-        company?: string
-        school?: string
-      }
-    } = await req.json()
+    }: ProviderInvitePostParam = await req.json()
 
-    if (!account_id || !keywords) {
+    if (!account_id || !target_account_urls || !keywords) {
       return NextResponse.json(
-        { error: 'Keyword and message are required' },
+        { error: 'account_id, keywords and limit are required' },
         { status: 400 }
       )
     }
@@ -79,10 +89,15 @@ export async function POST(req: Request) {
       )
     }
 
-    const url = `https://${env.UNIPILE_DNS}/api/v1/linkedin/search?account_id=${account_id}&limit=10`
+    const url = `https://${
+      env.UNIPILE_DNS
+    }/api/v1/linkedin/search?account_id=${account_id}&limit=${
+      limit ? limit : 10
+    }`
     const options = {
       method: 'POST',
       headers: {
+        'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
         accept: 'application/json',
         'content-type': 'application/json',
       },
@@ -107,30 +122,60 @@ export async function POST(req: Request) {
 
     fetch(url, options)
       .then(async (responseOfSearch) => {
-        if (!responseOfSearch.ok) {
+        if (responseOfSearch.status !== 200) {
           return NextResponse.json(
             { error: 'An error occurred while searching' },
             { status: 500 }
           )
         }
         const dataOfSearch = await responseOfSearch.json()
-        dataOfSearch.items.map(async (item: { id: any }) => {
-          // send invitation
-          const responseOfSendInvitation =
-            await unipileClient.users.sendInvitation({
-              account_id: item.id,
-              provider_id: 'LINKEDIN',
-              message,
-            })
-          console.log('response', responseOfSendInvitation)
-          //           {
-          //   "object": "UserInvitationSent",
-          //   "invitation_id": "string",
-          //   "usage": 0
-          // }
-        })
+        let responseListOfGetProfile: UserProfileApiResponse[] = []
+        dataOfSearch.items.map(
+          async (item: { id: string; public_identifier: string }) => {
+            console.log('item', item)
+            // send invitation
+            const responseOfSendInvitation =
+              await unipileClient.users.sendInvitation({
+                account_id,
+                provider_id: item.id,
+                message,
+              })
+            console.log('responseOfSendInvitation', responseOfSendInvitation)
+            //  {
+            //   "object": "UserInvitationSent",
+            //   "invitation_id": "string",
+            //   "usage": 0
+            // }
+
+            if (export_profile) {
+              // get each profile
+              try {
+                const responseOfGetProfile =
+                  await unipileClient.users.getProfile({
+                    account_id,
+                    identifier: item.public_identifier,
+                    linkedin_sections: [
+                      'experience',
+                      'education',
+                      'languages',
+                      'skills',
+                      'certifications',
+                      'about',
+                    ],
+                  })
+
+                console.log('responseOfGetProfile', responseOfGetProfile)
+
+                responseListOfGetProfile.push(responseOfGetProfile)
+              } catch (error) {
+                console.log(error)
+              }
+            }
+          }
+        )
+        if (responseListOfGetProfile)
+          convertJsonToCsv(responseListOfGetProfile, `output_${account_id}_${new Date().getTime()}.csv`)
       })
-      .then((json) => console.log(json))
       .catch((err) => {
         console.error(err)
         return NextResponse.json(

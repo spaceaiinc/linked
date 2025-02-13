@@ -39,53 +39,83 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
           >
             {field.label}
           </Label>
-          {field.type === "input" && (
+          {field.type === 'input' && (
             <Input
               value={formData[field.name!]}
               onChange={(e) => handleChange(e, field.name!)}
-              type="text"
+              type={field.inputType || 'text'}
               required={field.required}
-              placeholder={field.placeholder || "Enter text"}
+              placeholder={field.placeholder || 'Enter text'}
               id={field.name}
               name={field.name}
               className="w-full"
             />
           )}
 
-          {field.type === "textarea" && (
+          {field.type === 'textarea' && (
             <Textarea
               value={formData[field.name!]}
               onChange={(e) => handleChange(e, field.name!)}
               required={field.required}
-              placeholder={field.placeholder || "Enter text"}
+              placeholder={field.placeholder || 'Enter text'}
               id={field.name}
               name={field.name}
               className="p-2 text-xs w-full"
             />
           )}
-          {field.type === "select" && (
+          {field.type === 'select' && (
             <Select
-              value={formData[field.name!]}
-              onValueChange={(value) =>
-                handleChange(
-                  {
-                    target: { value } as any,
-                  } as React.ChangeEvent<HTMLSelectElement>,
-                  field.name!
-                )
-              }
+              value={formData[field.name!] || ''}
+              onValueChange={(value) => {
+                if (field.multiple) {
+                  const currentValue = formData[field.name!] || '';
+                  const currentValues = currentValue ? currentValue.split(',') : [];
+                  console.log(currentValue);
+                  const newValues = currentValues.includes(value)
+                    ? currentValues.filter(v => v !== value)
+                    : [...currentValues, value];
+                  const newValue = newValues.join(',');
+                  handleChange(
+                    {
+                      target: { value: newValue }
+                    } as React.ChangeEvent<HTMLSelectElement>,
+                    field.name!
+                  );
+                } else {
+                  handleChange(
+                    {
+                      target: { value }
+                    } as React.ChangeEvent<HTMLSelectElement>,
+                    field.name!
+                  );
+                }
+              }}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Please make a selection" />
+                <SelectValue>
+                  {field.multiple 
+                    ? formData[field.name!] || 'Please make a selection'
+                    : undefined
+                  }
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>{field.label}</SelectLabel>
-                  {field.options?.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {option}
-                    </SelectItem>
-                  ))}
+                  {field.options?.map((option) => {
+                    const isSelected = field.multiple 
+                      ? (formData[field.name!] || '').split(',').includes(option)
+                      : formData[field.name!] === option;
+                    return (
+                      <SelectItem 
+                        key={option} 
+                        value={option}
+                        className={isSelected ? 'bg-accent/10' : ''}
+                      >
+                        {option}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectGroup>
               </SelectContent>
             </Select>

@@ -52,6 +52,7 @@ export async function POST(req: Request) {
       const options = {
         method: 'POST',
         headers: {
+          'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
           accept: 'application/json',
           'content-type': 'application/json',
         },

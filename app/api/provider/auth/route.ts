@@ -20,12 +20,13 @@ export async function POST(req: Request) {
     const res = await unipileClient.account.createHostedAuthLink({
       // or reconnect
       type: 'create',
-      expiresOn: '2025-12-22T12:00:00.701Z',
+      // TODO
+      expiresOn: '2026-02-01T12:00:00.701Z',
       api_url: `https://${env.UNIPILE_DNS}`,
       providers: ['LINKEDIN'],
-      // TODO:
-      success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/linkedin`,
-      failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/linkedin`,
+      success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/apps/linkedin/app`,
+      failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/apps/linkedin/app`,
+      name: user.id,
       notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback?user_id=${user.id}`,
     })
 

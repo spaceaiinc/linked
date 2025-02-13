@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import React, { useState, useCallback, useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 import { Heading } from "./Heading";
-import { IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
+import { IconCurrencyDollar, IconLayoutSidebarRightCollapse } from "@tabler/icons-react";
 import { isMobile } from "@/lib/utils";
 import {
   IconMicrophone,
@@ -22,6 +22,7 @@ import {
   IconHome,
 } from "@tabler/icons-react";
 import { User } from "@supabase/supabase-js";
+import { GitHubLogoIcon, LinkedInLogoIcon } from "@radix-ui/react-icons";
 
 type Navlink = {
   href: string;
@@ -31,6 +32,7 @@ type Navlink = {
 };
 
 const navlinks = [
+  { href: "/apps/linkedin/app", label: "LinkedIn", icon: LinkedInLogoIcon },
   { href: "/apps/audio/app", label: "Audio AI", icon: IconMicrophone },
   { href: "/apps/llama/app", label: "Groq Llama", icon: IconBolt },
   { href: "/apps/gpt/app", label: "OpenAI GPT", icon: IconMessage },
@@ -83,6 +85,16 @@ const Navigation = React.memo(
       //   label: "Documentation",
       //   icon: IconFileText,
       // },
+      {
+        href: "https://spaceai.jp",
+        label: "Organization",
+        icon: IconFileText,
+      },
+      {
+        href: "https://github.com/spaceaiinc",
+        label: "GitHub",
+        icon: GitHubLogoIcon,
+      },
       // {
       //   href: "https://spaceai.lemonsqueezy.com/affiliates",
       //   label: "Affiliates Program",

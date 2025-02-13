@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { updateSession } from '@/lib/utils/supabase/middleware'
-import { decrypt } from './lib/jwt'
 
 export async function middleware(request: NextRequest) {
   await updateSession(request)

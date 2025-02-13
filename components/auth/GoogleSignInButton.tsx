@@ -6,6 +6,7 @@ export default function GoogleSignInButton() {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ next: "/" }),
       });
 
       const data = await response.json();

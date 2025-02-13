@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   const supabase = createClient();
   console.log("Supabase client created.");
 
-  const { email } = await request.json();
+  const { email, next } = await request.json();
   console.log(`Received email: ${email}`);
 
   try {
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: redirectTo,
+        emailRedirectTo: redirectTo(next),
       },
     });
 
