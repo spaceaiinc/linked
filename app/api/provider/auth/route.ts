@@ -30,6 +30,9 @@ export async function POST(req: Request) {
       notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
     })
 
+    console.log('Url:', res.url)
+    res.url = res.url.replace('account.unipile.com', 'provider.spaceai.jp')
+
     return NextResponse.json(res)
   } catch (error) {
     console.error('LinkedIn API Error:', error)
