@@ -5,7 +5,7 @@ import { FormFields } from "@/lib/types/toolconfig";
 export const useFormData = (initialFields: FormFields[]) => {
   const initialState = initialFields.reduce(
     (acc: { [key: string]: string }, field: FormFields) => {
-      acc[field.name!] = field.initialValue || ""; // Provide a default empty string if initialValue is undefined
+      acc[field.name!] = field.initialValue || "";
       return acc;
     },
     {}

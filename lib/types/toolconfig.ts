@@ -105,6 +105,8 @@ export interface FormFields {
   type: string;
   placeholder?: string;
   required: boolean;
+  inputType?: string;
   options?: string[];
   initialValue?: string;
+  multiple?: boolean;
 }

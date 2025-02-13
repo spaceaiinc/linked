@@ -164,9 +164,9 @@ auth_token = "env(SUPABASE_AUTH_SMS_TWILIO_AUTH_TOKEN)"
 # `twitter`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.google]
 enabled = true
-client_id = "128992208182-1tvqqnqkjfu0ae1dhe8ut91m88rgunt6.apps.googleusercontent.com"
+client_id = "128992208182-tai4tfgfpm69vpfbb3gd4nid31oauj5h.apps.googleusercontent.com"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
-secret = "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"
+secret = "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"
 # Overrides the default auth redirectUrl.
 redirect_uri = ""
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,

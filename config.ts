@@ -46,8 +46,8 @@ export const authImage = "/hero.webp";
 
 // Inside routing
 export const homePage = "/home";
-const getRedirectUrl = () => {
-  return `${productionUrl}/auth/confirm?next=/home`
+const getRedirectUrl = (next: string) => {
+  return `${productionUrl}/auth/confirm?next=${next}`;
 };
 
-export const redirectTo = getRedirectUrl();
+export const redirectTo = getRedirectUrl;

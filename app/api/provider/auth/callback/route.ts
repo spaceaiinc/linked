@@ -9,6 +9,7 @@ import { createClient } from '@/lib/utils/supabase/server'
 
 export async function POST(req: Request) {
   try {
+    console.log('LinkedIn Callback:', req.body)
     const { status, account_id, name } = await req.json()
 
     if (!status || account_id || name) {
@@ -18,22 +19,24 @@ export async function POST(req: Request) {
       )
     }
 
-    // Get user_id from query param
-    const { searchParams } = new URL(req.url)
-    const user_id = searchParams.get('user_id')
-
-    if (!user_id) {
+    if (status !== 'CREATION_SUCCESS' && status !== 'RECONNECTED') {
       return NextResponse.json(
-        { error: 'user_id is required' },
+        { error: 'Invalid status' },
         { status: 400 }
       )
     }
 
+    let status_code = 0
+    if (status === 'RECONNECTED') {
+      status_code = 1
+    }
+
     const account = {
-      user_id,
+      user_id: name,
       type: 0,
+      daily_limit: 10,
       name,
-      status,
+      status: status_code,
       account_id,
     }
 
