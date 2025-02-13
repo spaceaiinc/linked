@@ -1,7 +1,7 @@
 // app/page.tsx
-import Link from "next/link";
-import { compareDesc, format, parseISO } from "date-fns";
-import { allPosts, Post } from "contentlayer/generated";
+import Link from 'next/link'
+import { compareDesc, format, parseISO } from 'date-fns'
+import { allPosts, Post } from 'contentlayer/generated'
 
 function PostCard(post: Post) {
   return (
@@ -20,7 +20,7 @@ function PostCard(post: Post) {
               dateTime={post.date}
               className="mb-2 block text-xs text-gray-600"
             >
-              {format(parseISO(post.date), "LLLL d, yyyy")}
+              {format(parseISO(post.date), 'LLLL d, yyyy')}
             </time>
           </p>
           <p className="mt-4 text-md sm:text-xl font-bold leading-tight text-gray-900 xl:pr-8">
@@ -46,13 +46,13 @@ function PostCard(post: Post) {
         </Link>
       </div>
     </div>
-  );
+  )
 }
 
 export default function Home() {
   const posts = allPosts.sort((a, b) =>
     compareDesc(new Date(a.date), new Date(b.date))
-  );
+  )
 
   return (
     <div>
@@ -68,7 +68,7 @@ export default function Home() {
             </h1>
             <p className="mt-4 md:mt-8 text-[#878787] max-w-[600px] mx-auto">
               Here come all your amazing blog posts. You can easily add new
-              posts by creating new markdown files in the `blog` directory.{" "}
+              posts by creating new markdown files in the `blog` directory.{' '}
             </p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export default function Home() {
             <PostCard key={idx} {...post} />
           ))}
         </div>
-      </div>{" "}
+      </div>{' '}
     </div>
-  );
+  )
 }

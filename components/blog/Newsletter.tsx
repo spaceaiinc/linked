@@ -1,39 +1,39 @@
-"use client";
-import { useState } from "react";
-import { createClient } from "@/lib/utils/supabase/client";
-import Check from "@/components/alerts/Check";
+'use client'
+import { useState } from 'react'
+import { createClient } from '@/lib/utils/supabase/client'
+import Check from '@/components/alerts/Check'
 
 export default function Newsletter() {
-  const [message, setMessage] = useState("");
-  const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('')
+  const [email, setEmail] = useState('')
+  const [subscribed, setSubscribed] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const validateEmail = (email: string) => {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
-  };
+    const re = /\S+@\S+\.\S+/
+    return re.test(email)
+  }
 
   const handleSubscription = async () => {
     if (!validateEmail(email)) {
-      setMessage("Please enter a valid email!");
-      return;
+      setMessage('Please enter a valid email!')
+      return
     }
-    setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.from("newsletter").insert([{ email }]);
+    setLoading(true)
+    const supabase = createClient()
+    const { error } = await supabase.from('newsletter').insert([{ email }])
     if (error) {
-      if (error.code === "23505") {
-        setMessage("You're already subscribed to the newsletter!");
+      if (error.code === '23505') {
+        setMessage("You're already subscribed to the newsletter!")
       } else {
-        console.error("Error inserting email: ", error);
+        console.error('Error inserting email: ', error)
       }
     } else {
-      setMessage("You have subscribed!");
-      setSubscribed(true);
+      setMessage('You have subscribed!')
+      setSubscribed(true)
     }
-    setLoading(false);
-  };
+    setLoading(false)
+  }
 
   return (
     <>
@@ -57,7 +57,7 @@ export default function Newsletter() {
               onClick={handleSubscription}
               disabled={loading}
             >
-              {loading ? "Loading..." : "Subscribe to newsletter"}
+              {loading ? 'Loading...' : 'Subscribe to newsletter'}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="hidden sm:flex h-5 w-5 ml-2"
@@ -78,5 +78,5 @@ export default function Newsletter() {
         <Check>{message}</Check>
       )}
     </>
-  );
+  )
 }

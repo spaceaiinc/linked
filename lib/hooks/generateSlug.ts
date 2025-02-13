@@ -1,49 +1,49 @@
-import { createClient } from "@/lib/utils/supabase/server";
+import { createClient } from '@/lib/utils/supabase/server'
 
 function slugify(text: string): string {
   return text
     .toString()
     .toLowerCase()
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-")
-    .replace(/^-+/, "")
-    .replace(/-+$/, "");
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
 }
 
 export async function generateUniqueSlug(
   title: string,
   type: string
 ): Promise<string> {
-  const supabase = createClient();
+  const supabase = createClient()
 
-  const baseSlug = slugify(title);
-  let slug = baseSlug;
-  let counter = 0;
-  let isUnique = false;
+  const baseSlug = slugify(title)
+  let slug = baseSlug
+  let counter = 0
+  let isUnique = false
 
   while (!isUnique) {
     const { data, error } = await supabase
-      .from("generations")
-      .select("slug")
-      .eq("slug", counter === 0 ? slug : `${slug}-${counter}`)
-      .eq("type", type)
-      .single();
+      .from('generations')
+      .select('slug')
+      .eq('slug', counter === 0 ? slug : `${slug}-${counter}`)
+      .eq('type', type)
+      .single()
 
-    if (error?.code === "PGRST116") {
+    if (error?.code === 'PGRST116') {
       // No results found, slug is unique
-      isUnique = true;
+      isUnique = true
       if (counter > 0) {
-        slug = `${slug}-${counter}`;
+        slug = `${slug}-${counter}`
       }
     } else if (error) {
-      throw error;
+      throw error
     } else {
       // Slug exists, increment counter
-      counter++;
+      counter++
     }
   }
 
-  return slug;
+  return slug
 }

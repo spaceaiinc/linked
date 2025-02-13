@@ -1,4 +1,4 @@
-import { openai } from "@/lib/openai";
+import { openai } from '@/lib/openai'
 
 export async function generateVisionResponse(
   prompt: any,
@@ -7,20 +7,20 @@ export async function generateVisionResponse(
   systemMessage?: string
 ) {
   try {
-    console.log("GPT Vision request received for image: ", image_url);
+    console.log('GPT Vision request received for image: ', image_url)
     const response = await openai.chat.completions.create({
       model: aiModel,
       messages: [
         {
-          role: "system",
-          content: systemMessage || "You are a helpful assistant. ",
+          role: 'system',
+          content: systemMessage || 'You are a helpful assistant. ',
         },
         {
-          role: "user",
+          role: 'user',
           content: [
-            { type: "text", text: prompt },
+            { type: 'text', text: prompt },
             {
-              type: "image_url",
+              type: 'image_url',
               image_url: {
                 url: image_url,
               },
@@ -28,10 +28,10 @@ export async function generateVisionResponse(
           ],
         },
       ],
-    });
-    return response;
+    })
+    return response
   } catch (error) {
-    console.error("Error with OpenAI request: ", error);
-    throw error;
+    console.error('Error with OpenAI request: ', error)
+    throw error
   }
 }

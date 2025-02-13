@@ -1,72 +1,72 @@
-"use client";
+'use client'
 
-import { FC, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { createClient } from "@/lib/utils/supabase/client";
-import EditChatDialog from "@/components/chat/EditChatModal";
-import { Ellipsis } from "lucide-react";
-import UserActions from "@/components/chat/ChatUserActions";
-import Logo from "@/components/Logo";
+import { FC, useEffect, useState } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { createClient } from '@/lib/utils/supabase/client'
+import EditChatDialog from '@/components/chat/EditChatModal'
+import { Ellipsis } from 'lucide-react'
+import UserActions from '@/components/chat/ChatUserActions'
+import Logo from '@/components/Logo'
 
 interface ChatListProps {
-  user: any;
+  user: any
 }
 
 const ChatList: FC<ChatListProps> = ({ user }) => {
-  const [chats, setChats] = useState<any[]>([]);
-  const [selectedChat, setSelectedChat] = useState<any | null>(null);
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
-  const supabase = createClient();
+  const [chats, setChats] = useState<any[]>([])
+  const [selectedChat, setSelectedChat] = useState<any | null>(null)
+  const [isModalOpen, setModalOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+  const pathname = usePathname()
+  const supabase = createClient()
 
   useEffect(() => {
     const fetchChats = async () => {
       if (user) {
         const { data, error } = await supabase
-          .from("conversations")
-          .select("id, title, created_at")
-          .eq("user_id", user.id)
-          .eq("type", "chat")
-          .order("created_at", { ascending: false });
+          .from('conversations')
+          .select('id, title, created_at')
+          .eq('user_id', user.id)
+          .eq('type', 'chat')
+          .order('created_at', { ascending: false })
 
-        if (!error) setChats(data);
+        if (!error) setChats(data)
       }
-      setLoading(false);
-    };
-    fetchChats();
-  }, [supabase, user]);
+      setLoading(false)
+    }
+    fetchChats()
+  }, [supabase, user])
 
   useEffect(() => {
-    const chatId = pathname.split("/").pop();
-    const activeChat = chats.find((chat) => chat.id === chatId);
-    setSelectedChat(activeChat);
-  }, [pathname, chats]);
+    const chatId = pathname.split('/').pop()
+    const activeChat = chats.find((chat) => chat.id === chatId)
+    setSelectedChat(activeChat)
+  }, [pathname, chats])
 
   const handleChatClick = (id: string) => {
-    router.push(`/chat/${id}`);
-  };
+    router.push(`/chat/${id}`)
+  }
 
   const handleEditClick = (chat: any) => {
-    setSelectedChat(chat);
-    setModalOpen(true);
-  };
+    setSelectedChat(chat)
+    setModalOpen(true)
+  }
 
   const handleModalClose = () => {
-    setModalOpen(false);
-    setSelectedChat(null);
-  };
+    setModalOpen(false)
+    setSelectedChat(null)
+  }
 
   const handleTitleUpdate = (updatedChat: any) => {
     setChats(
       chats.map((chat) => (chat.id === updatedChat.id ? updatedChat : chat))
-    );
-  };
+    )
+  }
 
   const handleNewChat = (newChat: any) => {
-    setChats([newChat, ...chats]);
-  };
+    setChats([newChat, ...chats])
+  }
 
   return (
     <div className="w-64 text-base-content flex flex-col justify-between">
@@ -93,8 +93,8 @@ const ChatList: FC<ChatListProps> = ({ user }) => {
                   key={chat.id}
                   className={`group flex justify-between items-center mb-2 px-2 cursor-pointer rounded-md transition-all duration-300 ${
                     selectedChat?.id === chat.id
-                      ? "bg-primary/10"
-                      : "hover:bg-primary/10"
+                      ? 'bg-primary/10'
+                      : 'hover:bg-primary/10'
                   }`}
                   onClick={() => handleChatClick(chat.id)}
                 >
@@ -103,8 +103,8 @@ const ChatList: FC<ChatListProps> = ({ user }) => {
                   </div>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation();
-                      handleEditClick(chat);
+                      e.stopPropagation()
+                      handleEditClick(chat)
                     }}
                     className="hover:bg-primary/20 p-1 rounded-xl text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   >
@@ -135,7 +135,7 @@ const ChatList: FC<ChatListProps> = ({ user }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ChatList;
+export default ChatList

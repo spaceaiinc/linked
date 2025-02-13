@@ -1,19 +1,19 @@
 // useFormData.ts
-import { useState } from "react";
-import { FormFields } from "@/lib/types/toolconfig";
+import { useState } from 'react'
+import { FormFields } from '@/lib/types/toolconfig'
 
 export const useFormData = (initialFields: FormFields[]) => {
   const initialState = initialFields.reduce(
     (acc: { [key: string]: string }, field: FormFields) => {
-      acc[field.name!] = field.initialValue || "";
-      return acc;
+      acc[field.name!] = field.initialValue || ''
+      return acc
     },
     {}
-  );
+  )
 
   const [formData, setFormData] = useState<{ [key: string]: string }>(
     initialState
-  );
+  )
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -21,8 +21,8 @@ export const useFormData = (initialFields: FormFields[]) => {
     >,
     fieldName: string
   ) => {
-    setFormData((prevState) => ({ ...prevState, [fieldName]: e.target.value }));
-  };
+    setFormData((prevState) => ({ ...prevState, [fieldName]: e.target.value }))
+  }
 
-  return [formData, handleChange] as const;
-};
+  return [formData, handleChange] as const
+}

@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react'
 
 interface LoadingModalProps {
-  isOpen: boolean;
+  isOpen: boolean
 }
 
 const LoadingModal: React.FC<LoadingModalProps> = ({ isOpen }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed p-4 inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -14,7 +14,7 @@ const LoadingModal: React.FC<LoadingModalProps> = ({ isOpen }) => {
         <p className="mt-4 text-sm text-black">Processing, please wait...</p>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoadingModal;
+export default LoadingModal

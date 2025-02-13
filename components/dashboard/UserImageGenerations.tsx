@@ -1,32 +1,32 @@
-"use client";
+'use client'
 
-import { Heading } from "@/components/dashboard/Heading";
-import { Paragraph } from "@/components/dashboard/Paragraph";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { format } from "date-fns";
+import { Heading } from '@/components/dashboard/Heading'
+import { Paragraph } from '@/components/dashboard/Paragraph'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { useState, useEffect } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { format } from 'date-fns'
 
 interface Generation {
-  id: string;
-  created_at: string;
+  id: string
+  created_at: string
   input_data: {
-    prompt?: string;
-    ideaDescription?: string;
-    negativePrompt?: string;
-  };
-  output_data: string;
-  type: string;
+    prompt?: string
+    ideaDescription?: string
+    negativePrompt?: string
+  }
+  output_data: string
+  type: string
 }
 
 interface UserGenerationsProps {
-  generations: Generation[];
-  generationType: "replicate/sdxl" | "openai/dalle";
+  generations: Generation[]
+  generationType: 'replicate/sdxl' | 'openai/dalle'
 }
 
 function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return format(date, "yyyy-MM-dd HH:mm:ss");
+  const date = new Date(dateString)
+  return format(date, 'yyyy-MM-dd HH:mm:ss')
 }
 
 export function UserGenerations({
@@ -35,59 +35,59 @@ export function UserGenerations({
 }: UserGenerationsProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
-  );
-  const [currentPage, setCurrentPage] = useState(1);
-  const imagesPerPage = 24;
+  )
+  const [currentPage, setCurrentPage] = useState(1)
+  const imagesPerPage = 24
 
   const filteredGenerations = generations.filter((gen) => {
-    if (generationType === "replicate/sdxl") {
-      return gen.type.includes("sdxl");
-    } else if (generationType === "openai/dalle") {
-      return gen.type.includes("dalle");
+    if (generationType === 'replicate/sdxl') {
+      return gen.type.includes('sdxl')
+    } else if (generationType === 'openai/dalle') {
+      return gen.type.includes('dalle')
     }
-    return false;
-  });
+    return false
+  })
 
   const paginatedGenerations = filteredGenerations.slice(
     (currentPage - 1) * imagesPerPage,
     currentPage * imagesPerPage
-  );
+  )
 
   // Reset selectedImageIndex when page changes
   useEffect(() => {
-    setSelectedImageIndex(null);
-  }, [currentPage]);
+    setSelectedImageIndex(null)
+  }, [currentPage])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedImageIndex !== null) {
-        if (e.key === "ArrowLeft") {
+        if (e.key === 'ArrowLeft') {
           setSelectedImageIndex((prev) => {
-            if (prev === null) return paginatedGenerations.length - 1;
-            return prev > 0 ? prev - 1 : paginatedGenerations.length - 1;
-          });
-        } else if (e.key === "ArrowRight") {
+            if (prev === null) return paginatedGenerations.length - 1
+            return prev > 0 ? prev - 1 : paginatedGenerations.length - 1
+          })
+        } else if (e.key === 'ArrowRight') {
           setSelectedImageIndex((prev) => {
-            if (prev === null) return 0;
-            return prev < paginatedGenerations.length - 1 ? prev + 1 : 0;
-          });
-        } else if (e.key === "Escape") {
-          setSelectedImageIndex(null);
+            if (prev === null) return 0
+            return prev < paginatedGenerations.length - 1 ? prev + 1 : 0
+          })
+        } else if (e.key === 'Escape') {
+          setSelectedImageIndex(null)
         }
       }
-    };
+    }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedImageIndex, paginatedGenerations]);
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [selectedImageIndex, paginatedGenerations])
 
   const generationTitle =
-    generationType === "replicate/sdxl" ? "SDXL" : "DALL-E";
+    generationType === 'replicate/sdxl' ? 'SDXL' : 'DALL-E'
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    setSelectedImageIndex(null);
-  };
+    setCurrentPage(newPage)
+    setSelectedImageIndex(null)
+  }
 
   return (
     <div className="space-y-8 mx-auto pb-20">
@@ -129,10 +129,10 @@ export function UserGenerations({
                           onClick={() =>
                             setSelectedImageIndex((prev) => {
                               if (prev === null)
-                                return paginatedGenerations.length - 1;
+                                return paginatedGenerations.length - 1
                               return prev > 0
                                 ? prev - 1
-                                : paginatedGenerations.length - 1;
+                                : paginatedGenerations.length - 1
                             })
                           }
                           className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/50 rounded-lg p-2 shadow-md hover:bg-gray-100 transition-colors duration-200"
@@ -142,10 +142,10 @@ export function UserGenerations({
                         <button
                           onClick={() =>
                             setSelectedImageIndex((prev) => {
-                              if (prev === null) return 0;
+                              if (prev === null) return 0
                               return prev < paginatedGenerations.length - 1
                                 ? prev + 1
-                                : 0;
+                                : 0
                             })
                           }
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/50 rounded-lg p-2 shadow-md hover:bg-gray-100 transition-colors duration-200"
@@ -161,16 +161,16 @@ export function UserGenerations({
                     {formatDate(gen.created_at)}
                   </p>
                   <p className="font-medium">
-                    {generationType === "openai/dalle"
-                      ? "Idea Description:"
-                      : "Prompt:"}
+                    {generationType === 'openai/dalle'
+                      ? 'Idea Description:'
+                      : 'Prompt:'}
                   </p>
                   <p className="text-sm text-gray-700">
-                    {generationType === "openai/dalle"
+                    {generationType === 'openai/dalle'
                       ? gen.input_data.ideaDescription
                       : gen.input_data.prompt}
                   </p>
-                  {generationType === "replicate/sdxl" &&
+                  {generationType === 'replicate/sdxl' &&
                     gen.input_data.negativePrompt && (
                       <>
                         <p className="font-medium">Negative Prompt:</p>
@@ -202,7 +202,7 @@ export function UserGenerations({
               {[
                 ...Array(Math.ceil(filteredGenerations.length / imagesPerPage)),
               ].map((_, i) => {
-                const pageNumber = i + 1;
+                const pageNumber = i + 1
                 if (
                   pageNumber === 1 ||
                   pageNumber ===
@@ -217,20 +217,20 @@ export function UserGenerations({
                       disabled={currentPage === pageNumber}
                       className={`px-3 py-2 rounded ${
                         currentPage === pageNumber
-                          ? "bg-primary text-white"
-                          : "bg-gray-200"
+                          ? 'bg-primary text-white'
+                          : 'bg-gray-200'
                       }`}
                     >
                       {pageNumber}
                     </button>
-                  );
+                  )
                 } else if (
                   pageNumber === currentPage - 3 ||
                   pageNumber === currentPage + 3
                 ) {
-                  return <span key={i}>...</span>;
+                  return <span key={i}>...</span>
                 }
-                return null;
+                return null
               })}
               <button
                 onClick={() =>
@@ -268,5 +268,5 @@ export function UserGenerations({
         </>
       )}
     </div>
-  );
+  )
 }

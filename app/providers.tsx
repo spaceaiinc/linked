@@ -1,21 +1,21 @@
-import { Toaster } from "@/components/ui/toaster";
-import { PHProvider } from "@/lib/services/posthog/provider";
+import { Toaster } from '@/components/ui/toaster'
+import { PHProvider } from '@/lib/services/posthog/provider'
 
 // This needs to be declared so we can use Pixel tracking in the app
 declare global {
   interface Window {
-    fbq: any;
-    ttq: any;
+    fbq: any
+    ttq: any
   }
 }
 
 export default async function Providers({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="min-h-screen bg-white">
       <PHProvider>
         <body>
           <Toaster />
@@ -23,5 +23,5 @@ export default async function Providers({
         </body>
       </PHProvider>
     </html>
-  );
+  )
 }

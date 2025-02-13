@@ -1,9 +1,9 @@
-import { TextToSpeechTab } from "@/components/voice/TextToSpeechTab";
-import AppInfo from "@/components/voice/AppInfo";
-import Login from "@/components/input/login";
+import { TextToSpeechTab } from '@/components/voice/TextToSpeechTab'
+import AppInfo from '@/components/voice/AppInfo'
+import Login from '@/components/input/login'
 
 interface InputCaptureProps {
-  userEmail?: string;
+  userEmail?: string
 }
 
 export default function VoiceLayout({ userEmail }: InputCaptureProps) {
@@ -25,5 +25,5 @@ export default function VoiceLayout({ userEmail }: InputCaptureProps) {
         </div>
       </div>
     </section>
-  );
+  )
 }

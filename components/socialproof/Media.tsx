@@ -35,5 +35,5 @@ export default function Media({ seen = true }) {
         />
       </div>
     </div>
-  );
+  )
 }

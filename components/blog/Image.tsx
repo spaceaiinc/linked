@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react'
 
 interface ImageProps {
-  src: string;
-  alt?: string;
-  text: string;
+  src: string
+  alt?: string
+  text: string
 }
 
 const Image: React.FC<ImageProps> = ({ src, alt, text }) => {
@@ -18,7 +18,7 @@ const Image: React.FC<ImageProps> = ({ src, alt, text }) => {
         {text}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Image;
+export default Image

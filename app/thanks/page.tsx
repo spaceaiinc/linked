@@ -6,7 +6,7 @@ export default function Hero() {
           Thank you
           <span
             className="bg-primary text-primary-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap"
-            style={{ display: "inline-block", transform: "rotate(-1deg)" }}
+            style={{ display: 'inline-block', transform: 'rotate(-1deg)' }}
           >
             for your purchase 🎉
           </span>
@@ -17,5 +17,5 @@ export default function Hero() {
         </h2>
       </section>
     </>
-  );
+  )
 }

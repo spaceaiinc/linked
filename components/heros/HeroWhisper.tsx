@@ -1,9 +1,9 @@
-import SocialProof from "@/components/socialproof/SocialProof";
+import SocialProof from '@/components/socialproof/SocialProof'
 
 export default function Hero() {
   return (
     <>
-      {" "}
+      {' '}
       <section className="text-white bg-primary">
         <div className="grid lg:grid-cols-2 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-12 py-10 lg:py-24">
           <div className="lg:hidden items-center justify-center text-center gap-10">
@@ -11,7 +11,7 @@ export default function Hero() {
               Turn voice recordings into
               <span
                 className="bg-base-100 text-base-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap"
-                style={{ display: "inline-block", transform: "rotate(-1deg)" }}
+                style={{ display: 'inline-block', transform: 'rotate(-1deg)' }}
               >
                 structured notes
               </span>
@@ -23,7 +23,7 @@ export default function Hero() {
               Turn voice recordings into
               <span
                 className="bg-base-100 text-base-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap"
-                style={{ display: "inline-block", transform: "rotate(-1deg)" }}
+                style={{ display: 'inline-block', transform: 'rotate(-1deg)' }}
               >
                 structured notes
               </span>
@@ -74,8 +74,8 @@ export default function Hero() {
 
             <div className="flex flex-col justify-center lg:justify-start">
               <SocialProof
-                text={"Justin Bieber likes this"}
-                color={"text-white"}
+                text={'Justin Bieber likes this'}
+                color={'text-white'}
               />
             </div>
           </div>
@@ -90,5 +90,5 @@ export default function Hero() {
         </div>
       </section>
     </>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-import React from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import React from 'react'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectTrigger,
@@ -9,19 +9,19 @@ import {
   SelectValue,
   SelectLabel,
   SelectGroup,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { type FormFields } from "@/lib/types/toolconfig";
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
+import { type FormFields } from '@/lib/types/toolconfig'
 
 interface RenderFieldsProps {
-  fields: FormFields[];
-  formData: { [key: string]: string };
+  fields: FormFields[]
+  formData: { [key: string]: string }
   handleChange: (
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >,
     fieldName: string
-  ) => void;
+  ) => void
 }
 
 export const RenderFields: React.FC<RenderFieldsProps> = ({
@@ -68,53 +68,56 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
               value={formData[field.name!] || ''}
               onValueChange={(value) => {
                 if (field.multiple) {
-                  const currentValue = formData[field.name!] || '';
-                  const currentValues = currentValue ? currentValue.split(',') : [];
-                  console.log(currentValue);
+                  const currentValue = formData[field.name!] || ''
+                  const currentValues = currentValue
+                    ? currentValue.split(',')
+                    : []
+                  console.log(currentValue)
                   const newValues = currentValues.includes(value)
-                    ? currentValues.filter(v => v !== value)
-                    : [...currentValues, value];
-                  const newValue = newValues.join(',');
+                    ? currentValues.filter((v) => v !== value)
+                    : [...currentValues, value]
+                  const newValue = newValues.join(',')
                   handleChange(
                     {
-                      target: { value: newValue }
+                      target: { value: newValue },
                     } as React.ChangeEvent<HTMLSelectElement>,
                     field.name!
-                  );
+                  )
                 } else {
                   handleChange(
                     {
-                      target: { value }
+                      target: { value },
                     } as React.ChangeEvent<HTMLSelectElement>,
                     field.name!
-                  );
+                  )
                 }
               }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue>
-                  {field.multiple 
+                  {field.multiple
                     ? formData[field.name!] || 'Please make a selection'
-                    : undefined
-                  }
+                    : undefined}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectLabel>{field.label}</SelectLabel>
                   {field.options?.map((option) => {
-                    const isSelected = field.multiple 
-                      ? (formData[field.name!] || '').split(',').includes(option)
-                      : formData[field.name!] === option;
+                    const isSelected = field.multiple
+                      ? (formData[field.name!] || '')
+                          .split(',')
+                          .includes(option)
+                      : formData[field.name!] === option
                     return (
-                      <SelectItem 
-                        key={option} 
+                      <SelectItem
+                        key={option}
                         value={option}
                         className={isSelected ? 'bg-accent/10' : ''}
                       >
                         {option}
                       </SelectItem>
-                    );
+                    )
                   })}
                 </SelectGroup>
               </SelectContent>
@@ -123,5 +126,5 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
         </div>
       ))}
     </>
-  );
-};
+  )
+}

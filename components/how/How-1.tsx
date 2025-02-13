@@ -1,19 +1,19 @@
 export default function How() {
   const steps = [
     {
-      title: "step 1:",
-      description: "Upload your image & choose your desired output format",
+      title: 'step 1:',
+      description: 'Upload your image & choose your desired output format',
     },
     {
-      title: "step 2:",
+      title: 'step 2:',
       description:
-        "Our AI analyzes your image and generates an image description",
+        'Our AI analyzes your image and generates an image description',
     },
     {
-      title: "step 3:",
-      description: "Get your image description. Wohooooo! $100k MRR incoming",
+      title: 'step 3:',
+      description: 'Get your image description. Wohooooo! $100k MRR incoming',
     },
-  ];
+  ]
 
   return (
     <>
@@ -62,5 +62,5 @@ export default function How() {
         </div>
       </div>
     </>
-  );
+  )
 }

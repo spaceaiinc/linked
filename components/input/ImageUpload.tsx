@@ -1,63 +1,63 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import { FileUpload } from "@/components/ui/image-upload";
-import { Button } from "@/components/ui/button";
-import { X, Loader2 } from "lucide-react";
+import React, { useState } from 'react'
+import { FileUpload } from '@/components/ui/image-upload'
+import { Button } from '@/components/ui/button'
+import { X, Loader2 } from 'lucide-react'
 
 const ImageUpload: React.FC<any> = ({
   currentImg = null,
   uploadConfig,
   setImageUrl,
 }) => {
-  const [uploading, setUploading] = useState<boolean>(false);
-  const [src, setSrc] = useState<string | null>(currentImg);
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [src, setSrc] = useState<string | null>(currentImg)
 
   const handleFileUpload = async (files: File[]) => {
     if (files.length === 0) {
-      alert("You must select an image to upload.");
-      return;
+      alert('You must select an image to upload.')
+      return
     }
 
-    const file = files[0];
+    const file = files[0]
 
-    if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image file.");
-      return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file.')
+      return
     }
 
     try {
-      setUploading(true);
+      setUploading(true)
 
-      let formData = new FormData();
-      formData.append("image", file);
-      formData.append("uploadPath", uploadConfig.path);
+      let formData = new FormData()
+      formData.append('image', file)
+      formData.append('uploadPath', uploadConfig.path)
 
-      const response = await fetch("/api/vision/upload", {
-        method: "POST",
+      const response = await fetch('/api/vision/upload', {
+        method: 'POST',
         body: formData,
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Failed to upload image: ${response.statusText}`);
+        throw new Error(`Failed to upload image: ${response.statusText}`)
       }
 
-      const data = await response.json();
-      console.log("Upload response:", data);
-      setSrc(data.url);
-      setImageUrl(data.url);
+      const data = await response.json()
+      console.log('Upload response:', data)
+      setSrc(data.url)
+      setImageUrl(data.url)
     } catch (error) {
-      console.error("Upload error:", error);
-      alert((error as Error).message);
+      console.error('Upload error:', error)
+      alert((error as Error).message)
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   const removeImage = () => {
-    setSrc(null);
-    setImageUrl(null);
-  };
+    setSrc(null)
+    setImageUrl(null)
+  }
 
   return (
     <div className="mb-4 w-full max-w-4xl mx-auto min-h-96 border border-dashed bg-white dark:bg-black border-neutral-200 dark:border-neutral-800 rounded-lg relative overflow-hidden">
@@ -85,7 +85,7 @@ const ImageUpload: React.FC<any> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default ImageUpload;
+export default ImageUpload

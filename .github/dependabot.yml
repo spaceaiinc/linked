@@ -5,20 +5,20 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: 'npm' # See documentation for possible values
+    directory: '/' # Location of package manifests
     ignore:
-      - dependency-name: "*"
-        update-types: [ "version-update:semver-major" ]
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
     schedule:
-      interval: "weekly"
-      time: "09:00"
+      interval: 'weekly'
+      time: '09:00'
       # Use Japan Standard Time (UTC +09:00)
-      timezone: "Asia/Tokyo"
-    target-branch: "main"
+      timezone: 'Asia/Tokyo'
+    target-branch: 'main'
     labels:
-      - "dependencies"
+      - 'dependencies'
     allow:
       # Allow both direct and indirect updates for all packages
-      - dependency-type: "all"
+      - dependency-type: 'all'
     versioning-strategy: increase-if-necessary

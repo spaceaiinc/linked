@@ -1,15 +1,15 @@
 export default function OutputHero({
-  title = "Response generated",
-  subtitle = "Here comes your subtitle",
-  textColor = "text-primary-content",
+  title = 'Response generated',
+  subtitle = 'Here comes your subtitle',
+  textColor = 'text-primary-content',
 }: {
-  title?: string;
-  subtitle?: string;
-  textColor?: string;
+  title?: string
+  subtitle?: string
+  textColor?: string
 }) {
   return (
     <>
-      {" "}
+      {' '}
       <div className={`relative ${textColor} bg-primary`}>
         <div className="absolute inset-x-0 bottom-0">
           <svg
@@ -53,5 +53,5 @@ export default function OutputHero({
         </div>
       </div>
     </>
-  );
+  )
 }

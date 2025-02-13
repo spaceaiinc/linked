@@ -1,17 +1,17 @@
-import React, { useState } from "react";
+import React, { useState } from 'react'
 
 interface AuthFormProps {
-  onEmailSubmit: (email: string) => void;
-  isLoading: boolean;
+  onEmailSubmit: (email: string) => void
+  isLoading: boolean
 }
 
 export default function AuthForm({ onEmailSubmit, isLoading }: AuthFormProps) {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('')
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onEmailSubmit(email);
-  };
+    event.preventDefault()
+    onEmailSubmit(email)
+  }
 
   return (
     <form onSubmit={handleSubmit}>
@@ -32,7 +32,7 @@ export default function AuthForm({ onEmailSubmit, isLoading }: AuthFormProps) {
         title="Send magic link"
         type="submit"
         className={`btn bg-primary hover:bg-primary/70 rounded-xl text-white w-full p-3 font-medium ${
-          isLoading ? "bg-primary/80" : ""
+          isLoading ? 'bg-primary/80' : ''
         }`}
         role="button"
       >
@@ -73,8 +73,8 @@ export default function AuthForm({ onEmailSubmit, isLoading }: AuthFormProps) {
             </g>
           </svg>
         )}
-        {isLoading ? "Loading..." : "Send Magic Link"}
+        {isLoading ? 'Loading...' : 'Send Magic Link'}
       </button>
     </form>
-  );
+  )
 }

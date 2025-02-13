@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { TrashIcon } from "@radix-ui/react-icons";
+import React, { useState } from 'react'
+import { formatDistanceToNow } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { TrashIcon } from '@radix-ui/react-icons'
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table'
 import {
   Pagination,
   PaginationContent,
@@ -17,7 +17,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination'
 
 import {
   Dialog,
@@ -26,46 +26,46 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
 
 interface YourFilesProps {
-  documents: any[];
+  documents: any[]
 }
 
 const YourFiles: React.FC<YourFilesProps> = ({ documents }) => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedDoc, setSelectedDoc] = useState<any>(null);
-  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [selectedDoc, setSelectedDoc] = useState<any>(null)
+  const itemsPerPage = 5
 
   const sortedDocuments = [...documents].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  )
 
-  const totalPages = Math.ceil(sortedDocuments.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedDocuments.length / itemsPerPage)
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   const currentDocuments = sortedDocuments.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
+  )
 
   const handleDelete = async (documentId: string) => {
-    const res = await fetch("/api/pdf/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/pdf/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ documentId }),
-    });
+    })
     if (res.ok) {
       // Refresh the documents list or handle the UI update
-      setSelectedDoc(null);
+      setSelectedDoc(null)
       // Assuming you have a way to refresh the documents list, e.g., refetching from the server
-      window.location.reload();
+      window.location.reload()
     }
-  };
+  }
 
   return (
     <div>
@@ -104,7 +104,7 @@ const YourFiles: React.FC<YourFilesProps> = ({ documents }) => {
                     {formatDistanceToNow(new Date(doc.created_at))} ago
                   </TableCell>
                   <TableCell className="hidden md:table-cell text-center text-sm text-gray-500">
-                    {doc.size ? `${doc.size} MB` : "N/A"}
+                    {doc.size ? `${doc.size} MB` : 'N/A'}
                   </TableCell>
                   <TableCell>
                     <Dialog>
@@ -175,7 +175,7 @@ const YourFiles: React.FC<YourFilesProps> = ({ documents }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default YourFiles;
+export default YourFiles

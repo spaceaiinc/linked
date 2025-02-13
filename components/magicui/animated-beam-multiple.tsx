@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import { IconOpenAI, Icons } from "@/components/icons";
-import { cn } from "@/lib/utils";
-import { AnimatedBeam } from "@/components/magicui/animated-beam";
-import React, { forwardRef, useRef } from "react";
-import { UserIcon } from "lucide-react";
-import { IconPdf } from "@tabler/icons-react";
+import { IconOpenAI, Icons } from '@/components/icons'
+import { cn } from '@/lib/utils'
+import { AnimatedBeam } from '@/components/magicui/animated-beam'
+import React, { forwardRef, useRef } from 'react'
+import { UserIcon } from 'lucide-react'
+import { IconPdf } from '@tabler/icons-react'
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -15,24 +15,24 @@ const Circle = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-border bg-white p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)]",
+        'z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 border-border bg-white p-3 shadow-[0_0_20px_-12px_rgba(0,0,0,0.8)]',
         className
       )}
     >
       {children}
     </div>
-  );
-});
+  )
+})
 
 export function AnimatedBeamMultipleInputDemo() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const div1Ref = useRef<HTMLDivElement>(null);
-  const div2Ref = useRef<HTMLDivElement>(null);
-  const div3Ref = useRef<HTMLDivElement>(null);
-  const div4Ref = useRef<HTMLDivElement>(null);
-  const div5Ref = useRef<HTMLDivElement>(null);
-  const div6Ref = useRef<HTMLDivElement>(null);
-  const div7Ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const div1Ref = useRef<HTMLDivElement>(null)
+  const div2Ref = useRef<HTMLDivElement>(null)
+  const div3Ref = useRef<HTMLDivElement>(null)
+  const div4Ref = useRef<HTMLDivElement>(null)
+  const div5Ref = useRef<HTMLDivElement>(null)
+  const div6Ref = useRef<HTMLDivElement>(null)
+  const div7Ref = useRef<HTMLDivElement>(null)
 
   return (
     <div
@@ -87,5 +87,5 @@ export function AnimatedBeamMultipleInputDemo() {
         gradientStopColor="#272c34"
       />
     </div>
-  );
+  )
 }

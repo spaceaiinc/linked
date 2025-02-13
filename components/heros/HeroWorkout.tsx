@@ -1,9 +1,9 @@
-import SocialProof from "@/components/socialproof/SocialProof";
+import SocialProof from '@/components/socialproof/SocialProof'
 
 export default function Hero() {
   return (
     <>
-      {" "}
+      {' '}
       <section className="text-neutral bg-primary">
         <div className="grid lg:grid-cols-2 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-12 py-10 lg:py-24">
           <div className="lg:hidden items-center justify-center text-center gap-10">
@@ -73,13 +73,13 @@ export default function Hero() {
 
             <div className="flex flex-col justify-center lg:justify-start">
               <SocialProof
-                text={"Trusted by Chris Bumstead"}
-                color={"text-white"}
+                text={'Trusted by Chris Bumstead'}
+                color={'text-white'}
               />
             </div>
           </div>
         </div>
       </section>
     </>
-  );
+  )
 }

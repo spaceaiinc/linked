@@ -1,16 +1,16 @@
-import { allPosts } from "contentlayer/generated";
-import { useMDXComponent } from "next-contentlayer2/hooks";
-import type { MDXComponents } from "mdx/types";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Hero from "@/components/blog/Hero";
-import Info from "@/components/alerts/Info";
-import Idea from "@/components/alerts/Idea";
-import Image from "@/components/blog/Image";
-import Card from "@/components/blog/Card";
-import Check from "@/components/alerts/Check";
-import Newsletter from "@/components/blog/Newsletter";
-import { companyConfig } from "@/config";
+import { allPosts } from 'contentlayer/generated'
+import { useMDXComponent } from 'next-contentlayer2/hooks'
+import type { MDXComponents } from 'mdx/types'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import Hero from '@/components/blog/Hero'
+import Info from '@/components/alerts/Info'
+import Idea from '@/components/alerts/Idea'
+import Image from '@/components/blog/Image'
+import Card from '@/components/blog/Card'
+import Check from '@/components/alerts/Check'
+import Newsletter from '@/components/blog/Newsletter'
+import { companyConfig } from '@/config'
 
 // Custom MDX components.
 const mdxComponents: MDXComponents = {
@@ -46,25 +46,25 @@ const mdxComponents: MDXComponents = {
   Image,
   Card,
   Newsletter,
-};
+}
 
 export async function generateStaticParams() {
   return allPosts.map((post) => ({
     slug: post._raw.flattenedPath,
-  }));
+  }))
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: { slug: string }
 }) {
-  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug);
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
   if (!post) {
-    return;
+    return
   }
 
-  const canonicalUrl = `${companyConfig.company.homeUrl}/blog/${params.slug}`;
+  const canonicalUrl = `${companyConfig.company.homeUrl}/blog/${params.slug}`
 
   return {
     title: post.title,
@@ -72,8 +72,8 @@ export async function generateMetadata({
     openGraph: {
       title: post.title,
       description: post.subtitle,
-      locale: "en_US",
-      type: "article",
+      locale: 'en_US',
+      type: 'article',
       images: [
         {
           url: post.image,
@@ -82,25 +82,25 @@ export async function generateMetadata({
       ],
     },
     twitter: {
-      card: "summary_large_image",
+      card: 'summary_large_image',
       title: post.title,
       description: post.subtitle,
     },
     alternates: {
       canonical: canonicalUrl,
     },
-  };
+  }
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
   // Find the post for the current page.
-  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug);
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
 
   // 404 if the post does not exist.
-  if (!post) notFound();
+  if (!post) notFound()
 
   // Parse the MDX file via the useMDXComponent hook.
-  const MDXContent = useMDXComponent(post.body.code);
+  const MDXContent = useMDXComponent(post.body.code)
 
   return (
     <>
@@ -115,5 +115,5 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <MDXContent components={mdxComponents} />
       </article>
     </>
-  );
+  )
 }

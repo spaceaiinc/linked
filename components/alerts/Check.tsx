@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 const Check: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -20,7 +20,7 @@ const Check: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Check;
+export default Check

@@ -1,36 +1,36 @@
-"use client";
+'use client'
 
-import { useState, useEffect, useRef } from "react";
-import ChatHistory from "@/components/chat/ChatHistory";
-import { MenuIcon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import Logo from "@/components/Logo";
-import Login from "@/components/input/login";
+import { useState, useEffect, useRef } from 'react'
+import ChatHistory from '@/components/chat/ChatHistory'
+import { MenuIcon } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Logo from '@/components/Logo'
+import Login from '@/components/input/login'
 
 const SidebarWrapper = ({ user }: { user: any }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const sidebarRef = useRef<HTMLDivElement>(null)
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
       sidebarRef.current &&
       !sidebarRef.current.contains(event.target as Node)
     ) {
-      setSidebarOpen(false);
+      setSidebarOpen(false)
     }
-  };
+  }
 
   useEffect(() => {
     if (sidebarOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside)
     } else {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [sidebarOpen]);
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [sidebarOpen])
 
   const sidebarContent = (
     <div className="w-64 text-base-content flex flex-col justify-between bg-white shadow-lg h-full">
@@ -49,7 +49,7 @@ const SidebarWrapper = ({ user }: { user: any }) => {
         )}
       </div>
     </div>
-  );
+  )
 
   return (
     <>
@@ -64,9 +64,9 @@ const SidebarWrapper = ({ user }: { user: any }) => {
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div
-            initial={{ x: "-100%" }}
+            initial={{ x: '-100%' }}
             animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
+            exit={{ x: '-100%' }}
             transition={{ duration: 0.3 }}
             className="fixed inset-0 z-40 md:hidden"
           >
@@ -76,7 +76,7 @@ const SidebarWrapper = ({ user }: { user: any }) => {
       </AnimatePresence>
       <div className="hidden md:flex md:relative">{sidebarContent}</div>
     </>
-  );
-};
+  )
+}
 
-export default SidebarWrapper;
+export default SidebarWrapper

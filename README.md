@@ -15,6 +15,7 @@ In order to use build tools, you will need to download and install Node.js. If N
 ## Getting Started
 
 1. Clone
+
 ```bash
 git clone https://github.com/spaceaiinc/corporate.git
 ```
@@ -22,11 +23,13 @@ git clone https://github.com/spaceaiinc/corporate.git
 2. Get env.local file from Admin
 
 3. Install Deps
+
 ```bash
 npm install
 ```
 
 4. Run the development server:
+
 ```bash
 npm run dev
 ```

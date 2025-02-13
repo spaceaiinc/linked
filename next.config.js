@@ -1,4 +1,4 @@
-const { withContentlayer } = require("next-contentlayer2");
+const { withContentlayer } = require('next-contentlayer2')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -7,11 +7,11 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/apps/:path*",
-        destination: "/:path*",
+        source: '/apps/:path*',
+        destination: '/:path*',
       },
-    ];
+    ]
   },
-};
+}
 
-module.exports = withContentlayer(nextConfig);
+module.exports = withContentlayer(nextConfig)

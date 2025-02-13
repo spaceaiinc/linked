@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import posthog from "posthog-js";
-import { PostHogProvider } from "posthog-js/react";
+import posthog from 'posthog-js'
+import { PostHogProvider } from 'posthog-js/react'
 
 if (
-  typeof window !== "undefined" &&
+  typeof window !== 'undefined' &&
   process.env.NEXT_PUBLIC_POSTHOG_KEY &&
   process.env.NEXT_PUBLIC_POSTHOG_HOST
 ) {
@@ -15,5 +15,5 @@ if (
 }
 
 export function PHProvider({ children }: { children: React.ReactNode }) {
-  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+  return <PostHogProvider client={posthog}>{children}</PostHogProvider>
 }

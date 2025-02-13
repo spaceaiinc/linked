@@ -1,3 +1,3 @@
-import { LoopsClient } from "loops";
+import { LoopsClient } from 'loops'
 
-export const loops = new LoopsClient(process.env.LOOPS_API_KEY!);
+export const loops = new LoopsClient(process.env.LOOPS_API_KEY!)

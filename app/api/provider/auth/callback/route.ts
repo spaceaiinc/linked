@@ -20,10 +20,7 @@ export async function POST(req: Request) {
     }
 
     if (status !== 'CREATION_SUCCESS' && status !== 'RECONNECTED') {
-      return NextResponse.json(
-        { error: 'Invalid status' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
     let status_code = 0

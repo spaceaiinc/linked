@@ -1,16 +1,16 @@
-import { format, parseISO } from "date-fns";
+import { format, parseISO } from 'date-fns'
 
 interface HeroProps {
-  title: string;
-  subtitle: string;
-  image: string;
-  date: string;
+  title: string
+  subtitle: string
+  image: string
+  date: string
 }
 
 export default function Hero({ title, subtitle, image, date }: HeroProps) {
   return (
     <>
-      {" "}
+      {' '}
       <section className="text-primary-content bg-primary">
         <div className="grid lg:grid-cols-2 max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-12 py-10">
           <div className="lg:hidden items-center justify-center text-center gap-10">
@@ -32,7 +32,7 @@ export default function Hero({ title, subtitle, image, date }: HeroProps) {
               dateTime={date}
               className="mb-1 text-xs text-primary-content/80"
             >
-              {format(parseISO(date), "LLLL d, yyyy")}
+              {format(parseISO(date), 'LLLL d, yyyy')}
             </time>
             <h1 className="hidden lg:block font-extrabold text-4xl tracking-tight leading-tight">
               {title}
@@ -62,5 +62,5 @@ export default function Hero({ title, subtitle, image, date }: HeroProps) {
         </div>
       </section>
     </>
-  );
+  )
 }

@@ -1,29 +1,29 @@
 // Part 1: Setup and initial rendering
-import React from "react";
-import SocialProof from "@/components/socialproof/SocialProof";
+import React from 'react'
+import SocialProof from '@/components/socialproof/SocialProof'
 
 export default function Pricing() {
   const pricing = [
     {
       duration: "😅 The 'I Guess This Will Do' Plan",
       displayPrice: true,
-      highlight: "Meh",
+      highlight: 'Meh',
       action: false,
-      previousPrice: "10",
-      price: "420",
+      previousPrice: '10',
+      price: '420',
       benefits: [
-        "Our stuff, but like, not as good",
+        'Our stuff, but like, not as good',
         "One (1) half-hearted 'good job' from our CEO",
-        "Unlimited use of our mediocre customer support",
-        "Access to our library of mildly entertaining memes",
+        'Unlimited use of our mediocre customer support',
+        'Access to our library of mildly entertaining memes',
         "A free e-book: 'How to Be Kind of Okay at Things'",
       ],
       notIncluded: [
-        "Guaranteed success (or even moderate success)",
+        'Guaranteed success (or even moderate success)',
         "Personalized coaching (unless you're really annoying)",
         "Free pizza (unless you're gluten-free, then it's on you)",
       ],
-      link: "#",
+      link: '#',
       buttonText: "I guess I'll take this one",
       subscriptionInfo:
         "It's fine, I guess. 30-day money-back guarantee (no questions asked, unless you're just trolling us)",
@@ -32,30 +32,30 @@ export default function Pricing() {
     {
       duration: "🏀 The 'I'm a Baller' Plan",
       displayPrice: true,
-      highlight: " Baller",
+      highlight: ' Baller',
       action: false,
-      previousPrice: "100",
-      price: "42000",
+      previousPrice: '100',
+      price: '42000',
       benefits: [
         "Everything from the 'VIP' plan, but on steroids",
         "A personalized 'Hello, [Name]' from our CEO, in person, with a hug",
-        "Dedicated customer support (24/7, even on holidays)",
+        'Dedicated customer support (24/7, even on holidays)',
         "Access to our exclusive 'How to Make a Fortune in 30 Days or Less' webinar",
-        "A complimentary private jet consultation to discuss your brand strategy",
-        "A personalized meet-and-greet with Elon Musk (or someone who looks like him)",
-        "One (1) free unicorn (actual, magical unicorn not guaranteed)",
+        'A complimentary private jet consultation to discuss your brand strategy',
+        // "A personalized meet-and-greet with Elon Musk (or someone who looks like him)",
+        'One (1) free unicorn (actual, magical unicorn not guaranteed)',
       ],
       notIncluded: [
-        "A guaranteed Nobel Prize in Physics",
-        "A personalized invitation to the Met Gala",
-        "A side hustle as a professional superhero",
+        'A guaranteed Nobel Prize in Physics',
+        'A personalized invitation to the Met Gala',
+        'A side hustle as a professional superhero',
       ],
-      link: "#",
-      buttonText: "Make it rain (money, that is)",
+      link: '#',
+      buttonText: 'Make it rain (money, that is)',
       subscriptionInfo:
         "The whole shebang. 30-day money-back guarantee (but let's be real, you're not going to need it)",
     },
-  ];
+  ]
 
   return (
     <section id="pricing" className="bg-accent text-accent-content pt-10 pb-12">
@@ -63,24 +63,24 @@ export default function Pricing() {
         <div className="mt-8 max-w-3xl mx-auto">
           <div className="max-md:px-8 max-w-3xl">
             <h2 className="font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight mb-2">
-              We have prices.{" "}
+              We have prices.{' '}
               <p className="italic text-md font-light ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
                 (good prices, the best prices)
               </p>
-            </h2>{" "}
+            </h2>{' '}
             <p className="mt-4 md:mt-8 text-accent-content max-w-[600px] mx-auto">
               Our prices are so good, you'll wonder why you ever paid for
-              anything else. You'd be crazy not to buy it.{" "}
+              anything else. You'd be crazy not to buy it.{' '}
             </p>
           </div>
-        </div>{" "}
+        </div>{' '}
         <div className="mt-10 flex justify-center">
           <div className="mt-10 flex flex-col md:flex-row justify-center items-center">
             {pricing.map((plan) => (
               <div
                 key={plan.duration}
                 className={`bg-white border-base-200 mx-auto md:mx-2 mb-5 rounded-xl w-80 p-8 border ${
-                  plan.action ? "border-base-200 shadow" : ""
+                  plan.action ? 'border-base-200 shadow' : ''
                 }`}
               >
                 <h3
@@ -189,10 +189,10 @@ export default function Pricing() {
         </div>
         <div className="mt-10 pb-10 flex justify-center">
           <div className="flex flex-col">
-            <SocialProof text={"Trusted by Elon Musk"} color={"text-white"} />
+            <SocialProof text={''} color={'text-white'} />
           </div>
         </div>
       </div>
     </section>
-  );
+  )
 }

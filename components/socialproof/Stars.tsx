@@ -1,16 +1,16 @@
-import React from "react";
+import React from 'react'
 
 export default function LandingBest({
-  color = "text-base-content",
-  text = "Trusted by 200+ founders",
+  color = 'text-base-content',
+  text = 'Trusted by 200+ founders',
 }) {
   const avatars = [
-    "https://randomuser.me/api/portraits/men/43.jpg",
-    "https://randomuser.me/api/portraits/men/22.jpg",
-    "https://randomuser.me/api/portraits/men/94.jpg",
-    "https://randomuser.me/api/portraits/men/59.jpg",
-    "https://randomuser.me/api/portraits/men/17.jpg",
-  ];
+    'https://randomuser.me/api/portraits/men/43.jpg',
+    'https://randomuser.me/api/portraits/men/22.jpg',
+    'https://randomuser.me/api/portraits/men/94.jpg',
+    'https://randomuser.me/api/portraits/men/59.jpg',
+    'https://randomuser.me/api/portraits/men/17.jpg',
+  ]
 
   return (
     <div className="flex items-center text-center space-x-4 pb-3">
@@ -42,16 +42,16 @@ export default function LandingBest({
           <span
             className="text-primary-content font-bold px-2 bg-primary"
             style={{
-              display: "inline-block",
-              transform: "rotate(-1deg)",
+              display: 'inline-block',
+              transform: 'rotate(-1deg)',
             }}
           >
             🎁 EARLY BIRD DEAL - $100 off
-          </span>{" "}
+          </span>{' '}
           <br />
           for the next 10 customers!
         </p>
       </div>
     </div>
-  );
+  )
 }

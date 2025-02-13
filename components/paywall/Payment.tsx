@@ -1,52 +1,52 @@
-import Section from "@/components/Section";
-import { tosUrl } from "@/config";
-import { ArrowRightIcon } from "@radix-ui/react-icons";
-import { CheckIcon } from "lucide-react";
+import Section from '@/components/Section'
+import { tosUrl } from '@/config'
+import { ArrowRightIcon } from '@radix-ui/react-icons'
+import { CheckIcon } from 'lucide-react'
 
 export default function PaymentModal() {
   const pricing = [
     {
-      duration: "50 credits",
+      duration: '50 credits',
       highlight: false,
       previousPrice: 20,
       price: 10,
       benefits: [
-        "Structured LLM Generator (GPT)",
-        "Structured LLM Generator (LlaMA)",
-        "SDXL Studio",
-        "DALL-E Studio",
-        "GPT-4o Vision App",
-        "Voice to text (Whisper)",
-        "Chat",
-        "Chat with PDF",
+        'Structured LLM Generator (GPT)',
+        'Structured LLM Generator (LlaMA)',
+        'SDXL Studio',
+        'DALL-E Studio',
+        'GPT-4o Vision App',
+        'Voice to text (Whisper)',
+        'Chat',
+        'Chat with PDF',
       ],
-      link: "https://spaceai.lemonsqueezy.com/buy/98070e65-52b1-4208-88a2-176c4ee8688d",
-      buttonText: "Buy credits",
+      link: 'https://spaceai.lemonsqueezy.com/buy/98070e65-52b1-4208-88a2-176c4ee8688d',
+      buttonText: 'Buy credits',
       subscriptionInfo:
-        "Each generation costs 5 credits, regardless of the model. Good for 10 tests.",
+        'Each generation costs 5 credits, regardless of the model. Good for 10 tests.',
     },
 
     {
-      duration: "100 credits",
+      duration: '100 credits',
       highlight: true,
       previousPrice: 40,
       price: 15,
       benefits: [
-        "Structured LLM Generator (GPT)",
-        "Structured LLM Generator (LlaMA)",
-        "SDXL Studio",
-        "DALL-E Studio",
-        "GPT-4o Vision App",
-        "Voice to text (Whisper)",
-        "Chat",
-        "Chat with PDF",
+        'Structured LLM Generator (GPT)',
+        'Structured LLM Generator (LlaMA)',
+        'SDXL Studio',
+        'DALL-E Studio',
+        'GPT-4o Vision App',
+        'Voice to text (Whisper)',
+        'Chat',
+        'Chat with PDF',
       ],
-      link: "https://spaceai.lemonsqueezy.com/buy/d69ee93a-1070-4820-bec8-cce8b7d6de7d",
-      buttonText: "Buy credits",
+      link: 'https://spaceai.lemonsqueezy.com/buy/d69ee93a-1070-4820-bec8-cce8b7d6de7d',
+      buttonText: 'Buy credits',
       subscriptionInfo:
-        "Each generation costs 5 credits, regardless of the model. Good for 20 tests.",
+        'Each generation costs 5 credits, regardless of the model. Good for 20 tests.',
     },
-  ];
+  ]
 
   return (
     <Section>
@@ -57,7 +57,7 @@ export default function PaymentModal() {
               Your
               <span className="bg-primary text-primary-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
                 free trial credits
-              </span>{" "}
+              </span>{' '}
               have run out
             </h2>
             <p className="mt-4 md:mt-8 text-base-content max-w-[600px] mx-auto">
@@ -74,7 +74,7 @@ export default function PaymentModal() {
                 <div
                   key={index}
                   className={`bg-white mx-auto md:mx-2 mb-5 rounded-xl w-80 p-8 border border-base-200 ${
-                    plan.highlight ? "shadow" : ""
+                    plan.highlight ? 'shadow' : ''
                   }`}
                 >
                   <h3
@@ -132,10 +132,10 @@ export default function PaymentModal() {
             </div>
           </div>
           <p className="mt-4 text-center text-xs text-base-content/60">
-            Please make sure to make the purchase{" "}
+            Please make sure to make the purchase{' '}
             <span className="underline">with the same email</span> as the one
             you're using for this account. When making a purchase, you agree to
-            the{" "}
+            the{' '}
             <a href={tosUrl} className="underline" target="_blank">
               terms of service.
             </a>
@@ -143,5 +143,5 @@ export default function PaymentModal() {
         </div>
       </div>
     </Section>
-  );
+  )
 }

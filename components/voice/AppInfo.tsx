@@ -1,13 +1,13 @@
-import AppInfo from "@/components/input/AppInfo";
-import { AnimatedBeamOpenAI } from "@/components/magicui/animated-beam-bi-directional";
-import { IconOpenAI } from "@/components/icons";
+import AppInfo from '@/components/input/AppInfo'
+import { AnimatedBeamOpenAI } from '@/components/magicui/animated-beam-bi-directional'
+import { IconOpenAI } from '@/components/icons'
 import {
   GearIcon,
   Link1Icon,
   PaddingIcon,
   RocketIcon,
-} from "@radix-ui/react-icons";
-import { BookIcon, SpeakerIcon, VolumeIcon } from "lucide-react";
+} from '@radix-ui/react-icons'
+import { BookIcon, SpeakerIcon, VolumeIcon } from 'lucide-react'
 
 export default function VoiceAppInfo() {
   return (
@@ -51,7 +51,7 @@ export default function VoiceAppInfo() {
             <PaddingIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The main frontend logic is found in the{" "}
+            The main frontend logic is found in the{' '}
             <code>app/(apps)/voice</code> folder. Components used are found in
             the <code>components/voice</code> folder.
           </span>
@@ -70,7 +70,7 @@ export default function VoiceAppInfo() {
             <Link1Icon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API endpoints for text-to-speech can be found in{" "}
+            The API endpoints for text-to-speech can be found in{' '}
             <code>app/api/(apps)/voice/*</code>. There are 4 endpoints: (1) get
             available voices, (2) get available models, (3) generate speech and
             (4) upload the audio.
@@ -102,5 +102,5 @@ export default function VoiceAppInfo() {
         </li>
       </ul>
     </AppInfo>
-  );
+  )
 }

@@ -1,21 +1,21 @@
-"use client";
+'use client'
 
-import { useState, ReactElement } from "react";
-import Upload from "@/components//input/ImageUpload";
-import { useFormData } from "@/lib/hooks/useFormData";
-import { generateAIResponse } from "@/lib/hooks/generateAIResponse";
-import { RenderFields } from "@/components/input/FormFields";
-import { type ToolConfig } from "@/lib/types/toolconfig";
-import AppInfo from "@/components/input/AppInfo";
-import { LoaderCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import Login from "@/components/input/login";
+import { useState, ReactElement } from 'react'
+import Upload from '@/components//input/ImageUpload'
+import { useFormData } from '@/lib/hooks/useFormData'
+import { generateAIResponse } from '@/lib/hooks/generateAIResponse'
+import { RenderFields } from '@/components/input/FormFields'
+import { type ToolConfig } from '@/lib/types/toolconfig'
+import AppInfo from '@/components/input/AppInfo'
+import { LoaderCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Login from '@/components/input/login'
 
 interface InputCaptureProps {
-  emptyStateComponent: ReactElement;
-  toolConfig: ToolConfig;
-  userEmail?: string;
-  credits?: number;
+  emptyStateComponent: ReactElement
+  toolConfig: ToolConfig
+  userEmail?: string
+  credits?: number
 }
 
 export default function InputCapture({
@@ -24,36 +24,36 @@ export default function InputCapture({
   userEmail,
   credits: initialCredits,
 }: InputCaptureProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [credits, setCredits] = useState(initialCredits ?? undefined);
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null)
+  const [credits, setCredits] = useState(initialCredits ?? undefined)
 
-  const [formData, handleChange] = useFormData(toolConfig.fields!);
+  const [formData, handleChange] = useFormData(toolConfig.fields!)
   const [generateResponse, loading] = generateAIResponse(
     toolConfig,
-    userEmail || "",
+    userEmail || '',
     imageUrl,
     setGeneratedImage
-  );
+  )
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
     if (credits !== undefined && toolConfig.credits !== undefined) {
       if (credits < toolConfig.credits || credits < 1) {
-        window.location.reload();
-        return;
+        window.location.reload()
+        return
       }
     }
-    await generateResponse(formData, event);
+    await generateResponse(formData, event)
     if (credits !== undefined && toolConfig.credits !== undefined) {
       setCredits((prevCredits) => {
         const updatedCredits = prevCredits
           ? prevCredits - toolConfig.credits
-          : undefined;
-        return updatedCredits;
-      });
+          : undefined
+        return updatedCredits
+      })
     }
-  };
+  }
 
   return (
     <section className="pb-20 w-full mx-auto">
@@ -68,7 +68,7 @@ export default function InputCapture({
               <form onSubmit={handleSubmit} className="w-full">
                 <div className="flex flex-col items-center">
                   <div className="w-full mb-5">
-                    {toolConfig.type === "vision" && (
+                    {toolConfig.type === 'vision' && (
                       <Upload
                         uploadConfig={toolConfig.upload}
                         setImageUrl={setImageUrl}
@@ -84,7 +84,7 @@ export default function InputCapture({
                 <div className="mb-5 flex justify-center">
                   <Button
                     disabled={
-                      (!imageUrl && toolConfig.type === "vision") || loading
+                      (!imageUrl && toolConfig.type === 'vision') || loading
                     }
                     type="submit"
                     className="bg-accent hover:bg-accent/80 text-white w-full"
@@ -104,16 +104,16 @@ export default function InputCapture({
           )}
         </div>
         <div className="w-full md:w-1/2">
-          {toolConfig.type === "gpt" ||
-          toolConfig.type === "grok" ||
-          toolConfig.type === "groq" ||
-          toolConfig.type === "claude" ||
-          toolConfig.type === "vision" ? (
+          {toolConfig.type === 'gpt' ||
+          toolConfig.type === 'grok' ||
+          toolConfig.type === 'groq' ||
+          toolConfig.type === 'claude' ||
+          toolConfig.type === 'vision' ? (
             emptyStateComponent
-          ) : (toolConfig.type === "sdxl" || toolConfig.type === "dalle") &&
+          ) : (toolConfig.type === 'sdxl' || toolConfig.type === 'dalle') &&
             !generatedImage ? (
             emptyStateComponent
-          ) : (toolConfig.type === "sdxl" || toolConfig.type === "dalle") &&
+          ) : (toolConfig.type === 'sdxl' || toolConfig.type === 'dalle') &&
             generatedImage ? (
             <AppInfo title="Your image has been generated.">
               <img
@@ -125,8 +125,8 @@ export default function InputCapture({
               </p>
             </AppInfo>
           ) : null}
-        </div>{" "}
+        </div>{' '}
       </div>
     </section>
-  );
+  )
 }

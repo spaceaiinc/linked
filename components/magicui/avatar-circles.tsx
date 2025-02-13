@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils'
 
 interface AvatarCirclesProps {
-  className?: string;
-  numPeople?: number;
+  className?: string
+  numPeople?: number
 }
 
 export default function AvatarCircles({
@@ -12,7 +12,7 @@ export default function AvatarCircles({
   className,
 }: AvatarCirclesProps) {
   return (
-    <div className={cn("z-10 flex -space-x-4 rtl:space-x-reverse", className)}>
+    <div className={cn('z-10 flex -space-x-4 rtl:space-x-reverse', className)}>
       <img
         className="h-10 w-10 rounded-full border-2 border-white dark:border-gray-800"
         src="https://avatars.githubusercontent.com/u/16860528"
@@ -32,5 +32,5 @@ export default function AvatarCircles({
         +{numPeople}
       </a>
     </div>
-  );
+  )
 }

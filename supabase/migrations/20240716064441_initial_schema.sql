@@ -38,8 +38,8 @@ CREATE FUNCTION public.handle_new_user() RETURNS trigger
     LANGUAGE plpgsql SECURITY DEFINER
     AS $$
 begin
-  insert into public.profiles (id, full_name, avatar_url, email)
-  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url', new.email);
+  insert into public.profiles (id, full_name, avatar_url, username, email)
+  values (new.id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url', new.email, new.email);
   return new;
 end;
 $$;
@@ -158,14 +158,16 @@ CREATE TABLE public.newsletter (
 
 CREATE TABLE public.profiles (
     id uuid NOT NULL,
-    updated_at timestamp with time zone,
+    updated_at timestamp with time zone not null DEFAULT now(),
     username text,
     full_name text,
+    last_name text,
+    first_name text,
     avatar_url text,
     email text,
     purchase text,
-    credits smallint DEFAULT '20'::smallint,
-    CONSTRAINT username_length CHECK ((char_length(username) >= 3))
+    type smallint DEFAULT '0'::smallint,
+    credits smallint DEFAULT '20'::smallint
 );
 
 
@@ -251,9 +253,9 @@ ALTER TABLE ONLY public.transcripts FORCE ROW LEVEL SECURITY;
 
 CREATE TABLE public.providers (
     id UUID DEFAULT extensions.UUID_generate_v4() NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('UTC', NOW()),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('UTC', NOW()),
-    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
+    deleted_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NULL,
     user_id UUID NOT NULL,
     type SMALLINT NOT NULL,
     status SMALLINT NOT NULL,
@@ -350,6 +352,13 @@ ALTER TABLE ONLY public.profiles
 
 ALTER TABLE ONLY public.profiles
     ADD CONSTRAINT profiles_username_key UNIQUE (username);
+
+--
+-- Name: profiles profiles_username_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.profiles
+    ADD CONSTRAINT profiles_email_key UNIQUE (email);
 
 
 --

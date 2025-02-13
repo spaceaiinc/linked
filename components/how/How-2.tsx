@@ -1,34 +1,34 @@
-import React from "react";
+import React from 'react'
 
 interface StepDetails {
-  title: string;
-  subtitle: string;
-  image?: string;
+  title: string
+  subtitle: string
+  image?: string
 }
 
 const stepOne: StepDetails = {
-  title: "Fill in business information",
+  title: 'Fill in business information',
   subtitle:
-    "Fill in some information about your business to get started. Please.",
+    'Fill in some information about your business to get started. Please.',
   image:
-    "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-};
+    'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+}
 
 const stepTwo: StepDetails = {
-  title: "Our AI takes action",
+  title: 'Our AI takes action',
   subtitle:
-    "We use cutting-edge AI technology, developed by leading AI research labs. Yes, we are an OpenAI wrapper.",
+    'We use cutting-edge AI technology, developed by leading AI research labs. Yes, we are an OpenAI wrapper.',
   image:
-    "https://images.unsplash.com/photo-1677756119517-756a188d2d94?q=80&w=2050&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-};
+    'https://images.unsplash.com/photo-1677756119517-756a188d2d94?q=80&w=2050&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+}
 
 const stepThree: StepDetails = {
-  title: "Get your marketing plan",
+  title: 'Get your marketing plan',
   subtitle:
     "Your AI marketing plan will be generated in seconds. And you'll become instantly rich.",
   image:
-    "https://images.unsplash.com/photo-1533750349088-cd871a92f312?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-};
+    'https://images.unsplash.com/photo-1533750349088-cd871a92f312?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+}
 
 export default function How() {
   return (
@@ -78,14 +78,14 @@ export default function How() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function renderStep(step: StepDetails, stepNumber: number) {
   return (
     <div
       className={`py-12 flex flex-col sm:flex-row justify-center ${
-        stepNumber % 2 === 0 ? "sm:flex-row-reverse" : ""
+        stepNumber % 2 === 0 ? 'sm:flex-row-reverse' : ''
       }`}
     >
       <div className="flex items-center sm:w-1/2">
@@ -115,5 +115,5 @@ function renderStep(step: StepDetails, stepNumber: number) {
         </div>
       )}
     </div>
-  );
+  )
 }
