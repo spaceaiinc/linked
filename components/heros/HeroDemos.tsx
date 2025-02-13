@@ -22,7 +22,7 @@ export default function Hero() {
     });
 
     // Scroll to Pricing
-    window.location.href = "https://lab.spaceai.jp/#pricing";
+    window.location.href = "https://linked.spaceai.jp/#pricing";
   };
 
   return (

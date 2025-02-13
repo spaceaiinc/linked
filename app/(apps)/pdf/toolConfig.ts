@@ -24,8 +24,8 @@ export const toolConfig: ToolConfig = {
     title: "Ask your PDF AI wrapper demo app | Space AI",
     description:
       "Build your own chat with a PDF app using OpenAI, LangChain and Supabase vector embeddings. Ask questions to your PDF!",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/pdf",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/pdf",
   },
 
   ////// Paywall

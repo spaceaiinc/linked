@@ -23,8 +23,8 @@ export const toolConfig: ToolConfig = {
     title: "Claude 3.5 Sonnet AI Wrapper | Space AI",
     description:
       "Build your own Claude 3.5 Sonnet AI wrapper in minutes with this demo app that uses Anthropic, LangChain & Supabase.",
-    og_image: "https://lab.spaceai.jp/og.png",
-    canonical: "https://lab.spaceai.jp/apps/claude",
+    og_image: "https://linked.spaceai.jp/og.png",
+    canonical: "https://linked.spaceai.jp/apps/claude",
   },
 
   ////// Paywall

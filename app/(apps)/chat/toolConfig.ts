@@ -24,8 +24,8 @@ export const toolConfig: ToolConfig = {
     title: "Build a chat bot using GPT-4o mini | Space AI",
     description:
       "Build your own chat bot GPT wrapper using OpenAI's GPT-4o mini (or GPT-4o), LangChain and Supabase for memory.",
-    og_image: "https://lab./og.png",
-    canonical: "https://lab.spaceai.jp/apps/chat",
+    og_image: "https://linked./og.png",
+    canonical: "https://linked.spaceai.jp/apps/chat",
   },
 
   ////// Payments

@@ -25,7 +25,7 @@ export const toolConfig: ToolConfig = {
     description:
       "Build your own SDXL AI wrapper image generator in minutes with this demo app that uses Replicate, Cloudflare R2 & Supabase.",
     og_image: "https://indielogs.com/og-image.png",
-    canonical: "https://lab.spaceai.jp/apps/sdxl",
+    canonical: "https://linked.spaceai.jp/apps/sdxl",
   },
 
   ////// Paywall
