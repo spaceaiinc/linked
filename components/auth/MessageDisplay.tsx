@@ -1,20 +1,20 @@
-import React from "react";
+import React from 'react'
 
 interface MessageDisplayProps {
-  message: string;
-  messageType: string;
+  message: string
+  messageType: string
 }
 
 export default function MessageDisplay({
   message,
   messageType,
 }: MessageDisplayProps) {
-  const isSuccess = messageType === "success";
+  const isSuccess = messageType === 'success'
 
   return (
     <div
       className={`mt-10 flex justify-center w-full ${
-        isSuccess ? "text-green-500" : "text-red-500"
+        isSuccess ? 'text-green-500' : 'text-red-500'
       }`}
     >
       <div className="flex flex-col justify-center items-center">
@@ -52,5 +52,5 @@ export default function MessageDisplay({
         <div className={`text-sm font-medium mt-2`}>{message}</div>
       </div>
     </div>
-  );
+  )
 }

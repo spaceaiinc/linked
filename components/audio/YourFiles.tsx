@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { TrashIcon } from "@radix-ui/react-icons";
+import React, { useState } from 'react'
+import { formatDistanceToNow } from 'date-fns'
+import { Button } from '@/components/ui/button'
+import { TrashIcon } from '@radix-ui/react-icons'
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table'
 import {
   Pagination,
   PaginationContent,
@@ -19,7 +19,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination'
 import {
   Dialog,
   DialogTrigger,
@@ -27,44 +27,44 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog'
 
 interface YourFilesProps {
-  recordings: any[];
+  recordings: any[]
 }
 
 const YourFiles: React.FC<YourFilesProps> = ({ recordings }) => {
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedRecording, setSelectedRecording] = useState<any>(null);
-  const itemsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const [selectedRecording, setSelectedRecording] = useState<any>(null)
+  const itemsPerPage = 5
 
   const handleDelete = async (recordingId: string) => {
-    const res = await fetch("/api/audio/delete", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('/api/audio/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ recordingId }),
-    });
+    })
     if (res.ok) {
-      setSelectedRecording(null);
-      window.location.reload();
+      setSelectedRecording(null)
+      window.location.reload()
     }
-  };
+  }
 
   const sortedRecordings = [...recordings].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
+  )
 
-  const totalPages = Math.ceil(sortedRecordings.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedRecordings.length / itemsPerPage)
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   const currentRecordings = sortedRecordings.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
-  );
+  )
 
   return (
     <div className="px-4">
@@ -93,7 +93,7 @@ const YourFiles: React.FC<YourFilesProps> = ({ recordings }) => {
                       href={`/audio/${recording.id}`}
                       className="text-primary hover:underline"
                     >
-                      {recording.title ?? "Untitled"}
+                      {recording.title ?? 'Untitled'}
                     </a>
                   </TableCell>
                   <TableCell className="text-center text-sm text-gray-500">
@@ -168,7 +168,7 @@ const YourFiles: React.FC<YourFilesProps> = ({ recordings }) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default YourFiles;
+export default YourFiles

@@ -1,14 +1,14 @@
-import { AnimatedBeamOpenAI } from "@/components/magicui/animated-beam-bi-directional";
-import { IconOpenAI } from "@/components/icons";
+import { AnimatedBeamOpenAI } from '@/components/magicui/animated-beam-bi-directional'
+import { IconOpenAI } from '@/components/icons'
 import {
   GearIcon,
   Link1Icon,
   PaddingIcon,
   RocketIcon,
-} from "@radix-ui/react-icons";
-import { DatabaseIcon, RouteIcon, TrashIcon } from "lucide-react";
-import { IconVector } from "@tabler/icons-react";
-import AppInfo from "@/components/input/AppInfo";
+} from '@radix-ui/react-icons'
+import { DatabaseIcon, RouteIcon, TrashIcon } from 'lucide-react'
+import { IconVector } from '@tabler/icons-react'
+import AppInfo from '@/components/input/AppInfo'
 
 export default function AudioInfo() {
   return (
@@ -53,7 +53,7 @@ export default function AudioInfo() {
             <PaddingIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The main frontend logic is found in the{" "}
+            The main frontend logic is found in the{' '}
             <code>app/(apps)/audio</code> folder.
           </span>
         </li>
@@ -62,7 +62,7 @@ export default function AudioInfo() {
             <GearIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The main configuration file can be found in{" "}
+            The main configuration file can be found in{' '}
             <code>app/(apps)/audio/toolConfig.ts</code> file.
           </span>
         </li>
@@ -71,7 +71,7 @@ export default function AudioInfo() {
             <RouteIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API transcription endpoint and logic can be found in{" "}
+            The API transcription endpoint and logic can be found in{' '}
             <code>app/api/(apps)/audio/transcribe/route.ts</code>.
           </span>
         </li>
@@ -80,7 +80,7 @@ export default function AudioInfo() {
             <IconVector className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API to summarize the transcript be found in{" "}
+            The API to summarize the transcript be found in{' '}
             <code>app/api/(apps)/audio/summarize/route.ts</code>.
           </span>
         </li>
@@ -89,7 +89,7 @@ export default function AudioInfo() {
             <Link1Icon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API to upload audio can be found in{" "}
+            The API to upload audio can be found in{' '}
             <code>app/api/(apps)/audio/upload/route.ts</code>.
           </span>
         </li>
@@ -98,7 +98,7 @@ export default function AudioInfo() {
             <TrashIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API to delete audio & Supabase entries can be found in{" "}
+            The API to delete audio & Supabase entries can be found in{' '}
             <code>app/api/(apps)/audio/delete/route.ts</code>.
           </span>
         </li>
@@ -110,5 +110,5 @@ export default function AudioInfo() {
         </li>
       </ul>
     </AppInfo>
-  );
+  )
 }

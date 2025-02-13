@@ -1,11 +1,11 @@
-import SocialProof from "@/components/socialproof/SocialProof";
-import Media from "@/components/socialproof/Media";
-import { ArrowRight, NotebookPen } from "lucide-react";
+import SocialProof from '@/components/socialproof/SocialProof'
+import Media from '@/components/socialproof/Media'
+import { ArrowRight, NotebookPen } from 'lucide-react'
 
 export default function Hero() {
   return (
     <>
-      {" "}
+      {' '}
       <div className="relative text-neutral bg-primary">
         <div className="absolute inset-x-0 bottom-0">
           <svg
@@ -44,7 +44,7 @@ export default function Hero() {
           </div>
 
           <div className="mt-5 flex  ">
-            <SocialProof text={"Trusted by Elon Musk"} color={"text-accent"} />
+            <SocialProof text={''} color={'text-accent'} />
           </div>
           <p className="max-w-mdtext-xs font-thin tracking-wide sm:text-sm">
             Sed ut perspiciatis unde omnis iste natus error sit voluptatem
@@ -80,5 +80,5 @@ export default function Hero() {
         </div>
       </div>
     </>
-  );
+  )
 }

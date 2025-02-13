@@ -1,62 +1,62 @@
-"use client";
+'use client'
 
-import { useState, Suspense } from "react";
-import { formatTimestamp } from "@/lib/utils";
+import { useState, Suspense } from 'react'
+import { formatTimestamp } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AudioInfo from "@/components/audio/AudioInfo";
-import { ArrowRight } from "lucide-react";
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import AudioInfo from '@/components/audio/AudioInfo'
+import { ArrowRight } from 'lucide-react'
 
 export default function RecordingDesktop({ data }: { data: any }) {
-  const { recording, summary, transcript } = data;
-  const [note, setNote] = useState(summary);
-  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const router = useRouter();
+  const { recording, summary, transcript } = data
+  const [note, setNote] = useState(summary)
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const router = useRouter()
 
   const generateSummary = async () => {
-    setIsGeneratingSummary(true);
-    setIsOpen(true);
+    setIsGeneratingSummary(true)
+    setIsOpen(true)
 
     // Call your API to generate summary
-    const response = await fetch("/api/audio/summarize", {
-      method: "POST",
+    const response = await fetch('/api/audio/summarize', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         recordingId: recording.id,
         transcript: transcript.transcript,
       }),
-    });
+    })
 
-    const result = await response.json();
+    const result = await response.json()
 
     if (response.ok) {
       setNote({
         ...note,
         summary: result.summary,
         action_items: result.action_items,
-      });
-      router.refresh();
-      setIsOpen(false); // Close the modal after summary is generated
+      })
+      router.refresh()
+      setIsOpen(false) // Close the modal after summary is generated
     } else {
-      console.error("Error generating summary:", result.error);
+      console.error('Error generating summary:', result.error)
     }
 
-    setIsGeneratingSummary(false);
-  };
+    setIsGeneratingSummary(false)
+  }
 
-  const { created_at: _creationTime } = recording;
-  const { generatingTitle, title } = summary ?? {};
+  const { created_at: _creationTime } = recording
+  const { generatingTitle, title } = summary ?? {}
 
   return (
     <>
@@ -64,10 +64,12 @@ export default function RecordingDesktop({ data }: { data: any }) {
         <div className="space-y-1 mb-4 mt-4">
           <h4
             className={`text-sm font-medium leading-none ${
-              generatingTitle && "animate-pulse"
+              generatingTitle && 'animate-pulse'
             }`}
           >
-            {generatingTitle ? "Generating Title..." : title ?? "Untitled Note"}
+            {generatingTitle
+              ? 'Generating Title...'
+              : (title ?? 'Untitled Note')}
           </h4>
           <p className="text-sm text-muted-foreground">
             You'll find a summary and action items below.
@@ -104,8 +106,8 @@ export default function RecordingDesktop({ data }: { data: any }) {
                         disabled={isGeneratingSummary}
                       >
                         {isGeneratingSummary
-                          ? "Generating summary..."
-                          : "Generate summary"}
+                          ? 'Generating summary...'
+                          : 'Generate summary'}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </>
@@ -137,8 +139,8 @@ export default function RecordingDesktop({ data }: { data: any }) {
                         disabled={isGeneratingSummary}
                       >
                         {isGeneratingSummary
-                          ? "Generating summary..."
-                          : "Generate summary"}
+                          ? 'Generating summary...'
+                          : 'Generate summary'}
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </>
@@ -176,5 +178,5 @@ export default function RecordingDesktop({ data }: { data: any }) {
         </div>
       </div>
     </>
-  );
+  )
 }

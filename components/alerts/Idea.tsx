@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 const Info: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -22,7 +22,7 @@ const Info: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Info;
+export default Info

@@ -6,7 +6,7 @@ const CTA: React.FC = () => {
           <div className="relative flex flex-col items-center lg:flex-row lg:items-center">
             <div className="px-6 py-12 text-center sm:p-12 lg:py-16 lg:text-left xl:p-20">
               <h5 className="text-3xl font-bold text-white sm:text-3xl lg:text-3xl">
-                You should buy our product.{" "}
+                You should buy our product.{' '}
                 <p className="italic text-md font-light ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
                   (please, so I can pay rent)
                 </p>
@@ -50,7 +50,7 @@ const CTA: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CTA;
+export default CTA

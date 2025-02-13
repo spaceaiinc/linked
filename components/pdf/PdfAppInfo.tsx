@@ -1,14 +1,14 @@
-import AppInfo from "@/components/input/AppInfo";
-import { AnimatedBeamMultipleInputDemo } from "@/components/magicui/animated-beam-multiple";
-import { IconOpenAI } from "@/components/icons";
+import AppInfo from '@/components/input/AppInfo'
+import { AnimatedBeamMultipleInputDemo } from '@/components/magicui/animated-beam-multiple'
+import { IconOpenAI } from '@/components/icons'
 import {
   GearIcon,
   Link1Icon,
   PaddingIcon,
   RocketIcon,
-} from "@radix-ui/react-icons";
-import { DatabaseIcon, RouteIcon, TrashIcon } from "lucide-react";
-import { IconVector } from "@tabler/icons-react";
+} from '@radix-ui/react-icons'
+import { DatabaseIcon, RouteIcon, TrashIcon } from 'lucide-react'
+import { IconVector } from '@tabler/icons-react'
 
 export default function PdfAppInfo() {
   return (
@@ -52,7 +52,7 @@ export default function PdfAppInfo() {
             <PaddingIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The main frontend logic is found in the{" "}
+            The main frontend logic is found in the{' '}
             <code>app/(apps)/chat/pdf</code> folder.
           </span>
         </li>
@@ -61,7 +61,7 @@ export default function PdfAppInfo() {
             <GearIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The main configuration file can be found in{" "}
+            The main configuration file can be found in{' '}
             <code>app/(apps)/pdf/toolConfig.ts</code> file. You can specify the
             GPT model used & number messages included in the history.
           </span>
@@ -71,7 +71,7 @@ export default function PdfAppInfo() {
             <RouteIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API endpoint and logic can be found in{" "}
+            The API endpoint and logic can be found in{' '}
             <code>app/api/(apps)/pdf/chat/route.ts</code>.
           </span>
         </li>
@@ -80,7 +80,7 @@ export default function PdfAppInfo() {
             <IconVector className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API to generate embeddings be found in{" "}
+            The API to generate embeddings be found in{' '}
             <code>app/api/(apps)/pdf/vectorize/route.ts</code>.
           </span>
         </li>
@@ -89,7 +89,7 @@ export default function PdfAppInfo() {
             <Link1Icon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API to upload PDF can be found in{" "}
+            The API to upload PDF can be found in{' '}
             <code>app/api/(apps)/pdf/upload/route.ts</code>.
           </span>
         </li>
@@ -98,7 +98,7 @@ export default function PdfAppInfo() {
             <TrashIcon className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            The API to delete PDF & embeddings can be found in{" "}
+            The API to delete PDF & embeddings can be found in{' '}
             <code>app/api/(apps)/pdf/delete/route.ts</code>.
           </span>
         </li>
@@ -110,5 +110,5 @@ export default function PdfAppInfo() {
         </li>
       </ul>
     </AppInfo>
-  );
+  )
 }

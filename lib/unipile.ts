@@ -39,15 +39,25 @@ export const convertJsonToCsv = (
 
     if (profile.work_experience) {
       const workExperiencesText = profile.work_experience
-        .map((exp: { company: any; position: any; location: any; description: any; skills: any; start: any; end: any }) => {
-          return `会社: ${exp.company || ''}\n役職: ${
-            exp.position || ''
-          }\n場所: ${exp.location || ''}\n説明: ${
-            exp.description || ''
-          }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
-            exp.start || ''
-          }\n終了: ${exp.end || ''}`
-        })
+        .map(
+          (exp: {
+            company: any
+            position: any
+            location: any
+            description: any
+            skills: any
+            start: any
+            end: any
+          }) => {
+            return `会社: ${exp.company || ''}\n役職: ${
+              exp.position || ''
+            }\n場所: ${exp.location || ''}\n説明: ${
+              exp.description || ''
+            }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
+              exp.start || ''
+            }\n終了: ${exp.end || ''}`
+          }
+        )
         .join('\n\n')
 
       baseInfo.work_experience = workExperiencesText

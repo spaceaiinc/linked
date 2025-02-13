@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react'
 
 interface CardProps {
-  href: string;
-  icon: React.ReactNode;
-  text: string;
-  subtext: string;
+  href: string
+  icon: React.ReactNode
+  text: string
+  subtext: string
 }
 
 const Card: React.FC<CardProps> = ({ href, icon, text, subtext }) => {
@@ -23,7 +23,7 @@ const Card: React.FC<CardProps> = ({ href, icon, text, subtext }) => {
         </div>
       </a>
     </div>
-  );
-};
+  )
+}
 
-export default Card;
+export default Card

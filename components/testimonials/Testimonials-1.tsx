@@ -1,32 +1,32 @@
-import React from "react";
+import React from 'react'
 
 interface Testimonial {
-  text: string;
-  author: string;
-  role: string;
-  image: string;
+  text: string
+  author: string
+  role: string
+  image: string
 }
 
 const testimonials: Testimonial[] = [
   {
-    text: "This is a great service, I highly recommend it!",
-    author: "John Doe",
-    role: "CEO, ABC Inc.",
-    image: "https://randomuser.me/api/portraits/men/17.jpg",
+    text: 'This is a great service, I highly recommend it!',
+    author: 'John Doe',
+    role: 'CEO, ABC Inc.',
+    image: 'https://randomuser.me/api/portraits/men/17.jpg',
   },
   {
-    text: "I was blown away by the quality of the work delivered.",
-    author: "Jane Smith",
-    role: "CTO, DEF Inc.",
-    image: "https://randomuser.me/api/portraits/men/94.jpg",
+    text: 'I was blown away by the quality of the work delivered.',
+    author: 'Jane Smith',
+    role: 'CTO, DEF Inc.',
+    image: 'https://randomuser.me/api/portraits/men/94.jpg',
   },
   {
-    text: "This is by far the best solution I have ever used.",
-    author: "Bob Johnson",
-    role: "Founder, GHI Inc.",
-    image: "https://randomuser.me/api/portraits/men/59.jpg",
+    text: 'This is by far the best solution I have ever used.',
+    author: 'Bob Johnson',
+    role: 'Founder, GHI Inc.',
+    image: 'https://randomuser.me/api/portraits/men/59.jpg',
   },
-];
+]
 
 const Testimonials: React.FC = () => {
   return (
@@ -36,17 +36,17 @@ const Testimonials: React.FC = () => {
           <div className="mt-8 max-w-3xl mx-auto">
             <div className="max-md:px-8 max-w-3xl">
               <h2 className="font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight mb-2">
-                We also have testimonials.{" "}
+                We also have testimonials.{' '}
                 <p className="italic text-md font-light ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
                   (real ones)
                 </p>
-              </h2>{" "}
+              </h2>{' '}
               <p className="mt-4 md:mt-8 text-base-content max-w-[600px] mx-auto">
                 Yes, what these people say is true. We are awesome. And you will
                 be too.
               </p>
             </div>
-          </div>{" "}
+          </div>{' '}
           <div className="mx-auto mt-10 grid max-w-2xl grid-cols-1 grid-rows-1 gap-8 text-sm leading-6 text-stone-900 sm:grid-cols-2 xl:mx-0 xl:max-w-none xl:grid-flow-col xl:grid-cols-4">
             <figure className="rounded-2xl bg-white shadow-lg ring-1 ring-stone-900/5 sm:col-span-2 xl:col-start-2 xl:row-end-1">
               <blockquote className="p-6 text-lg font-semibold leading-7 tracking-tight text-stone-700 sm:p-12 sm:text-xl sm:leading-8">
@@ -116,7 +116,7 @@ const Testimonials: React.FC = () => {
         </div>
       </div>
     </section>
-  );
-};
+  )
+}
 
-export default Testimonials;
+export default Testimonials

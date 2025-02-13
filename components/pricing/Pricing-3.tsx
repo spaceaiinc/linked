@@ -1,49 +1,49 @@
 export default function Pricing() {
   const pricingInfo = [
     {
-      title: "Social Media Guru",
+      title: 'Social Media Guru',
       description:
-        "For those who think Likes and Followers are the key to success.",
-      price: "$9.99",
-      period: "/month",
+        'For those who think Likes and Followers are the key to success.',
+      price: '$9.99',
+      period: '/month',
       features: [
-        "AI-generated social media posts",
-        "1-click posting to all platforms",
-        "Unlimited likes and followers (mostly bots)",
-        "Influencer status (in your dreams)",
-        "Complimentary selfie stick",
+        'AI-generated social media posts',
+        '1-click posting to all platforms',
+        'Unlimited likes and followers (mostly bots)',
+        'Influencer status (in your dreams)',
+        'Complimentary selfie stick',
       ],
       special: false,
     },
     {
-      title: "Marketing Maverick",
-      description: "For those who think outside the box (and often get fired).",
-      price: "$49.99",
-      period: "/month",
+      title: 'Marketing Maverick',
+      description: 'For those who think outside the box (and often get fired).',
+      price: '$49.99',
+      period: '/month',
       features: [
-        "AI-generated marketing plans",
-        "Unlimited creative ideas (mostly stolen from others)",
+        'AI-generated marketing plans',
+        'Unlimited creative ideas (mostly stolen from others)',
         "Priority support (we'll pretend to care)",
-        "Complimentary marketing jargon dictionary",
-        "Guru status (in your own mind)",
+        'Complimentary marketing jargon dictionary',
+        'Guru status (in your own mind)',
       ],
       special: true,
     },
     {
-      title: "CEO",
+      title: 'CEO',
       description: "For those who think they can do it all (but can't).",
-      price: "$999.99",
-      period: "/lifetime",
+      price: '$999.99',
+      period: '/lifetime',
       features: [
-        "All features from the app",
-        "Unlimited access to our coffee machine",
+        'All features from the app',
+        'Unlimited access to our coffee machine',
         "Complimentary 'World's Okayest CEO' mug",
         "Priority support (we'll try to tolerate you)",
-        "Lifetime supply of buzzwords",
+        'Lifetime supply of buzzwords',
       ],
       special: false,
     },
-  ];
+  ]
 
   return (
     <>
@@ -62,8 +62,8 @@ export default function Pricing() {
               key={index}
               className={`rounded-xl shadow bg-neutral relative flex flex-col w-full ${
                 info.special
-                  ? "border border-primary lg:scale-[1.1] lg:z-10"
-                  : "border border-base-200"
+                  ? 'border border-primary lg:scale-[1.1] lg:z-10'
+                  : 'border border-base-200'
               }`}
             >
               <div className="flex-1 gap-6 lg:gap-x-8 xl:gap-x-10 flex flex-col sm:p-6 p-6 lg:p-8 xl:p-10">
@@ -91,7 +91,7 @@ export default function Pricing() {
                 >
                   <span className="inline-flex items-center">
                     <span className="inline-flex shrink-0 items-center gap-2">
-                      Get started for free{" "}
+                      Get started for free{' '}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -141,5 +141,5 @@ export default function Pricing() {
         </div>
       </div>
     </>
-  );
+  )
 }

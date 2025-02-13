@@ -1,62 +1,62 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import Check from "@/components/alerts/Check";
+import React, { useState } from 'react'
+import Check from '@/components/alerts/Check'
 
 const Upload: React.FC<{
-  currentFile: string | null;
-  setFileDetails: (url: string | null, id: string | null) => void;
+  currentFile: string | null
+  setFileDetails: (url: string | null, id: string | null) => void
 }> = ({ currentFile = null, setFileDetails }) => {
-  const [uploading, setUploading] = useState<boolean>(false);
-  const [src, setSrc] = useState<string | null>(currentFile);
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [src, setSrc] = useState<string | null>(currentFile)
 
   const uploadFile = async (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const file = evt.target.files ? evt.target.files[0] : null;
+    const file = evt.target.files ? evt.target.files[0] : null
     if (!file) {
-      alert("You must select a PDF to upload.");
-      return;
+      alert('You must select a PDF to upload.')
+      return
     }
 
     const uploadConfig = {
-      path: "pdf",
-      apiEndpoint: "/api/pdf/upload",
-    };
+      path: 'pdf',
+      apiEndpoint: '/api/pdf/upload',
+    }
 
     if (!uploadConfig || !uploadConfig.path) {
-      alert("Upload configuration is missing.");
-      return;
+      alert('Upload configuration is missing.')
+      return
     }
 
     try {
-      setUploading(true);
+      setUploading(true)
 
-      let formData = new FormData();
-      formData.append("file", file);
-      formData.append("uploadPath", uploadConfig.path);
+      let formData = new FormData()
+      formData.append('file', file)
+      formData.append('uploadPath', uploadConfig.path)
 
       const response = await fetch(uploadConfig.apiEndpoint, {
-        method: "POST",
+        method: 'POST',
         body: formData,
-      });
+      })
 
       if (!response.ok) {
-        throw new Error(`Failed to upload PDF: ${response.statusText}`);
+        throw new Error(`Failed to upload PDF: ${response.statusText}`)
       }
 
-      const data = await response.json();
-      console.log("Upload response:", data);
+      const data = await response.json()
+      console.log('Upload response:', data)
       if (data.error) {
-        throw new Error(data.error);
+        throw new Error(data.error)
       }
-      setSrc(data.url);
-      setFileDetails(data.url, data.documentId); // Set the file URL and document ID in the parent component
+      setSrc(data.url)
+      setFileDetails(data.url, data.documentId) // Set the file URL and document ID in the parent component
     } catch (error) {
-      console.error("Upload error:", error);
-      alert((error as Error).message);
+      console.error('Upload error:', error)
+      alert((error as Error).message)
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -89,7 +89,7 @@ const Upload: React.FC<{
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default Upload;
+export default Upload

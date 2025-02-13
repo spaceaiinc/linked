@@ -1,4 +1,4 @@
-import Info from "@/components/alerts/Info";
+import Info from '@/components/alerts/Info'
 
 export default function WelcomeMessage() {
   return (
@@ -10,5 +10,5 @@ export default function WelcomeMessage() {
         </div>
       </Info>
     </div>
-  );
+  )
 }

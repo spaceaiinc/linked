@@ -1,23 +1,23 @@
 // components/EditChatDialog.tsx
-import { FC, useState } from "react";
-import { createClient } from "@/lib/utils/supabase/client";
+import { FC, useState } from 'react'
+import { createClient } from '@/lib/utils/supabase/client'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogFooter,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Trash2Icon } from "lucide-react";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Trash2Icon } from 'lucide-react'
+import { Label } from '@/components/ui/label'
 
 interface EditChatDialogProps {
-  chat: any;
-  onClose: () => void;
-  onUpdate: (chat: any) => void;
-  onDelete: (chatId: string) => void;
+  chat: any
+  onClose: () => void
+  onUpdate: (chat: any) => void
+  onDelete: (chatId: string) => void
 }
 
 const EditChatDialog: FC<EditChatDialogProps> = ({
@@ -26,33 +26,33 @@ const EditChatDialog: FC<EditChatDialogProps> = ({
   onUpdate,
   onDelete,
 }) => {
-  const [title, setTitle] = useState(chat.title);
-  const supabase = createClient();
+  const [title, setTitle] = useState(chat.title)
+  const supabase = createClient()
 
   const handleSave = async () => {
     const { data, error } = await supabase
-      .from("conversations")
+      .from('conversations')
       .update({ title })
-      .eq("id", chat.id)
-      .select();
+      .eq('id', chat.id)
+      .select()
 
     if (!error && data) {
-      onUpdate(data[0]);
-      onClose();
+      onUpdate(data[0])
+      onClose()
     }
-  };
+  }
 
   const handleDelete = async () => {
     const { error } = await supabase
-      .from("conversations")
+      .from('conversations')
       .delete()
-      .eq("id", chat.id);
+      .eq('id', chat.id)
 
     if (!error) {
-      onDelete(chat.id);
-      onClose();
+      onDelete(chat.id)
+      onClose()
     }
-  };
+  }
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -86,7 +86,7 @@ const EditChatDialog: FC<EditChatDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default EditChatDialog;
+export default EditChatDialog

@@ -1,4 +1,4 @@
-import SocialProof from "@/components/socialproof/SocialProof";
+import SocialProof from '@/components/socialproof/SocialProof'
 
 export default function CTA() {
   return (
@@ -9,10 +9,10 @@ export default function CTA() {
             <div className="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
               <div className="max-w-3xl mx-auto text-center">
                 <h2 className="mt-6 text-3xl font-medium tracking-tight text-gray-900 sm:text-3xl lg:mt-8 lg:text-4xl">
-                  This is an amazing {""}
+                  This is an amazing {''}
                   <span className="font-bold bg-clip-text text-primary-content">
                     call to action section
-                  </span>{" "}
+                  </span>{' '}
                   that will get you sales.
                 </h2>
                 <p className="mt-4 text-base font-normal leading-7 text-base-content lg:text-lg lg:mt-6 lg:leading-8">
@@ -80,5 +80,5 @@ export default function CTA() {
         </div>
       </section>
     </>
-  );
+  )
 }

@@ -22,7 +22,7 @@ export default function Pricing() {
                         2
                       </span>
                       <div className="font-medium">
-                        Our AI analyzes it{" "}
+                        Our AI analyzes it{' '}
                         <span className="text-sm font-normal">
                           - it takes around 1 minute
                         </span>
@@ -33,9 +33,9 @@ export default function Pricing() {
                         3
                       </span>
                       <div className="font-medium">
-                        Get your description{" "}
+                        Get your description{' '}
                         <span className="text-sm font-normal">
-                          - includes good stuff{" "}
+                          - includes good stuff{' '}
                         </span>
                       </div>
                     </div>
@@ -99,7 +99,7 @@ export default function Pricing() {
                           clipRule="evenodd"
                         ></path>
                       </svg>
-                      Description{" "}
+                      Description{' '}
                     </li>
                     <li className="flex gap-x-3">
                       <svg
@@ -169,5 +169,5 @@ export default function Pricing() {
         </div>
       </div>
     </>
-  );
+  )
 }

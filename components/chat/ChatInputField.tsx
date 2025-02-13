@@ -1,13 +1,13 @@
-import { FormEvent } from "react";
-import ShimmerButton from "@/components/magicui/shimmer-button";
-import { LoaderCircle, Send } from "lucide-react";
+import { FormEvent } from 'react'
+import ShimmerButton from '@/components/magicui/shimmer-button'
+import { LoaderCircle, Send } from 'lucide-react'
 
 interface ChatInputFieldProps {
-  input: string;
-  placeholder?: string;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  isLoading: boolean;
+  input: string
+  placeholder?: string
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => void
+  isLoading: boolean
 }
 
 export function ChatInputField({
@@ -26,7 +26,7 @@ export function ChatInputField({
         <input
           className="min-h-[60px] resize-none text-base-content bg-transparent pl-0 pr-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
           value={input}
-          placeholder={placeholder ?? "Send a message here."}
+          placeholder={placeholder ?? 'Send a message here.'}
           onChange={handleInputChange}
         />
         <div className="absolute right-0 top-[13px] sm:right-4 px-2 md:px-0">
@@ -36,17 +36,17 @@ export function ChatInputField({
           >
             <div
               role="status"
-              className={`${isLoading ? "" : "hidden"} flex justify-center`}
+              className={`${isLoading ? '' : 'hidden'} flex justify-center`}
             >
               <LoaderCircle className="w-6 h-6 text-white animate-spin dark:text-white" />
               <span className="sr-only">Loading...</span>
             </div>
-            <span className={isLoading ? "hidden" : ""}>
+            <span className={isLoading ? 'hidden' : ''}>
               <Send className="size-4 text-white" />
             </span>
           </ShimmerButton>
         </div>
       </div>
     </form>
-  );
+  )
 }

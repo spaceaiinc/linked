@@ -1,80 +1,78 @@
-"use client";
+'use client'
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { SettingsModal } from "./SettingsModal";
-import { AudioPlayer } from "./AudioPlayer";
-import { AudioWaveformIcon, SettingsIcon } from "lucide-react";
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
+import { SettingsModal } from './SettingsModal'
+import { AudioPlayer } from './AudioPlayer'
+import { AudioWaveformIcon, SettingsIcon } from 'lucide-react'
 
 export const TextToSpeechTab: React.FC = () => {
-  const [model, setModel] = useState("");
-  const [text, setText] = useState("");
-  const [voice, setVoice] = useState("");
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [settings, setSettings] = useState({});
-  const [voices, setVoices] = useState<{ voice_id: string; name: string }[]>(
-    []
-  );
+  const [model, setModel] = useState('')
+  const [text, setText] = useState('')
+  const [voice, setVoice] = useState('')
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [settings, setSettings] = useState({})
+  const [voices, setVoices] = useState<{ voice_id: string; name: string }[]>([])
 
   useEffect(() => {
     const fetchVoices = async () => {
       try {
-        const response = await fetch("/api/voice/voices");
+        const response = await fetch('/api/voice/voices')
         if (!response.ok) {
-          throw new Error("Failed to fetch voices");
+          throw new Error('Failed to fetch voices')
         }
-        const data = await response.json();
+        const data = await response.json()
         const voicesData = data.voices.map((v: any) => ({
           voice_id: v.voice_id,
           name: v.name,
-        }));
-        setVoices(voicesData);
+        }))
+        setVoices(voicesData)
 
         // Set the first voice as default
         if (voicesData.length > 0) {
-          setVoice(voicesData[0].voice_id);
+          setVoice(voicesData[0].voice_id)
         }
       } catch (error) {
-        console.error("Error fetching voices:", error);
+        console.error('Error fetching voices:', error)
       }
-    };
+    }
 
-    fetchVoices();
-  }, []);
+    fetchVoices()
+  }, [])
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
 
     try {
-      const response = await fetch("/api/voice/text-to-speech", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/voice/text-to-speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, voice, settings }),
-      });
+      })
 
       if (!response.ok) {
-        throw new Error("Failed to generate audio");
+        throw new Error('Failed to generate audio')
       }
 
-      const data = await response.json();
-      setAudioUrl(data.url);
+      const data = await response.json()
+      setAudioUrl(data.url)
     } catch (error) {
-      console.error("Error generating audio:", error);
-      alert("Failed to generate audio. Please try again.");
+      console.error('Error generating audio:', error)
+      alert('Failed to generate audio. Please try again.')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-4 w-full">
@@ -113,7 +111,7 @@ export const TextToSpeechTab: React.FC = () => {
             className="text-primary-content"
           >
             <AudioWaveformIcon className="w-4 mr-2" />
-            {isLoading ? "Generating..." : "Generate audio"}
+            {isLoading ? 'Generating...' : 'Generate audio'}
           </Button>
         </div>
       </form>
@@ -126,5 +124,5 @@ export const TextToSpeechTab: React.FC = () => {
         setModel={setModel}
       />
     </div>
-  );
-};
+  )
+}

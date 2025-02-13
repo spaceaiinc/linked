@@ -1,31 +1,31 @@
-import React, { useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { DownloadIcon } from "lucide-react";
+import React, { useEffect, useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { DownloadIcon } from 'lucide-react'
 
 interface AudioPlayerProps {
-  audioUrl: string;
+  audioUrl: string
 }
 
 export const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.play().catch((error) => {
-        console.error("Auto-play failed:", error);
+        console.error('Auto-play failed:', error)
         // Autoplay was prevented. You might want to show a play button here.
-      });
+      })
     }
-  }, [audioUrl]);
+  }, [audioUrl])
 
   const handleDownload = () => {
-    const link = document.createElement("a");
-    link.href = audioUrl;
-    link.download = "generated_audio.mp3";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    const link = document.createElement('a')
+    link.href = audioUrl
+    link.download = 'generated_audio.mp3'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   return (
     <div className="mt-4">
@@ -40,5 +40,5 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react'
 
 interface AppInfoProps {
-  children: React.ReactNode;
-  title?: string;
-  background?: string;
+  children: React.ReactNode
+  title?: string
+  background?: string
 }
 
 const AppInfo: React.FC<AppInfoProps> = ({
   children,
   title,
-  background = "bg-primary/5",
+  background = 'bg-primary/5',
 }) => {
   return (
     <div className="flex justify-center no-scrollbar overflow-y-scroll w-full">
@@ -20,7 +20,7 @@ const AppInfo: React.FC<AppInfoProps> = ({
         {children}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AppInfo;
+export default AppInfo

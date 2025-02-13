@@ -1,10 +1,10 @@
-import SocialProof from "@/components/socialproof/SocialProof";
-import { ArrowRight, Images } from "lucide-react";
+import SocialProof from '@/components/socialproof/SocialProof'
+import { ArrowRight, Images } from 'lucide-react'
 
 export default function Hero() {
   return (
     <>
-      {" "}
+      {' '}
       <div className="relative text-primary-content bg-primary">
         <div className="absolute inset-x-0 bottom-0">
           <svg
@@ -42,7 +42,7 @@ export default function Hero() {
             </div>
           </div>
           <div className="mt-5 flex  ">
-            <SocialProof text={"Sam Altman who?"} color={"text-base-100"} />
+            <SocialProof text={'Sam Altman who?'} color={'text-base-100'} />
           </div>
           <p className="max-w-mdtext-xs font-thin tracking-wide sm:text-sm">
             Sed ut perspiciatis unde omnis iste natus error sit voluptatem
@@ -76,5 +76,5 @@ export default function Hero() {
         </div>
       </div>
     </>
-  );
+  )
 }

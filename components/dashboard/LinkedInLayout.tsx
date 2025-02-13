@@ -6,6 +6,7 @@ import { Container } from '@/components/dashboard/Container'
 import { Heading } from '@/components/dashboard/Heading'
 import LoadingSpinner from '@/components/Loading'
 import { ToolConfig } from '@/lib/types/toolconfig'
+import { Paragraph } from './Paragraph'
 
 interface LinkedInLayoutProps {
   children: React.ReactNode
@@ -25,21 +26,21 @@ export async function LinkedInLayout({
 
   return (
     <>
-      <div className="flex overflow-hidden bg-gray-100">
+      <div className="flex overflow-hidden bg-white">
         <Sidebar user={user} />
-        <div className="lg:pl-2 lg:pt-2 bg-gray-100 flex-1 overflow-y-auto">
-          <div className="flex-1 bg-white lg:rounded-tl-xl border border-transparent lg:border-neutral-200 overflow-y-auto">
-            <Suspense fallback={<LoadingSpinner />}>
-              <MainContent
-                toolConfig={toolConfig}
-                showGreeting={showGreeting}
-                user={user}
-              >
-                {children}
-              </MainContent>
-            </Suspense>
-            <ContentFooter />
-          </div>
+        <div className="lg:pl-[15rem] lg:pt-2 bg-white flex-1">
+          {/* <div className="flex-1 bg-white lg:rounded-tl-xl border border-transparent lg:border-neutral-200 overflow-hidden"> */}
+          <Suspense fallback={<LoadingSpinner />}>
+            <MainContent
+              toolConfig={toolConfig}
+              showGreeting={showGreeting}
+              user={user}
+            >
+              {children}
+            </MainContent>
+          </Suspense>
+          {/* <ContentFooter /> */}
+          {/* </div> */}
         </div>
       </div>
       {/* <Suspense fallback={<LoadingSpinner />}>
@@ -64,9 +65,9 @@ async function MainContent({
   user: any
 }) {
   const supabase = createClient()
-  const {
-    data: { user: supabaseUser },
-  } = await supabase.auth.getUser()
+  // const {
+  //   data: { user: supabaseUser },
+  // } = await supabase.auth.getUser()
 
   let credits
   if (user && toolConfig.paywall) {
@@ -84,10 +85,10 @@ async function MainContent({
         <>
           {/* <span className="text-4xl">👋🏼</span> */}
           <Heading className="font-black mb-10">
-            {'LinkedIn Automation'}
+            {toolConfig.company?.name}
           </Heading>
           {/* <Paragraph className="max-w-xl mt-4">
-            Input your LinkedIn credentials and the message you want to send to your connections.
+            {toolConfig.company?.description}
           </Paragraph> */}
         </>
       )}

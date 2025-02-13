@@ -1,18 +1,18 @@
-import { supabase } from "@/lib/utils/supabase/service";
+import { supabase } from '@/lib/utils/supabase/service'
 
 export async function checkUserProfile(userEmail: string) {
   const { data: user, error } = await supabase
-    .from("profiles")
+    .from('profiles')
     .select()
-    .eq("email", userEmail.toLowerCase())
-    .single();
+    .eq('email', userEmail.toLowerCase())
+    .single()
 
   if (error) {
-    console.error("Error fetching user :", error);
-    return null;
+    console.error('Error fetching user :', error)
+    return null
   }
 
-  return user;
+  return user
 }
 
 export async function updateUserProfile(
@@ -20,37 +20,37 @@ export async function updateUserProfile(
   purchaseType: string
 ) {
   const { error: updateError } = await supabase
-    .from("profiles")
+    .from('profiles')
     .update({ purchase: purchaseType })
-    .eq("email", userEmail.toLowerCase());
+    .eq('email', userEmail.toLowerCase())
 
   if (updateError) {
-    console.error("Error updating user profile:", updateError);
+    console.error('Error updating user profile:', updateError)
   }
 }
 
 export async function addUserCredits(userEmail: string, creditsToAdd: number) {
   const { data: user, error: selectError } = await supabase
-    .from("profiles")
-    .select("credits")
-    .eq("email", userEmail.toLowerCase())
-    .single();
+    .from('profiles')
+    .select('credits')
+    .eq('email', userEmail.toLowerCase())
+    .single()
 
   if (selectError) {
-    console.error("Error fetching user profile:", selectError);
-    return;
+    console.error('Error fetching user profile:', selectError)
+    return
   }
 
-  const currentCredits = user.credits || 0;
-  const newCredits = currentCredits + creditsToAdd;
+  const currentCredits = user.credits || 0
+  const newCredits = currentCredits + creditsToAdd
 
   const { error: updateError } = await supabase
-    .from("profiles")
+    .from('profiles')
     .update({ credits: newCredits })
-    .eq("email", userEmail.toLowerCase());
+    .eq('email', userEmail.toLowerCase())
 
   if (updateError) {
-    console.error("Error updating user profile:", updateError);
+    console.error('Error updating user profile:', updateError)
   }
 }
 
@@ -66,14 +66,14 @@ export async function updatePurchasesTable(
     purchase_id: purchaseId,
     payload: payload,
     type: purchaseType,
-    provider: provider || "lemonsqueezy",
-  };
+    provider: provider || 'lemonsqueezy',
+  }
 
   const { error: insertError } = await supabase
-    .from("purchases")
-    .insert([insertSubscriptionsPayload]);
+    .from('purchases')
+    .insert([insertSubscriptionsPayload])
 
   if (insertError) {
-    console.error("Error inserting into purchases table:", insertError);
+    console.error('Error inserting into purchases table:', insertError)
   }
 }

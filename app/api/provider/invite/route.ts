@@ -174,7 +174,10 @@ export async function POST(req: Request) {
           }
         )
         if (responseListOfGetProfile)
-          convertJsonToCsv(responseListOfGetProfile, `output_${account_id}_${new Date().getTime()}.csv`)
+          convertJsonToCsv(
+            responseListOfGetProfile,
+            `output_${account_id}_${new Date().getTime()}.csv`
+          )
       })
       .catch((err) => {
         console.error(err)

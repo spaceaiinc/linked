@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { type ToolConfig } from '@/lib/types/toolconfig'
 import { ProviderInvitePostParam } from '@/app/api/provider/invite/route'
 
-export const linkedInResponse = (
-  toolConfig: ToolConfig,
-) => {
+export const linkedInResponse = (toolConfig: ToolConfig) => {
   const [loading, setLoading] = useState(false)
   // const router = useRouter()
 

@@ -1,73 +1,73 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowRightCircle, Share2 } from "lucide-react";
-import Loading from "@/components/Loading";
-import { useRouter } from "next/navigation";
-import Info from "@/components/alerts/Info";
-import { ToolConfig } from "@/lib/types/toolconfig";
-import { Heading } from "@/components/dashboard/Heading";
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { ArrowRightCircle, Share2 } from 'lucide-react'
+import Loading from '@/components/Loading'
+import { useRouter } from 'next/navigation'
+import Info from '@/components/alerts/Info'
+import { ToolConfig } from '@/lib/types/toolconfig'
+import { Heading } from '@/components/dashboard/Heading'
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
+} from '@/components/ui/select'
 
 interface DisplayOutputProps {
-  toolConfig: ToolConfig;
-  generationData: any;
+  toolConfig: ToolConfig
+  generationData: any
 }
 
 export default function DisplayOutput({
   toolConfig,
   generationData,
 }: DisplayOutputProps) {
-  const router = useRouter();
-  const [activeTab, setActiveTab] = useState<string>("");
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [linkCopied, setLinkCopied] = useState(false);
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<string>('')
+  const [isMobile, setIsMobile] = useState<boolean>(false)
+  const [linkCopied, setLinkCopied] = useState(false)
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 640);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    const handleResize = () => setIsMobile(window.innerWidth < 640)
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   useEffect(() => {
     if (
       generationData?.output_data &&
-      typeof generationData.output_data === "object"
+      typeof generationData.output_data === 'object'
     ) {
-      const output = generationData.output_data;
-      let initialTab = "";
+      const output = generationData.output_data
+      let initialTab = ''
       if (
-        "parameters" in output &&
+        'parameters' in output &&
         output.parameters &&
-        typeof output.parameters === "object"
+        typeof output.parameters === 'object'
       ) {
-        initialTab = Object.keys(output.parameters)[0] || "";
+        initialTab = Object.keys(output.parameters)[0] || ''
       } else {
-        initialTab = Object.keys(output)[0] || "";
+        initialTab = Object.keys(output)[0] || ''
       }
-      setActiveTab(initialTab);
+      setActiveTab(initialTab)
     }
-  }, [generationData]);
+  }, [generationData])
 
   if (!generationData) {
-    return <Loading />;
+    return <Loading />
   }
 
-  const { output_data: output, input_data: input } = generationData;
+  const { output_data: output, input_data: input } = generationData
 
-  if (!output || typeof output !== "object") {
+  if (!output || typeof output !== 'object') {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <p className="text-md mb-4">Oops, this page could not be found!</p>
@@ -75,18 +75,18 @@ export default function DisplayOutput({
           Return
         </Button>
       </div>
-    );
+    )
   }
 
   const copyLink = () => {
     navigator.clipboard
       .writeText(window.location.href)
       .then(() => {
-        setLinkCopied(true);
-        setTimeout(() => setLinkCopied(false), 3000);
+        setLinkCopied(true)
+        setTimeout(() => setLinkCopied(false), 3000)
       })
-      .catch((err) => console.error("Could not copy text: ", err));
-  };
+      .catch((err) => console.error('Could not copy text: ', err))
+  }
 
   const renderProperty = (propertyValue: any): JSX.Element => {
     if (propertyValue === null || propertyValue === undefined) {
@@ -94,14 +94,14 @@ export default function DisplayOutput({
         <div className="text-sm text-muted-foreground">
           Oops, this could not be found!
         </div>
-      );
+      )
     }
 
-    if (typeof propertyValue === "object" && !Array.isArray(propertyValue)) {
+    if (typeof propertyValue === 'object' && !Array.isArray(propertyValue)) {
       // Handle imageUrl if present
       if (
-        "imageUrl" in propertyValue &&
-        typeof propertyValue.imageUrl === "string"
+        'imageUrl' in propertyValue &&
+        typeof propertyValue.imageUrl === 'string'
       ) {
         return (
           <a href={propertyValue.imageUrl} target="_blank" rel="noreferrer">
@@ -111,7 +111,7 @@ export default function DisplayOutput({
               className="rounded-xl max-w-md mb-4"
             />
           </a>
-        );
+        )
       }
 
       return (
@@ -119,13 +119,13 @@ export default function DisplayOutput({
           {Object.entries(propertyValue).map(([key, value]) => (
             <div key={key}>
               <h4 className="text-sm font-semibold capitalize text-primary">
-                {key.replace(/([A-Z])/g, " $1").trim()}:
+                {key.replace(/([A-Z])/g, ' $1').trim()}:
               </h4>
               {renderProperty(value)}
             </div>
           ))}
         </div>
-      );
+      )
     }
 
     if (Array.isArray(propertyValue)) {
@@ -139,28 +139,28 @@ export default function DisplayOutput({
             </li>
           ))}
         </ul>
-      );
+      )
     }
 
-    return <p className="text-sm text-muted-foreground">{propertyValue}</p>;
-  };
+    return <p className="text-sm text-muted-foreground">{propertyValue}</p>
+  }
 
   const handleGenerateAnother = () => {
-    router.push(`${toolConfig.company.appUrl}`);
-  };
+    router.push(`${toolConfig.company.appUrl}`)
+  }
 
   // Determine the tabs to display
-  let tabs: string[] = [];
-  let content: any = {};
+  let tabs: string[] = []
+  let content: any = {}
 
-  if ("parameters" in output && typeof output.parameters === "object") {
+  if ('parameters' in output && typeof output.parameters === 'object') {
     // Use the keys within 'parameters' as tabs
-    tabs = Object.keys(output.parameters);
-    content = output.parameters;
+    tabs = Object.keys(output.parameters)
+    content = output.parameters
   } else {
     // Use the keys within 'output' as tabs
-    tabs = Object.keys(output);
-    content = output;
+    tabs = Object.keys(output)
+    content = output
   }
 
   return (
@@ -168,7 +168,7 @@ export default function DisplayOutput({
       <Card className="mx-auto shadow-none border-none">
         <CardHeader>
           <Heading className="font-black">
-            {generationData.title || "Generated Output"}
+            {generationData.title || 'Generated Output'}
           </Heading>
           {generationData.subtitle && (
             <p className="text-muted-foreground">{generationData.subtitle}</p>
@@ -219,7 +219,7 @@ export default function DisplayOutput({
               {toolConfig.fields!.map((field) => (
                 <div key={field.name} className="mb-2">
                   <span className="font-medium">{field.label}: </span>
-                  <span>{input ? input[field.name] : ""}</span>
+                  <span>{input ? input[field.name] : ''}</span>
                 </div>
               ))}
             </div>
@@ -238,7 +238,7 @@ export default function DisplayOutput({
                       value={key}
                       className="capitalize data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
                     >
-                      {key.replace(/([A-Z])/g, " $1").trim()}
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -259,7 +259,7 @@ export default function DisplayOutput({
                       value={key}
                       className="capitalize inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow"
                     >
-                      {key.replace(/([A-Z])/g, " $1").trim()}
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -283,5 +283,5 @@ export default function DisplayOutput({
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

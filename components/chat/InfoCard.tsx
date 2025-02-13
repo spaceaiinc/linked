@@ -1,12 +1,12 @@
-import AppInfo from "@/components/input/AppInfo";
-import { AnimatedBeamOpenAI } from "@/components/magicui/animated-beam-bi-directional";
-import { IconOpenAI } from "@/components/icons";
+import AppInfo from '@/components/input/AppInfo'
+import { AnimatedBeamOpenAI } from '@/components/magicui/animated-beam-bi-directional'
+import { IconOpenAI } from '@/components/icons'
 import {
   GearIcon,
   Link1Icon,
   PaddingIcon,
   RocketIcon,
-} from "@radix-ui/react-icons";
+} from '@radix-ui/react-icons'
 
 const InfoCard = () => (
   <AppInfo title="A simple chatbot using GPT">
@@ -40,7 +40,7 @@ const InfoCard = () => (
           <PaddingIcon className="w-4 h-4" />
         </span>
         <span className="ml-2">
-          The main frontend logic is found in the <code>app/(apps)/chat</code>{" "}
+          The main frontend logic is found in the <code>app/(apps)/chat</code>{' '}
           folder.
         </span>
       </li>
@@ -49,7 +49,7 @@ const InfoCard = () => (
           <GearIcon className="w-4 h-4" />
         </span>
         <span className="ml-2">
-          The main configuration file can be found in{" "}
+          The main configuration file can be found in{' '}
           <code>app/(apps)/chat/toolConfig.ts</code>. You can specify the GPT
           model used & number messages included in the history.
         </span>
@@ -59,7 +59,7 @@ const InfoCard = () => (
           <Link1Icon className="w-4 h-4" />
         </span>
         <span className="ml-2">
-          The API endpoint and logic can be found in{" "}
+          The API endpoint and logic can be found in{' '}
           <code>app/api/(apps)/chat/route.ts</code>.
         </span>
       </li>
@@ -71,6 +71,6 @@ const InfoCard = () => (
       </li>
     </ul>
   </AppInfo>
-);
+)
 
-export default InfoCard;
+export default InfoCard

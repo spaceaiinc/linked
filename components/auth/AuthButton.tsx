@@ -1,39 +1,39 @@
-import { createClient } from "@/lib/utils/supabase/server";
-import Link from "next/link";
-import { redirect } from "next/navigation";
+import { createClient } from '@/lib/utils/supabase/server'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 interface AuthButtonProps {
   classProps?: {
-    primaryTextColor?: string;
-    bgColor?: string;
-    buttonClassName?: string;
-    svgClassName?: string;
-  };
+    primaryTextColor?: string
+    bgColor?: string
+    buttonClassName?: string
+    svgClassName?: string
+  }
 }
 
 export default async function AuthButton({ classProps }: AuthButtonProps) {
-  const supabase = createClient();
+  const supabase = createClient()
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   const signOut = async () => {
-    "use server";
+    'use server'
 
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    return redirect("/auth");
-  };
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    return redirect('/auth')
+  }
 
-  const primaryTextColor = classProps?.primaryTextColor || "primary-content";
-  const bgColor = classProps?.bgColor || "primary";
+  const primaryTextColor = classProps?.primaryTextColor || 'primary-content'
+  const bgColor = classProps?.bgColor || 'primary'
   const buttonClassName =
-    classProps?.buttonClassName || "hidden sm:flex relative group scale-[.9]";
-  const svgClassName = classProps?.svgClassName || "";
+    classProps?.buttonClassName || 'hidden sm:flex relative group scale-[.9]'
+  const svgClassName = classProps?.svgClassName || ''
 
   // trim @~
-  const username = user?.email?.split("@")[0];
+  const username = user?.email?.split('@')[0]
 
   return user ? (
     <div className="flex items-center gap-4">
@@ -74,5 +74,5 @@ export default async function AuthButton({ classProps }: AuthButtonProps) {
         </svg>
       </Link>
     </div>
-  );
+  )
 }

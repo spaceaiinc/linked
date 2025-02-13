@@ -1,11 +1,11 @@
-import { ArrowRightCircle, CheckCircle2Icon, Share2Icon } from "lucide-react";
-import React from "react";
+import { ArrowRightCircle, CheckCircle2Icon, Share2Icon } from 'lucide-react'
+import React from 'react'
 
 interface ResponseSidebarProps {
-  toolConfig: any;
-  input: any;
-  copyLink: () => void;
-  linkCopied: boolean;
+  toolConfig: any
+  input: any
+  copyLink: () => void
+  linkCopied: boolean
 }
 
 const OutputSidebar: React.FC<ResponseSidebarProps> = ({
@@ -68,7 +68,7 @@ const OutputSidebar: React.FC<ResponseSidebarProps> = ({
                       </thead>
                       <tbody>
                         <tr>
-                          <td> {input ? input[field.name] : ""}</td>
+                          <td> {input ? input[field.name] : ''}</td>
                         </tr>
                       </tbody>
                     </table>
@@ -80,6 +80,6 @@ const OutputSidebar: React.FC<ResponseSidebarProps> = ({
         </div>
       </div>
     </aside>
-  );
-};
-export default OutputSidebar;
+  )
+}
+export default OutputSidebar

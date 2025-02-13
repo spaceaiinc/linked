@@ -1,46 +1,46 @@
-"use client";
+'use client'
 
-import { FC, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { PlusCircleIcon } from "lucide-react";
-import { createClient } from "@/lib/utils/supabase/client";
-import { useRouter } from "next/navigation";
-import { toolConfig } from "@/app/(apps)/chat/toolConfig";
+import { FC, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { PlusCircleIcon } from 'lucide-react'
+import { createClient } from '@/lib/utils/supabase/client'
+import { useRouter } from 'next/navigation'
+// import { toolConfig } from '@/app/(apps)/chat/toolConfig'
 
 interface UserActionsProps {
-  user: any;
-  onNewChat: (chat: any) => void;
+  user: any
+  onNewChat: (chat: any) => void
 }
 
 const UserActions: FC<UserActionsProps> = ({ user, onNewChat }) => {
-  const [creatingChat, setCreatingChat] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
+  const [creatingChat, setCreatingChat] = useState(false)
+  const router = useRouter()
+  const supabase = createClient()
 
   const handleNewChat = async () => {
-    if (!user) return;
+    if (!user) return
 
-    setCreatingChat(true);
+    setCreatingChat(true)
     try {
       const { data, error } = await supabase
-        .from("conversations")
+        .from('conversations')
         .insert([
-          { user_id: user.id, model_used: toolConfig.aiModel, type: "chat" },
+          // { user_id: user.id, model_used: toolConfig.aiModel, type: 'chat' },
         ])
-        .select();
+        .select()
 
-      if (error) throw error;
+      if (error) throw error
 
       if (data[0].id) {
-        onNewChat(data[0]);
-        router.push(`/chat/${data[0].id}`);
+        onNewChat(data[0])
+        router.push(`/chat/${data[0].id}`)
       }
     } catch (error) {
-      console.error("Failed to create a new chat:", error);
+      console.error('Failed to create a new chat:', error)
     } finally {
-      setCreatingChat(false);
+      setCreatingChat(false)
     }
-  };
+  }
 
   return (
     <div>
@@ -59,7 +59,7 @@ const UserActions: FC<UserActionsProps> = ({ user, onNewChat }) => {
             disabled={creatingChat}
           >
             <PlusCircleIcon size={16} className="mr-2" />
-            {creatingChat ? "Creating..." : "Start new chat"}
+            {creatingChat ? 'Creating...' : 'Start new chat'}
           </Button>
           <a href="/apps" className="text-primary-content">
             <Button className="w-full text-primary-content mb-2">
@@ -80,7 +80,7 @@ const UserActions: FC<UserActionsProps> = ({ user, onNewChat }) => {
         </>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default UserActions;
+export default UserActions

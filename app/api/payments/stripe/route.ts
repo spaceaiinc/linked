@@ -1,19 +1,19 @@
-import Stripe from "stripe";
-import { NextRequest, NextResponse } from "next/server";
+import Stripe from 'stripe'
+import { NextRequest, NextResponse } from 'next/server'
 import {
   checkUserProfile,
   updateUserProfile,
   updatePurchasesTable,
   addUserCredits,
-} from "@/lib/hooks/userData";
+} from '@/lib/hooks/userData'
 
 // Initialize Stripe with the secret key from environment variables
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-09-30.acacia",
-});
+  apiVersion: '2024-09-30.acacia',
+})
 
 // Ensure dynamic content generation for each request
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 /**
  * Handles POST requests for Stripe webhook events.
@@ -24,10 +24,10 @@ export const dynamic = "force-dynamic";
  * @returns A JSON response indicating the result of the webhook processing
  */
 export async function POST(request: NextRequest) {
-  const payload = await request.text();
-  const signature = request.headers.get("stripe-signature")!;
+  const payload = await request.text()
+  const signature = request.headers.get('stripe-signature')!
 
-  let event: Stripe.Event;
+  let event: Stripe.Event
 
   try {
     // Construct the Stripe event asynchronously
@@ -35,19 +35,19 @@ export async function POST(request: NextRequest) {
       payload,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    )
   } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`);
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    console.error(`Webhook Error: ${err.message}`)
+    return NextResponse.json({ error: err.message }, { status: 400 })
   }
 
   // Handle the 'checkout.session.completed' event
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    await handleCheckoutSessionCompleted(session);
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session
+    await handleCheckoutSessionCompleted(session)
   }
 
-  return NextResponse.json({ received: true });
+  return NextResponse.json({ received: true })
 }
 
 /**
@@ -60,57 +60,57 @@ export async function POST(request: NextRequest) {
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session
 ) {
-  const userEmail = session.customer_details?.email;
+  const userEmail = session.customer_details?.email
   if (!userEmail) {
-    console.log("No user email found in the session");
-    return;
+    console.log('No user email found in the session')
+    return
   }
 
   // Retrieve line items from the session
-  const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
 
   if (lineItems.data.length === 0) {
-    console.log("No line items found in the session");
-    return;
+    console.log('No line items found in the session')
+    return
   }
 
   // Get the first item (assuming one product per checkout)
-  const item = lineItems.data[0];
+  const item = lineItems.data[0]
 
   if (!item.price?.product) {
-    console.log("No product information found in the line item");
-    return;
+    console.log('No product information found in the line item')
+    return
   }
 
   // Extract the product ID
   const productId =
-    typeof item.price.product === "string"
+    typeof item.price.product === 'string'
       ? item.price.product
-      : item.price.product.id;
+      : item.price.product.id
 
-  let purchaseType: string | null = null;
+  let purchaseType: string | null = null
 
   // Try to get purchase type from session metadata
   if (session.metadata && session.metadata.type) {
-    purchaseType = session.metadata.type;
+    purchaseType = session.metadata.type
   }
 
   // If not found in session metadata, fetch product details
   if (!purchaseType) {
-    const product = await stripe.products.retrieve(productId);
+    const product = await stripe.products.retrieve(productId)
 
     if (product.metadata && product.metadata.type) {
-      purchaseType = product.metadata.type;
+      purchaseType = product.metadata.type
     }
   }
 
   if (!purchaseType) {
-    console.log("Unable to determine purchase type from metadata");
-    return;
+    console.log('Unable to determine purchase type from metadata')
+    return
   }
 
   // Check if the user profile exists based on the email used for purchase
-  const userProfile = await checkUserProfile(userEmail);
+  const userProfile = await checkUserProfile(userEmail)
 
   // Record the purchase in the database
   await updatePurchasesTable(
@@ -118,25 +118,25 @@ async function handleCheckoutSessionCompleted(
     session.id,
     session,
     purchaseType,
-    "stripe"
-  );
+    'stripe'
+  )
 
   if (!userProfile) {
     console.log(
-      "No user found with this email, but purchase was stored in database!"
-    );
-    return;
+      'No user found with this email, but purchase was stored in database!'
+    )
+    return
   }
 
   // Update the user's profile with the new purchase type
-  await updateUserProfile(userEmail, purchaseType);
+  await updateUserProfile(userEmail, purchaseType)
 
   // Add credits for credit products
-  if (purchaseType === "credits-small") {
-    await addUserCredits(userEmail, 50);
-  } else if (purchaseType === "credits-large") {
-    await addUserCredits(userEmail, 100);
+  if (purchaseType === 'credits-small') {
+    await addUserCredits(userEmail, 50)
+  } else if (purchaseType === 'credits-large') {
+    await addUserCredits(userEmail, 100)
   }
 
-  console.log("User profile updated successfully");
+  console.log('User profile updated successfully')
 }

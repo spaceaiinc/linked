@@ -1,5 +1,5 @@
-"use client";
-import React from "react";
+'use client'
+import React from 'react'
 
 export const ContentFooter = () => {
   return (
@@ -9,5 +9,5 @@ export const ContentFooter = () => {
         Space AI
       </a>
     </div>
-  );
-};
+  )
+}

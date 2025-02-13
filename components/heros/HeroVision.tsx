@@ -1,16 +1,16 @@
-import SocialProof from "@/components/socialproof/SocialProof";
+import SocialProof from '@/components/socialproof/SocialProof'
 
 export default function Hero() {
   return (
     <div className="bg-primary text-white">
-      {" "}
+      {' '}
       <section className="pb-24 p-4 text-center items-center flex flex-col">
         <h2 className="max-w-5xl mt-16 md:mt-18 font-extrabold text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-tight mb-2">
           Generate accurate image descriptions
           <span className="bg-base-100 text-base-content px-2 md:px-4 ml-1 md:ml-1.5 leading-relaxed whitespace-nowrap">
             with AI
-          </span>{" "}
-        </h2>{" "}
+          </span>{' '}
+        </h2>{' '}
         <h1 className="mt-4 md:mt-6 max-w-[600px]">
           Build your own GPT-4o vision app in minutes with this demo app that
           uses OpenAI, Cloudflare R2 & Supabase.
@@ -56,8 +56,8 @@ export default function Hero() {
           </div>
         </div>
         <div className="mt-4 flex flex-col justify-center lg:justify-start">
-          {" "}
-          <SocialProof text="Enjoyed by many." color={"text-base-content"} />
+          {' '}
+          <SocialProof text="Enjoyed by many." color={'text-base-content'} />
         </div>
         <div className="pt-10 lg:w-full flex flex-col items-center justify-center gap-10">
           <div className="bg-base-100 rounded-xl p-6 flex flex-row">
@@ -69,5 +69,5 @@ export default function Hero() {
         </div>
       </section>
     </div>
-  );
+  )
 }

@@ -1,108 +1,106 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 const RecordVoicePage = (user: any) => {
-  const [title, setTitle] = useState("Record new voice note");
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
-    null
-  );
-  const [isRunning, setIsRunning] = useState(false);
-  const [totalSeconds, setTotalSeconds] = useState(0);
+  const [title, setTitle] = useState('Record new voice note')
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
+  const [isRunning, setIsRunning] = useState(false)
+  const [totalSeconds, setTotalSeconds] = useState(0)
 
-  const router = useRouter();
+  const router = useRouter()
 
   async function startRecording() {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      let audioChunks: any = [];
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream)
+      let audioChunks: any = []
 
       recorder.ondataavailable = (e) => {
-        audioChunks.push(e.data);
-      };
+        audioChunks.push(e.data)
+      }
 
       recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-        const formData = new FormData();
-        formData.append("file", audioBlob);
-        formData.append("uploadPath", "audio");
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' })
+        const formData = new FormData()
+        formData.append('file', audioBlob)
+        formData.append('uploadPath', 'audio')
 
-        const response = await fetch("/api/audio/upload", {
-          method: "POST",
+        const response = await fetch('/api/audio/upload', {
+          method: 'POST',
           body: formData,
-        });
-        const result = await response.json();
+        })
+        const result = await response.json()
 
         if (result.error) {
-          console.error("Error uploading audio:", result.error);
-          return;
+          console.error('Error uploading audio:', result.error)
+          return
         }
 
-        const transcriptionResponse = await fetch("/api/audio/transcribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const transcriptionResponse = await fetch('/api/audio/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             recordingId: result.recordingId,
             audioUrl: result.url,
           }),
-        });
+        })
 
-        const transcriptionResult = await transcriptionResponse.json();
+        const transcriptionResult = await transcriptionResponse.json()
 
         if (transcriptionResponse.status !== 200) {
-          console.error("Error in transcription:", transcriptionResult.error);
-          return;
+          console.error('Error in transcription:', transcriptionResult.error)
+          return
         }
 
         if (user) {
-          router.push(`/audio/${result.recordingId}`);
+          router.push(`/audio/${result.recordingId}`)
         }
-      };
+      }
 
-      setMediaRecorder(recorder);
-      recorder.start();
-      setIsRunning(true);
+      setMediaRecorder(recorder)
+      recorder.start()
+      setIsRunning(true)
     } catch (error) {
-      console.error("Error accessing microphone:", error);
-      alert("Please allow access to the microphone and try again.");
-      setTitle("Record new voice note");
+      console.error('Error accessing microphone:', error)
+      alert('Please allow access to the microphone and try again.')
+      setTitle('Record new voice note')
     }
   }
 
   function stopRecording() {
     if (mediaRecorder) {
-      mediaRecorder.stop();
+      mediaRecorder.stop()
     }
-    setIsRunning(false);
+    setIsRunning(false)
   }
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout
 
     if (isRunning) {
       interval = setInterval(() => {
-        setTotalSeconds((prevTotalSeconds) => prevTotalSeconds + 1);
-      }, 1000);
+        setTotalSeconds((prevTotalSeconds) => prevTotalSeconds + 1)
+      }, 1000)
     }
 
-    return () => clearInterval(interval);
-  }, [isRunning]);
+    return () => clearInterval(interval)
+  }, [isRunning])
 
   function formatTime(time: number): string {
-    return time < 10 ? `0${time}` : `${time}`;
+    return time < 10 ? `0${time}` : `${time}`
   }
 
   const handleRecordClick = () => {
-    if (title === "Record new voice note") {
-      setTitle("Recording...");
-      startRecording();
-    } else if (title === "Recording...") {
-      setTitle("Processing...");
-      stopRecording();
+    if (title === 'Record new voice note') {
+      setTitle('Recording...')
+      startRecording()
+    } else if (title === 'Recording...') {
+      setTitle('Processing...')
+      stopRecording()
     }
-  };
+  }
 
   return (
     <>
@@ -118,7 +116,7 @@ const RecordVoicePage = (user: any) => {
             <div className="px-6">
               <div className="relative group z-50">
                 <div className="font-inter-medium text-black text-sm flex justify-center items-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2"></div>{" "}
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2"></div>{' '}
                   {formatTime(Math.floor(totalSeconds / 60))}:
                   {formatTime(totalSeconds % 60)}
                 </div>
@@ -127,11 +125,11 @@ const RecordVoicePage = (user: any) => {
             <div className="px-6">
               <button
                 onClick={handleRecordClick}
-                disabled={title === "Processing..."}
+                disabled={title === 'Processing...'}
                 className={`w-40 btn flex flex-col bg-black rounded-xl text-white text-sm transition-all relative flex justify-center items-center outline-none focus:outline-none ring-transparent cursor-pointer tw-dark-btn-rounded-2xl ${
                   isRunning
-                    ? "bg-red-500 hover:bg-red-400"
-                    : "hover:bg-black/80"
+                    ? 'bg-red-500 hover:bg-red-400'
+                    : 'hover:bg-black/80'
                 } text-base-100 px-4 py-1 flex items-center`}
               >
                 {isRunning ? (
@@ -155,7 +153,7 @@ const RecordVoicePage = (user: any) => {
                   </span>
                 )}
                 <span className="mr-1">
-                  {isRunning ? "Stop recording" : "Start recording"}
+                  {isRunning ? 'Stop recording' : 'Start recording'}
                 </span>
               </button>
             </div>
@@ -163,7 +161,7 @@ const RecordVoicePage = (user: any) => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default RecordVoicePage;
+export default RecordVoicePage

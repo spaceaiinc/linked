@@ -24,10 +24,10 @@ export async function POST(req: Request) {
       expiresOn: '2026-02-01T12:00:00.701Z',
       api_url: `https://${env.UNIPILE_DNS}`,
       providers: ['LINKEDIN'],
-      success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/apps/linkedin/app`,
-      failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/apps/linkedin/app`,
+      success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
+      failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
       name: user.id,
-      notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback?user_id=${user.id}`,
+      notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
     })
 
     return NextResponse.json(res)

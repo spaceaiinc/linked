@@ -1,35 +1,35 @@
-import AuthButton from "@/components/auth/AuthButton";
-import { createClient } from "@/lib/utils/supabase/server";
-import Link from "next/link";
-import SignOutButton from "@/components/auth/SignOut";
+import AuthButton from '@/components/auth/AuthButton'
+import { createClient } from '@/lib/utils/supabase/server'
+import Link from 'next/link'
+import SignOutButton from '@/components/auth/SignOut'
 
 interface NavbarConfig {
-  bgColor: string;
-  textColor: string;
-  buttonColor: string;
+  bgColor: string
+  textColor: string
+  buttonColor: string
 }
 interface CompanyConfig {
-  name: string;
-  theme: string;
-  homeUrl: string;
-  appUrl: string;
-  description: string;
-  logo: string;
-  navbarLinks: { label: string; href: string }[];
+  name: string
+  theme: string
+  homeUrl: string
+  appUrl: string
+  description: string
+  logo: string
+  navbarLinks: { label: string; href: string }[]
 }
 
 export default async function Navbar({
   navbarConfig,
   companyConfig,
 }: {
-  navbarConfig: NavbarConfig;
-  companyConfig: CompanyConfig;
+  navbarConfig: NavbarConfig
+  companyConfig: CompanyConfig
 }) {
-  const supabase = createClient();
+  const supabase = createClient()
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   return (
     <div className={`navbar bg-${navbarConfig.bgColor} px-12`}>
@@ -70,7 +70,7 @@ export default async function Navbar({
           </ul>
         </div>
         <a className="flex text-xl" href={companyConfig.homeUrl}>
-          {" "}
+          {' '}
           <img src={companyConfig.logo} alt="Logo" className="h-8 w-8" />
           <span
             className={`text-lg text-${navbarConfig.textColor} font-bold ml-2`}
@@ -103,5 +103,5 @@ export default async function Navbar({
         </li>
       </div>
     </div>
-  );
+  )
 }

@@ -1,10 +1,10 @@
-"use client";
-import SocialProof from "@/components/socialproof/SocialProof";
+'use client'
+import SocialProof from '@/components/socialproof/SocialProof'
 
 export default function Hero() {
   return (
     <>
-      {" "}
+      {' '}
       <div className="relative text-primary-content bg-primary">
         <div className="absolute inset-x-0 bottom-0">
           <svg
@@ -56,8 +56,8 @@ export default function Hero() {
 
             <div className="mt-5 flex justify-center ">
               <SocialProof
-                text={"Trusted by Picasso & co."}
-                color={"text-primary-content"}
+                text={'Trusted by Picasso & co.'}
+                color={'text-primary-content'}
               />
             </div>
             <p className="max-w-md mb-10 text-xs font-thin tracking-wide sm:text-sm sm:mx-auto md:mb-16">
@@ -67,10 +67,10 @@ export default function Hero() {
             <a
               href="#form"
               onClick={(e) => {
-                e.preventDefault();
+                e.preventDefault()
                 document
-                  .querySelector("#form")
-                  ?.scrollIntoView({ behavior: "smooth" });
+                  .querySelector('#form')
+                  ?.scrollIntoView({ behavior: 'smooth' })
               }}
               aria-label="Scroll down"
               className="flex items-center justify-center w-10 h-10 mx-auto text-white duration-300 transform border border-white rounded-full hover:text-teal-accent-400 hover:border-teal-accent-400 hover:shadow hover:scale-110"
@@ -89,5 +89,5 @@ export default function Hero() {
         </div>
       </div>
     </>
-  );
+  )
 }

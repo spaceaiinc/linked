@@ -1,46 +1,46 @@
-"use client";
-import React, { useState } from "react";
+'use client'
+import React, { useState } from 'react'
 
 export default function FaqSection() {
-  const [openIndex, setOpenIndex] = useState(-1);
+  const [openIndex, setOpenIndex] = useState(-1)
 
   const faq = [
     {
-      question: "What is the purpose of this platform?",
+      question: 'What is the purpose of this platform?',
       answer:
-        "This platform is designed to provide users with a seamless experience in managing their tasks and improving productivity.",
+        'This platform is designed to provide users with a seamless experience in managing their tasks and improving productivity.',
     },
     {
-      question: "How do I create an account?",
+      question: 'How do I create an account?',
       answer:
         "You can create an account by clicking on the 'Sign Up' button on the homepage and following the instructions.",
     },
     {
-      question: "What are the system requirements for this platform?",
+      question: 'What are the system requirements for this platform?',
       answer:
-        "Our platform is web-based and can be accessed from any device with an internet connection and a modern web browser.",
+        'Our platform is web-based and can be accessed from any device with an internet connection and a modern web browser.',
     },
     {
-      question: "How can I reset my password?",
+      question: 'How can I reset my password?',
       answer:
         "You can reset your password by clicking on the 'Forgot Password' link on the login page and following the instructions.",
     },
     {
-      question: "Is my data secure?",
+      question: 'Is my data secure?',
       answer:
-        "Yes, we prioritize user data security and have implemented robust security measures to protect your information.",
+        'Yes, we prioritize user data security and have implemented robust security measures to protect your information.',
     },
     {
-      question: "How can I contact customer support?",
+      question: 'How can I contact customer support?',
       answer:
         "You can contact our customer support team via the 'Contact Us' page or by sending an email to support@ourplatform.com.",
     },
     // Add more questions as needed
-  ];
+  ]
 
   const toggleOpenIndex = (index: number) => {
-    setOpenIndex(openIndex === index ? -1 : index);
-  };
+    setOpenIndex(openIndex === index ? -1 : index)
+  }
 
   return (
     <section id="faq" className="py-24">
@@ -69,7 +69,7 @@ export default function FaqSection() {
                 <span>{item.question}</span>
                 <svg
                   className={`flex-shrink-0 w-4 h-4 ml-auto ${
-                    openIndex === index ? "" : "rotate-90"
+                    openIndex === index ? '' : 'rotate-90'
                   } text-base-primary`}
                   viewBox="0 0 16 16"
                   xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +82,7 @@ export default function FaqSection() {
                     height="2"
                     rx="1"
                     transform={`rotate(${
-                      openIndex === index ? "0" : "90"
+                      openIndex === index ? '0' : '90'
                     } 8 8)`}
                   ></rect>
                 </svg>
@@ -90,7 +90,7 @@ export default function FaqSection() {
               <div
                 className="px-4 text-base-primary transition-all duration-300 ease-in-out overflow-hidden"
                 style={{
-                  maxHeight: openIndex === index ? "100%" : "0px",
+                  maxHeight: openIndex === index ? '100%' : '0px',
                   opacity: openIndex === index ? 1 : 0,
                 }}
               >
@@ -101,5 +101,5 @@ export default function FaqSection() {
         </ul>
       </div>
     </section>
-  );
+  )
 }

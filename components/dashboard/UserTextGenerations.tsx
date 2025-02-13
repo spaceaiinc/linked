@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import * as React from "react";
+import * as React from 'react'
 import {
   ColumnDef,
   flexRender,
@@ -9,10 +9,10 @@ import {
   getPaginationRowModel,
   SortingState,
   getSortedRowModel,
-} from "@tanstack/react-table";
-import { ArrowUpDown, Calendar, Bot } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from '@tanstack/react-table'
+import { ArrowUpDown, Calendar, Bot } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -20,96 +20,96 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { useRouter } from "next/navigation";
-import { useDebounce } from "@/lib/hooks/useDebounce";
-import { format } from "date-fns";
+} from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { useRouter } from 'next/navigation'
+import { useDebounce } from '@/lib/hooks/useDebounce'
+import { format } from 'date-fns'
 
 interface Generation {
-  id: string;
-  slug: string;
-  created_at: string;
-  model: string;
-  type: string;
-  title: string | null;
-  subtitle: string | null;
-  description: string | null;
+  id: string
+  slug: string
+  created_at: string
+  model: string
+  type: string
+  title: string | null
+  subtitle: string | null
+  description: string | null
 }
 
 interface UserGenerationsProps {
-  generations: Generation[];
-  generationType: "llama" | "gpt" | "vision" | "claude" | "grok";
+  generations: Generation[]
+  generationType: 'llama' | 'gpt' | 'vision' | 'claude' | 'grok'
 }
 
 export function UserGenerations({
   generations,
   generationType,
 }: UserGenerationsProps) {
-  const router = useRouter();
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [filterValue, setFilterValue] = React.useState("");
-  const debouncedFilterValue = useDebounce(filterValue, 300);
+  const router = useRouter()
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [filterValue, setFilterValue] = React.useState('')
+  const debouncedFilterValue = useDebounce(filterValue, 300)
 
   const columns: ColumnDef<Generation>[] = React.useMemo(
     () => [
       {
-        accessorKey: "title",
+        accessorKey: 'title',
         header: ({ column }) => {
           return (
             <Button
               variant="ghost"
               onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
+                column.toggleSorting(column.getIsSorted() === 'asc')
               }
             >
               Title
               <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
-          );
+          )
         },
         cell: ({ row }) => (
           <div className="font-medium">
-            {row.getValue("title") || "Untitled"}
+            {row.getValue('title') || 'Untitled'}
           </div>
         ),
       },
       {
-        accessorKey: "subtitle",
-        header: "Subtitle",
+        accessorKey: 'subtitle',
+        header: 'Subtitle',
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground">
-            {row.getValue("subtitle") || "No subtitle"}
+            {row.getValue('subtitle') || 'No subtitle'}
           </div>
         ),
       },
       {
-        accessorKey: "created_at",
-        header: "Date",
+        accessorKey: 'created_at',
+        header: 'Date',
         cell: ({ row }) => (
           <div className="flex items-center">
             <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
             <span className="text-sm">
-              {format(new Date(row.getValue("created_at")), "dd/MM/yyyy")}
+              {format(new Date(row.getValue('created_at')), 'dd/MM/yyyy')}
             </span>
           </div>
         ),
       },
       {
-        accessorKey: "model",
-        header: "Model",
+        accessorKey: 'model',
+        header: 'Model',
         cell: ({ row }) => (
           <div className="flex items-center whitespace-nowrap">
             <Bot className="mr-2 h-4 w-4 text-muted-foreground flex-shrink-0" />
             <Badge className="bg-black text-white hover:bg-black/80 text-xs">
-              {row.getValue("model")}
+              {row.getValue('model')}
             </Badge>
           </div>
         ),
       },
     ],
     []
-  );
+  )
 
   const filteredGenerations = React.useMemo(() => {
     return generations.filter(
@@ -122,8 +122,8 @@ export function UserGenerations({
             ?.toLowerCase()
             .includes(debouncedFilterValue.toLowerCase()) ||
           gen.model.toLowerCase().includes(debouncedFilterValue.toLowerCase()))
-    );
-  }, [generations, generationType, debouncedFilterValue]);
+    )
+  }, [generations, generationType, debouncedFilterValue])
 
   const table = useReactTable({
     data: filteredGenerations,
@@ -135,13 +135,13 @@ export function UserGenerations({
     state: {
       sorting,
     },
-  });
+  })
 
-  const { rows } = table.getRowModel();
-  const [visibleRange, setVisibleRange] = React.useState({ start: 0, end: 20 });
+  const { rows } = table.getRowModel()
+  const [visibleRange, setVisibleRange] = React.useState({ start: 0, end: 20 })
 
-  const observerRef = React.useRef<IntersectionObserver | null>(null);
-  const lastRowRef = React.useRef<HTMLTableRowElement | null>(null);
+  const observerRef = React.useRef<IntersectionObserver | null>(null)
+  const lastRowRef = React.useRef<HTMLTableRowElement | null>(null)
 
   React.useEffect(() => {
     observerRef.current = new IntersectionObserver(
@@ -150,44 +150,44 @@ export function UserGenerations({
           setVisibleRange((prev) => ({
             start: prev.start,
             end: Math.min(prev.end + 20, rows.length),
-          }));
+          }))
         }
       },
       { threshold: 0.1 }
-    );
+    )
 
-    return () => observerRef.current?.disconnect();
-  }, [rows.length]);
+    return () => observerRef.current?.disconnect()
+  }, [rows.length])
 
   React.useEffect(() => {
     if (lastRowRef.current && observerRef.current) {
-      observerRef.current.observe(lastRowRef.current);
+      observerRef.current.observe(lastRowRef.current)
     }
     return () => {
       if (lastRowRef.current && observerRef.current) {
-        observerRef.current.unobserve(lastRowRef.current);
+        observerRef.current.unobserve(lastRowRef.current)
       }
-    };
-  }, [visibleRange]);
+    }
+  }, [visibleRange])
 
   React.useEffect(() => {
-    setVisibleRange({ start: 0, end: 20 }); // Reset visible range when filter changes
-  }, [debouncedFilterValue]);
+    setVisibleRange({ start: 0, end: 20 }) // Reset visible range when filter changes
+  }, [debouncedFilterValue])
 
   const handleFilterChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setFilterValue(event.target.value);
+      setFilterValue(event.target.value)
     },
     []
-  );
+  )
 
   const generationTitle = {
-    claude: "Claude",
-    llama: "LLaMA",
-    gpt: "GPT",
-    vision: "Vision",
-    grok: "Grok",
-  }[generationType];
+    claude: 'Claude',
+    llama: 'LLaMA',
+    gpt: 'GPT',
+    vision: 'Vision',
+    grok: 'Grok',
+  }[generationType]
 
   return (
     <div className="space-y-4">
@@ -239,7 +239,7 @@ export function UserGenerations({
                         ? lastRowRef
                         : null
                     }
-                    data-state={row.getIsSelected() && "selected"}
+                    data-state={row.getIsSelected() && 'selected'}
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() =>
                       router.push(
@@ -280,5 +280,5 @@ export function UserGenerations({
         </Button>
       </div>
     </div>
-  );
+  )
 }

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import Upload from "@/components/pdf/PDFUploader";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react'
+import Upload from '@/components/pdf/PDFUploader'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,22 +9,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Check from "@/components/alerts/Check";
-import { UploadCloudIcon } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import Check from '@/components/alerts/Check'
+import { UploadCloudIcon } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 interface UploadDialogProps {
-  fileUrl: string | null;
-  fileName: string | null;
-  setFileUrl: (url: string | null) => void;
-  setFileName: (name: string | null) => void;
-  handleUpload: (url: string | null, id: string | null) => Promise<void>;
-  handleUrlSubmit: () => Promise<void>;
-  status: string;
-  response: any;
+  fileUrl: string | null
+  fileName: string | null
+  setFileUrl: (url: string | null) => void
+  setFileName: (name: string | null) => void
+  handleUpload: (url: string | null, id: string | null) => Promise<void>
+  handleUrlSubmit: () => Promise<void>
+  status: string
+  response: any
 }
 
 const UploadDialog: React.FC<UploadDialogProps> = ({
@@ -37,18 +37,18 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
   status,
   response,
 }) => {
-  const [activeTab, setActiveTab] = useState<string>("Upload");
-  const [isMounted, setIsMounted] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState<string>('Upload')
+  const [isMounted, setIsMounted] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
+    setIsMounted(true)
+  }, [])
 
   const isLoading =
-    status === "Adding document..." || status === "Generating embeddings...";
+    status === 'Adding document...' || status === 'Generating embeddings...'
 
-  if (!isMounted) return null;
+  if (!isMounted) return null
 
   return (
     <Dialog
@@ -122,7 +122,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
                         className="col-span-3"
                         id="fileName"
                         name="fileName"
-                        value={fileName || ""}
+                        value={fileName || ''}
                         onChange={(e) => setFileName(e.target.value)}
                       />
                     </div>
@@ -135,7 +135,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
                         type="text"
                         id="fileUrl"
                         name="fileUrl"
-                        value={fileUrl || ""}
+                        value={fileUrl || ''}
                         onChange={(e) => setFileUrl(e.target.value)}
                       />
                     </div>
@@ -157,7 +157,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
         )}
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default UploadDialog;
+export default UploadDialog

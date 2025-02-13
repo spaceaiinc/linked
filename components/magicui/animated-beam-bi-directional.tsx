@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { cn } from "@/lib/utils";
-import { AnimatedBeam } from "@/components/magicui/animated-beam";
-import React, { forwardRef, useRef } from "react";
-import { IconOpenAI } from "@/components/icons";
-import { PersonIcon } from "@radix-ui/react-icons";
+import { cn } from '@/lib/utils'
+import { AnimatedBeam } from '@/components/magicui/animated-beam'
+import React, { forwardRef, useRef } from 'react'
+import { IconOpenAI } from '@/components/icons'
+import { PersonIcon } from '@radix-ui/react-icons'
 
 const Circle = forwardRef<
   HTMLDivElement,
@@ -14,19 +14,19 @@ const Circle = forwardRef<
     <div
       ref={ref}
       className={cn(
-        "z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 bg-white p-3 ",
+        'z-10 flex h-12 w-12 items-center justify-center rounded-full border-2 bg-white p-3 ',
         className
       )}
     >
       {children}
     </div>
-  );
-});
+  )
+})
 
 export function AnimatedBeamOpenAI() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const div1Ref = useRef<HTMLDivElement>(null);
-  const div2Ref = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const div1Ref = useRef<HTMLDivElement>(null)
+  const div2Ref = useRef<HTMLDivElement>(null)
 
   return (
     <div
@@ -66,5 +66,5 @@ export function AnimatedBeamOpenAI() {
         gradientStopColor="#272c34"
       />
     </div>
-  );
+  )
 }

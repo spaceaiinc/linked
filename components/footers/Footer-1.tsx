@@ -1,25 +1,25 @@
-import Link from "next/link";
+import Link from 'next/link'
 
 interface FooterStyle {
-  bgColor: string;
-  textColor: string;
+  bgColor: string
+  textColor: string
 }
 interface CompanyConfig {
-  name: string;
-  theme: string;
-  homeUrl: string;
-  appUrl: string;
-  description: string;
-  logo: string;
-  navbarLinks: { label: string; href: string }[];
+  name: string
+  theme: string
+  homeUrl: string
+  appUrl: string
+  description: string
+  logo: string
+  navbarLinks: { label: string; href: string }[]
 }
 
 export default function Footer({
   footerConfig,
   companyConfig,
 }: {
-  footerConfig: FooterStyle;
-  companyConfig: CompanyConfig;
+  footerConfig: FooterStyle
+  companyConfig: CompanyConfig
 }) {
   return (
     <>
@@ -60,11 +60,11 @@ export default function Footer({
         </footer>
         <div className="md:ml-12 text-xs mt-12 flex justify-between flex-col md:flex-row gap-y-2 items-center">
           <div>
-            Copyright © {new Date().getFullYear()} - All Rights Reserved by{" "}
+            Copyright © {new Date().getFullYear()} - All Rights Reserved by{' '}
             {companyConfig.name}.
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }

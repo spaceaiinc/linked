@@ -1,17 +1,17 @@
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import s3 from "@/lib/cloudflare";
-import sharp from "sharp";
-import { v4 as uuidv4 } from "uuid";
+import { PutObjectCommand } from '@aws-sdk/client-s3'
+import s3 from '@/lib/cloudflare'
+import sharp from 'sharp'
+import { v4 as uuidv4 } from 'uuid'
 
 interface UploadOptions {
   file?: {
-    arrayBuffer(): Promise<ArrayBuffer>;
-    type?: string;
-  };
-  imageUrl?: string;
-  uploadPath: string;
-  contentType?: string;
-  fileName?: string;
+    arrayBuffer(): Promise<ArrayBuffer>
+    type?: string
+  }
+  imageUrl?: string
+  uploadPath: string
+  contentType?: string
+  fileName?: string
 }
 
 /**
@@ -38,47 +38,47 @@ export async function uploadFile({
   fileName,
 }: UploadOptions) {
   try {
-    let fileBuffer: Buffer;
-    let finalFileName = fileName || `file-${uuidv4()}`;
+    let fileBuffer: Buffer
+    let finalFileName = fileName || `file-${uuidv4()}`
 
     // Sanitize uploadPath to prevent path traversal
-    uploadPath = uploadPath.replace(/[^a-zA-Z0-9-_\/]/g, "");
+    uploadPath = uploadPath.replace(/[^a-zA-Z0-9-_\/]/g, '')
 
     if (file) {
-      fileBuffer = Buffer.from(await file.arrayBuffer());
+      fileBuffer = Buffer.from(await file.arrayBuffer())
 
       // Detect content type if not provided
-      if (!contentType && "type" in file) {
-        contentType = file.type;
+      if (!contentType && 'type' in file) {
+        contentType = file.type
       }
 
       // Check if the file is an image
-      if (contentType?.startsWith("image/")) {
+      if (contentType?.startsWith('image/')) {
         // Optimize image and convert to JPEG using sharp
-        fileBuffer = await sharp(fileBuffer).jpeg({ quality: 80 }).toBuffer();
+        fileBuffer = await sharp(fileBuffer).jpeg({ quality: 80 }).toBuffer()
         // Ensure the file extension is .jpeg
-        finalFileName = `${finalFileName.replace(/\.[^/.]+$/, "")}.jpeg`;
-        contentType = "image/jpeg";
+        finalFileName = `${finalFileName.replace(/\.[^/.]+$/, '')}.jpeg`
+        contentType = 'image/jpeg'
       }
       // No changes needed for other file types (audio, PDF, etc.)
     } else if (imageUrl) {
       // Fetch image from URL
-      const response = await fetch(imageUrl);
+      const response = await fetch(imageUrl)
       if (!response.ok) {
         throw new Error(
           `Failed to fetch image from URL: ${response.statusText}`
-        );
+        )
       }
-      fileBuffer = Buffer.from(await response.arrayBuffer());
+      fileBuffer = Buffer.from(await response.arrayBuffer())
       // Optimize image and convert to JPEG using sharp
-      fileBuffer = await sharp(fileBuffer).jpeg({ quality: 80 }).toBuffer();
-      finalFileName = `image-${uuidv4()}.jpeg`;
-      contentType = "image/jpeg";
+      fileBuffer = await sharp(fileBuffer).jpeg({ quality: 80 }).toBuffer()
+      finalFileName = `image-${uuidv4()}.jpeg`
+      contentType = 'image/jpeg'
     } else {
-      throw new Error("Either file or imageUrl must be provided.");
+      throw new Error('Either file or imageUrl must be provided.')
     }
 
-    const filePath = `${uploadPath}/${finalFileName}`;
+    const filePath = `${uploadPath}/${finalFileName}`
 
     // Upload the file to cloud storage using s3 client
     const putCommand = new PutObjectCommand({
@@ -86,14 +86,14 @@ export async function uploadFile({
       Key: filePath,
       Body: fileBuffer,
       ContentType: contentType,
-    });
+    })
 
-    await s3.send(putCommand);
+    await s3.send(putCommand)
 
-    const publicUrl = `${process.env.STORAGE_PUBLIC_URL}/${filePath}`;
-    return { url: publicUrl, path: filePath };
+    const publicUrl = `${process.env.STORAGE_PUBLIC_URL}/${filePath}`
+    return { url: publicUrl, path: filePath }
   } catch (error) {
-    console.error("Error in file upload:", error);
-    throw error;
+    console.error('Error in file upload:', error)
+    throw error
   }
 }

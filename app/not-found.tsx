@@ -1,7 +1,7 @@
-import { Dock, DockIcon } from "@/components/magicui/dock";
-import { IconMoneybag } from "@tabler/icons-react";
-import { HomeIcon, BuildingIcon } from "lucide-react";
-import Image from "next/image";
+import { Dock, DockIcon } from '@/components/magicui/dock'
+import { IconMoneybag } from '@tabler/icons-react'
+import { HomeIcon, BuildingIcon } from 'lucide-react'
+import Image from 'next/image'
 
 export default function NotFoundPage() {
   return (
@@ -24,5 +24,5 @@ export default function NotFoundPage() {
         </Dock>
       </div>
     </section>
-  );
+  )
 }

@@ -1,15 +1,15 @@
-import { securityUrl } from "@/config";
-import React from "react";
+import { securityUrl } from '@/config'
+import React from 'react'
 
 export default function LandingBest({
-  color = "text-base-content",
-  text = "Security is our top priority",
+  color = 'text-base-content',
+  text = 'Security is our top priority',
 }) {
   const avatars = [
-    "/brands/Vercel.svg",
-    "/brands/GCP.svg",
-    "/brands/Stripe.jpg",
-  ];
+    '/brands/Vercel.svg',
+    '/brands/GCP.svg',
+    '/brands/Stripe.jpg',
+  ]
 
   return (
     <div className="space-y-6 text-center pb-6">
@@ -34,5 +34,5 @@ export default function LandingBest({
         </a>
       </div>
     </div>
-  );
+  )
 }

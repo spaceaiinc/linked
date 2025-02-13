@@ -17,5 +17,5 @@ export default function LoadingPage() {
         </section>
       </div>
     </>
-  );
+  )
 }

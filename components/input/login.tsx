@@ -1,5 +1,5 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { LogInIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { LogInIcon } from 'lucide-react'
 
 export default function Login() {
   return (
@@ -8,13 +8,13 @@ export default function Login() {
         <LogInIcon className="h-4 w-4" />
         <AlertTitle>Login required</AlertTitle>
         <AlertDescription>
-          Please{" "}
+          Please{' '}
           <a href="/auth" className="font-bold hover:underline">
             log in
-          </a>{" "}
+          </a>{' '}
           first to test out the demo app.
         </AlertDescription>
       </Alert>
     </div>
-  );
+  )
 }

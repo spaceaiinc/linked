@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import PdfAppInfo from "@/components/pdf/PdfAppInfo";
-import UploadDialog from "./UploadDialog";
-import YourFiles from "./YourFiles";
-import { useRouter } from "next/navigation";
-import Login from "@/components/input/login";
+import React, { useState } from 'react'
+import PdfAppInfo from '@/components/pdf/PdfAppInfo'
+import UploadDialog from './UploadDialog'
+import YourFiles from './YourFiles'
+import { useRouter } from 'next/navigation'
+import Login from '@/components/input/login'
 
 interface InputCaptureProps {
-  userEmail?: string;
-  documents?: any;
-  credits?: any;
+  userEmail?: string
+  documents?: any
+  credits?: any
 }
 
 export default function PdfLayout({
@@ -18,97 +18,97 @@ export default function PdfLayout({
   documents,
   credits,
 }: InputCaptureProps) {
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [documentId, setDocumentId] = useState<string | null>(null);
-  const [response, setResponse] = useState<any>(null);
-  const [status, setStatus] = useState<string>("Idle");
-  const router = useRouter();
+  const [fileUrl, setFileUrl] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [documentId, setDocumentId] = useState<string | null>(null)
+  const [response, setResponse] = useState<any>(null)
+  const [status, setStatus] = useState<string>('Idle')
+  const router = useRouter()
 
   const handleUpload = async (url: string | null, id: string | null) => {
-    setStatus("Adding document...");
-    setFileUrl(url);
-    setDocumentId(id);
+    setStatus('Adding document...')
+    setFileUrl(url)
+    setDocumentId(id)
     if (url) {
-      setStatus("Generating embeddings...");
+      setStatus('Generating embeddings...')
 
-      const res = await fetch("/api/pdf/vectorize", {
-        method: "POST",
+      const res = await fetch('/api/pdf/vectorize', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           fileUrl: url,
           documentId: id,
         }),
-      });
+      })
 
-      const data = await res.json();
-      setResponse(data);
+      const data = await res.json()
+      setResponse(data)
 
       if (data?.id) {
-        router.push(`/pdf/document/${data.id}`);
+        router.push(`/pdf/document/${data.id}`)
       } else {
-        setStatus("Failed to generate embeddings.");
+        setStatus('Failed to generate embeddings.')
       }
 
-      setStatus("Idle");
+      setStatus('Idle')
     } else {
-      setFileName(null);
+      setFileName(null)
     }
-  };
+  }
 
   const handleUrlSubmit = async () => {
     if (!fileUrl || !fileName) {
-      alert("File URL and name are required.");
-      return;
+      alert('File URL and name are required.')
+      return
     }
 
-    setStatus("Adding document...");
+    setStatus('Adding document...')
 
-    const addDocumentResponse = await fetch("/api/pdf/externaldoc", {
-      method: "POST",
+    const addDocumentResponse = await fetch('/api/pdf/externaldoc', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ url: fileUrl, fileName }),
-    });
+    })
 
-    const addDocumentData = await addDocumentResponse.json();
+    const addDocumentData = await addDocumentResponse.json()
 
     if (addDocumentData.error) {
-      setStatus("Failed to add document.");
-      setResponse(addDocumentData);
-      return;
+      setStatus('Failed to add document.')
+      setResponse(addDocumentData)
+      return
     }
 
-    setDocumentId(addDocumentData.documentId);
-    setFileUrl(addDocumentData.url);
-    setStatus("Generating embeddings...");
+    setDocumentId(addDocumentData.documentId)
+    setFileUrl(addDocumentData.url)
+    setStatus('Generating embeddings...')
 
-    const res = await fetch("/api/pdf/vectorize", {
-      method: "POST",
+    const res = await fetch('/api/pdf/vectorize', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         fileUrl: addDocumentData.url,
         fileName,
         documentId: addDocumentData.documentId,
       }),
-    });
+    })
 
-    const data = await res.json();
-    setResponse(data);
+    const data = await res.json()
+    setResponse(data)
 
     if (data?.id) {
-      router.push(`/pdf/document/${data.id}`);
+      router.push(`/pdf/document/${data.id}`)
     } else {
-      setStatus("Failed to generate embeddings.");
+      setStatus('Failed to generate embeddings.')
     }
 
-    setStatus("Idle");
-  };
+    setStatus('Idle')
+  }
 
   return (
     <section className="relative min-h-screen">
@@ -141,5 +141,5 @@ export default function PdfLayout({
         </div>
       </div>
     </section>
-  );
+  )
 }

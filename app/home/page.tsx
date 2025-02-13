@@ -1,21 +1,21 @@
-import { companyConfig } from "@/config";
-import { createClient } from "@/lib/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { loops } from "@/lib/loops";
-import HeroDemos from "@/components/heros/HeroDemos";
-import Navbar from "@/components/navbars/Navbar-1";
-import Footer from "@/components/footers/Footer-1";
-import Apps from "@/components/app/Apps";
+import { companyConfig } from '@/config'
+import { createClient } from '@/lib/utils/supabase/server'
+import { redirect } from 'next/navigation'
+import { loops } from '@/lib/loops'
+import HeroDemos from '@/components/heros/HeroDemos'
+import Navbar from '@/components/navbars/Navbar-1'
+import Footer from '@/components/footers/Footer-1'
+import Apps from '@/components/app/Apps'
 
 export default async function Page() {
-  const supabase = createClient();
+  const supabase = createClient()
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser()
 
   if (!user) {
-    return redirect("/auth");
+    return redirect('/auth')
   }
 
   /// Once you have set up your Loops API key, you can uncomment the code below to create a contact in Loops when a user logs in
@@ -46,5 +46,5 @@ export default async function Page() {
         footerConfig={companyConfig.footerLanding!}
       />
     </div>
-  );
+  )
 }

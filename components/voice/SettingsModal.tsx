@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/dialog'
+import { Slider } from '@/components/ui/slider'
+import { Switch } from '@/components/ui/switch'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 
 interface SettingsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSettingsChange: (settings: any) => void;
-  model: string;
-  setModel: React.Dispatch<React.SetStateAction<string>>;
+  isOpen: boolean
+  onClose: () => void
+  onSettingsChange: (settings: any) => void
+  model: string
+  setModel: React.Dispatch<React.SetStateAction<string>>
 }
 
 interface Model {
-  model_id: string;
-  name: string;
-  can_use_style: boolean;
-  can_use_speaker_boost: boolean;
+  model_id: string
+  name: string
+  can_use_style: boolean
+  can_use_speaker_boost: boolean
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -38,32 +38,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   model,
   setModel,
 }) => {
-  const [stability, setStability] = useState(0.5);
-  const [similarity, setSimilarity] = useState(0.5);
-  const [styleExaggeration, setStyleExaggeration] = useState(0.5);
-  const [speakerBoost, setSpeakerBoost] = useState(false);
-  const [models, setModels] = useState<Model[]>([]);
+  const [stability, setStability] = useState(0.5)
+  const [similarity, setSimilarity] = useState(0.5)
+  const [styleExaggeration, setStyleExaggeration] = useState(0.5)
+  const [speakerBoost, setSpeakerBoost] = useState(false)
+  const [models, setModels] = useState<Model[]>([])
 
   useEffect(() => {
     const fetchModels = async () => {
       try {
-        const response = await fetch("/api/voice/models");
+        const response = await fetch('/api/voice/models')
         if (!response.ok) {
-          throw new Error("Failed to fetch models");
+          throw new Error('Failed to fetch models')
         }
-        const data = await response.json();
-        setModels(data);
+        const data = await response.json()
+        setModels(data)
         // Set the first model as default
         if (data.length > 0) {
-          setModel(data[0].model_id);
+          setModel(data[0].model_id)
         }
       } catch (error) {
-        console.error("Error fetching models:", error);
+        console.error('Error fetching models:', error)
       }
-    };
+    }
 
-    fetchModels();
-  }, []);
+    fetchModels()
+  }, [])
 
   useEffect(() => {
     onSettingsChange({
@@ -72,7 +72,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       styleExaggeration,
       speakerBoost,
       model,
-    });
+    })
   }, [
     stability,
     similarity,
@@ -80,9 +80,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     speakerBoost,
     model,
     onSettingsChange,
-  ]);
+  ])
 
-  const selectedModel = models.find((m) => m.model_id === model);
+  const selectedModel = models.find((m) => m.model_id === model)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -166,5 +166,5 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

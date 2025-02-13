@@ -1,28 +1,28 @@
 export default function GoogleSignInButton() {
   const signInWithGoogle = async () => {
     try {
-      const response = await fetch("/api/auth/google", {
-        method: "POST",
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ next: "/" }),
-      });
+        body: JSON.stringify({ next: '/' }),
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
-      if (!response.ok) throw new Error(data.message);
+      if (!response.ok) throw new Error(data.message)
 
       if (data.url) {
         // Redirect the user to the Supabase-provided URL
-        window.location.href = data.url;
+        window.location.href = data.url
       } else {
-        throw new Error("No URL returned from the server");
+        throw new Error('No URL returned from the server')
       }
     } catch (error) {
-      console.error("Error initiating Google Sign-In:", error);
+      console.error('Error initiating Google Sign-In:', error)
     }
-  };
+  }
 
   return (
     <div className="w-full w-full">
@@ -66,5 +66,5 @@ export default function GoogleSignInButton() {
         <span>Sign in with Google</span>
       </button>
     </div>
-  );
+  )
 }
