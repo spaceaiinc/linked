@@ -7,10 +7,19 @@ import { UserProfileApiResponse } from 'unipile-node-sdk/dist/types/users/user-p
 // request param
 export type ProviderInvitePostParam = {
   account_id: string
-  target_account_urls?: string[]
-  export_profile?: boolean
-  limit?: number
+
+  search_url?: string
   keywords?: string
+  file_url?: string
+  target_account_urls?: string[]
+  my_list_id?: string
+
+  manual?: boolean
+  schedule?: string
+  export_profile?: boolean
+  invite?: boolean
+
+  limit?: number
   message?: string
   industry?: string[]
   location?: string[]
@@ -36,9 +45,18 @@ export async function POST(req: Request) {
   try {
     const {
       account_id,
-      target_account_urls,
-      export_profile,
+
+      search_url,
       keywords,
+      file_url,
+      target_account_urls,
+
+      manual,
+      schedule,
+
+      export_profile,
+      invite,
+
       limit,
       message,
       industry,
@@ -55,9 +73,15 @@ export async function POST(req: Request) {
       advanced_keywords,
     }: ProviderInvitePostParam = await req.json()
 
-    if (!account_id || !target_account_urls || !keywords) {
+    if (
+      !account_id ||
+      !search_url ||
+      !keywords ||
+      !file_url ||
+      !target_account_urls
+    ) {
       return NextResponse.json(
-        { error: 'account_id, keywords and limit are required' },
+        { error: 'Invalid request parameters' },
         { status: 400 }
       )
     }
@@ -128,24 +152,28 @@ export async function POST(req: Request) {
             { status: 500 }
           )
         }
+
         const dataOfSearch = await responseOfSearch.json()
         let responseListOfGetProfile: UserProfileApiResponse[] = []
         dataOfSearch.items.map(
           async (item: { id: string; public_identifier: string }) => {
             console.log('item', item)
-            // send invitation
-            const responseOfSendInvitation =
-              await unipileClient.users.sendInvitation({
-                account_id,
-                provider_id: item.id,
-                message,
-              })
-            console.log('responseOfSendInvitation', responseOfSendInvitation)
-            //  {
-            //   "object": "UserInvitationSent",
-            //   "invitation_id": "string",
-            //   "usage": 0
-            // }
+
+            if (invite) {
+              // send invitation
+              const responseOfSendInvitation =
+                await unipileClient.users.sendInvitation({
+                  account_id,
+                  provider_id: item.id,
+                  message,
+                })
+              console.log('responseOfSendInvitation', responseOfSendInvitation)
+              //  {
+              //   "object": "UserInvitationSent",
+              //   "invitation_id": "string",
+              //   "usage": 0
+              // }
+            }
 
             if (export_profile) {
               // get each profile

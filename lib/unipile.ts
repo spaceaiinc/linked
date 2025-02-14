@@ -7,17 +7,7 @@ export const unipileClient = new UnipileClient(
 )
 
 import * as fs from 'fs'
-import { parse } from 'json2csv'
-
-interface WorkExperience {
-  company?: string
-  position?: string
-  location?: string
-  description?: string
-  skills?: string[]
-  start?: string
-  end?: string
-}
+import Papa from 'papaparse'
 
 export const convertJsonToCsv = (
   inputData: any[],
@@ -66,7 +56,7 @@ export const convertJsonToCsv = (
     return baseInfo
   })
 
-  const csv = parse(rows, { eol: '\n' })
+  const csv = Papa.unparse(rows, { newline: '\n' })
   fs.writeFileSync(outputFilePath, csv, 'utf8')
 
   console.log(`CSV file has been saved to ${outputFilePath}`)

@@ -34,6 +34,7 @@ type Navlink = {
 
 const navlinks = [
   { href: '/dashboard', label: 'Dashboard', icon: IconHome },
+  { href: '/search', label: 'プロフィール検索', icon: IconMessage },
   { href: '/invite', label: 'つながり申請', icon: IconMessage },
   { href: '/target', label: 'キーマン投稿', icon: IconMessage },
   { href: '/reaction', label: 'コメント反応', icon: IconMessage },
@@ -203,6 +204,13 @@ export const Sidebar = ({ user }: { user: User | null }) => {
     },
     []
   )
+
+  /* // 最初の三文字以降を****マスク xxx*****@gmail以降は表示 */
+  // const emailWithMask = ((user?.email
+  //   ?.split('@')[0]
+  //   .replace(/./g, '*') + '@' +
+  //   user?.email?.split('@')[1]) as string
+  // )
 
   return (
     <>

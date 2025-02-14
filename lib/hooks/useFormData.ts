@@ -24,5 +24,9 @@ export const useFormData = (initialFields: FormFields[]) => {
     setFormData((prevState) => ({ ...prevState, [fieldName]: e.target.value }))
   }
 
-  return [formData, handleChange] as const
+  const customHandleChange = (value: string, key: string) => {
+    setFormData((prevState) => ({ ...prevState, [key]: value }))
+  }
+
+  return [formData, handleChange, customHandleChange] as const
 }

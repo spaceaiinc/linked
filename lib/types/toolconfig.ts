@@ -109,4 +109,5 @@ export interface FormFields {
   options?: string[]
   initialValue?: string
   multiple?: boolean
+  custom?: boolean
 }

@@ -5,7 +5,7 @@ export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
     name: 'コメントへの反応',
-    theme: 'branding',
+    theme: '',
     homeUrl: '/',
     appUrl: '/dashboard',
     description: 'LinkedIn Automation',
