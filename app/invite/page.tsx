@@ -5,13 +5,13 @@ import AppInfo from '@/components/input/AppInfo'
 import { PaddingIcon } from '@radix-ui/react-icons'
 import { Database } from 'lucide-react'
 import { LinkedInUsage } from '@/components/dashboard/LinkedInUsage'
-import LinkedInInputCapture from '@/components/input/LinkedinInput'
+import InviteInputCapture from '@/components/input/InviteInput'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
 import Login from '@/components/input/login'
-import Info from '@/components/alerts/Info'
+import { IconPoint } from '@tabler/icons-react'
 
 export default function Page() {
   const [user, setUser] = useState<User | null>()
@@ -67,30 +67,15 @@ export default function Page() {
 
   const InfoCard = (
     <AppInfo title="概要" background="bg-accent/10">
-      {/* <div className="py-8 flex justify-center">
-        <AnimatedBeamOpenAI />
-      </div> */}
-      {/* <Info>
-        Have a look{" "}
-        <a
-          href="https://docs.spaceai.jp/ai/llama"
-          target="_blank"
-          className="font-semibold underline"
-        >
-          at the documentation
-        </a>{" "}
-        for more information on setting up the app.
-      </Info> */}
-      {/* キーワードまたは、ユーザーIDのCSVからつながり申請&CSVエクスポートを行います。 */}
       <ul className="mt-4 ml-4 text-sm space-y-2 flex flex-col mb-4 relative xs:leading-7">
         <li className="text-l flex mb-2">
           <span className="ml-2">
-            キーワードまたは、ユーザーIDのCSVからつながり申請&CSVエクスポートを行います。
+            キーワードまたは、ユーザーIDのCSVからつながり申請を行います。
           </span>
         </li>
         <li className="text-l flex">
           <span className="w-4 h-4 mt-1">
-            <Database className="w-4 h-4" />
+            <IconPoint className="w-4 h-4" />
           </span>
           <span className="ml-2">
             「Connect」ボタンをクリックして、LinkedInアカウントと紐づける。
@@ -99,18 +84,13 @@ export default function Page() {
 
         <li className="text-l flex">
           <span className="w-4 h-4 mt-1">
-            <PaddingIcon className="w-4 h-4" />
+            <IconPoint className="w-4 h-4" />
           </span>
 
           <span className="ml-2">
             検索条件に使用するキーワードを入力した後、実行ボタンを押すことで、つながり申請を自動で送信します。
           </span>
         </li>
-        {/* <li className="text-l flex">
-          <span className="w-4 h-4 mt-1">
-            <GearIcon className="w-4 h-4" />
-          </span>
-        </li> */}
       </ul>
     </AppInfo>
   )
@@ -143,7 +123,7 @@ export default function Page() {
         <>
           {provider ? (
             <>
-              <LinkedInInputCapture
+              <InviteInputCapture
                 toolConfig={toolConfig}
                 userEmail={user ? user.email : undefined}
                 credits={toolConfig.paywall ? 10 : undefined}

@@ -5,7 +5,7 @@ export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
     name: 'つながり申請',
-    theme: 'branding',
+    theme: '',
     homeUrl: '/',
     appUrl: '/dashboard',
     description: 'LinkedIn Automation',
@@ -40,11 +40,20 @@ export const toolConfig: ToolConfig = {
   type: 'groq',
   fields: [
     {
+      label: 'URLリスト',
+      name: 'target_account_urls',
+      type: 'textarea',
+      placeholder: '',
+      required: false,
+      custom: true,
+    },
+    {
       label: 'キーワード',
       name: 'keywords',
       type: 'textarea',
       placeholder: '',
-      required: true,
+      required: false,
+      custom: true,
     },
     {
       label: '申請数',
@@ -52,20 +61,8 @@ export const toolConfig: ToolConfig = {
       type: 'input',
       inputType: 'number',
       placeholder: '10',
-      required: true,
+      required: false,
     },
-    // {
-    //   label: "つながり",
-    //   name: "connection_distance",
-    //   type: "select",
-    //   options: [
-    //     "1次",
-    //     "2次",
-    //     "3次",
-    //   ],
-    //   required: false,
-    //   multiple: true
-    // },
     {
       label: '申請時メッセージ',
       name: 'message',
@@ -73,26 +70,6 @@ export const toolConfig: ToolConfig = {
       placeholder: '',
       required: false,
     },
-    // {
-    //   label: "👥 Target Audience",
-    //   name: "targetAudience",
-    //   type: "input",
-    //   placeholder:
-    //     "Who do you want to reach with your personal brand? (e.g., entrepreneurs, marketers)",
-    //   required: true,
-    // },
-    // {
-    //   label: "💼 Desired Personal Brand Image",
-    //   name: "desiredPersonalBrandImage",
-    //   type: "select",
-    //   options: [
-    //     "Thought leader/expert",
-    //     "Creative/innovative thinker",
-    //     "Authentic/transparent storyteller",
-    //     "Inspirational/motivational figure",
-    //   ],
-    //   required: true,
-    // },
   ],
   submitText: '実行',
   submitTextGenerating: '実行中',

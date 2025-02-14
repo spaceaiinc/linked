@@ -5,7 +5,7 @@ export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
     name: 'キーマン投稿へのいいね',
-    theme: 'branding',
+    theme: '',
     homeUrl: '/',
     appUrl: '/dashboard',
     description: 'LinkedIn Automation',
@@ -47,7 +47,7 @@ export const toolConfig: ToolConfig = {
       required: true,
     },
     {
-      label: '申請数',
+      label: '送信数',
       name: 'limit',
       type: 'input',
       inputType: 'number',
