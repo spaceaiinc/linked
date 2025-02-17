@@ -24,6 +24,7 @@ import {
 } from '@tabler/icons-react'
 import { User } from '@supabase/supabase-js'
 import { GitHubLogoIcon, LinkedInLogoIcon } from '@radix-ui/react-icons'
+import { Button } from '../ui/button'
 
 type Navlink = {
   href: string
@@ -212,6 +213,27 @@ export const Sidebar = ({ user }: { user: User | null }) => {
   //   user?.email?.split('@')[1]) as string
   // )
 
+  const handleConnect = async () => {
+    try {
+      // Try to get LinkedIn cookies
+      const response = await fetch('/api/provider/auth', {
+        method: 'POST',
+      })
+      // const res: {
+      //   object: 'HostedAuthUrl'
+      //   url: string
+      // }
+      // push to url
+      if (response.ok) {
+        const { url } = await response.json()
+        // router.push(url)
+        window.open(url, '_blank')
+      }
+    } catch (error) {
+      console.error('Error checking login status:', error)
+    }
+  }
+
   return (
     <>
       <div
@@ -235,9 +257,19 @@ export const Sidebar = ({ user }: { user: User | null }) => {
             </div>
           </div> */}
           {user ? (
-            <p className="text-sm font-semibold tracking-tight">
-              {user.email ? <span>{user.email}</span> : null}
-            </p>
+            <>
+              {/* <div className="flex justify-center mt-4">
+                <Button
+                  onClick={() => handleConnect()}
+                  className="bg-white hover:bg-white/10 text-black w-full border border-black"
+                >
+                  {'LinkedInアカウント追加'}
+                </Button>
+              </div> */}
+              <p className="text-sm font-semibold tracking-tight">
+                {user.email ? <span>{user.email}</span> : null}
+              </p>
+            </>
           ) : null}
         </div>
       </div>

@@ -1,6 +1,13 @@
 'use client'
 
-import { useState, ReactElement } from 'react'
+import {
+  useState,
+  ReactElement,
+  JSXElementConstructor,
+  Key,
+  PromiseLikeOfReactNode,
+  ReactNode,
+} from 'react'
 import Upload from '@/components//input/ImageUpload'
 import { useFormData } from '@/lib/hooks/useFormData'
 import { RenderFields } from '@/components/input/FormFields'
@@ -8,7 +15,6 @@ import { type ToolConfig } from '@/lib/types/toolconfig'
 import AppInfo from '@/components/input/AppInfo'
 import { LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { linkedInResponse } from '@/lib/hooks/linkedInResponpse'
 import { useRouter } from 'next/navigation'
 import Login from '@/components/input/login'
 import { motion } from 'framer-motion'
@@ -19,6 +25,9 @@ import { useDropzone } from 'react-dropzone'
 import Papa from 'papaparse'
 import { Input } from '../ui/input'
 import { IconBrandLinkedin } from '@tabler/icons-react'
+import { Checkbox } from '../ui/checkbox'
+import { Label } from '../ui/label'
+import { searchResponse } from '@/lib/hooks/SearchResponse'
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -63,10 +72,10 @@ export default function InviteInputCapture({
   credits: initialCredits,
 }: InviteInputCaptureProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null)
+  // const [generatedImage, setGeneratedImage] = useState<string | null>(null)
   // const [credits, setCredits] = useState(initialCredits ?? undefined)
 
-  const [generateResponse, loading] = linkedInResponse(toolConfig)
+  const [generateResponse, loading] = searchResponse(toolConfig)
 
   const [formData, handleChange, customHandleChange] = useFormData(
     toolConfig.fields!
@@ -183,6 +192,14 @@ export default function InviteInputCapture({
     )
   }
 
+  const [selectedHours, setSelectedHours] = useState([])
+  const [selectedDays, setSelectedDays] = useState([])
+  const [selectedWeekdays, setSelectedWeekdays] = useState([])
+
+  const hours = Array.from({ length: 24 }, (_, i) => i)
+  const days = Array.from({ length: 31 }, (_, i) => i + 1)
+  const weekdays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+
   return (
     <section className="pb-20 w-full mx-auto">
       <div className="flex flex-col md:flex-row items-stretch gap-8 relative">
@@ -273,7 +290,7 @@ export default function InviteInputCapture({
                                     </label>
                                     <div className="relative mt-1">
                                       <Input
-                                        placeholder="https://www.linkedin.com/search/results/..."
+                                        placeholder="https://www.linkedin.com/search/results/profile/..."
                                         value={formData['search_url']}
                                         onChange={(e) =>
                                           handleChange(e, 'search_url')
@@ -316,6 +333,51 @@ export default function InviteInputCapture({
                                         name={'keywords'}
                                         className="p-2 text-xs w-full"
                                       />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                      {'つながり'}
+                                    </label>
+                                    <div className="relative mt-1 grid grid-cols-4 gap-2">
+                                      {['1次', '2次', '3次'].map(
+                                        (searchType) => (
+                                          <label
+                                            key={searchType}
+                                            className="flex items-center space-x-2"
+                                          >
+                                            <Checkbox
+                                              checked={
+                                                formData['network_distance'] ==
+                                                searchType
+                                              }
+                                              onCheckedChange={(e) => {
+                                                if (e) {
+                                                  handleChange(
+                                                    {
+                                                      target: {
+                                                        value: { searchType },
+                                                      },
+                                                    } as any,
+                                                    'network_distance'
+                                                  )
+                                                } else {
+                                                  handleChange(
+                                                    {
+                                                      target: {
+                                                        value: { searchType },
+                                                      },
+                                                    } as any,
+                                                    'network_distance'
+                                                  )
+                                                }
+                                              }}
+                                              className="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                            />
+                                            <span>{searchType}</span>
+                                          </label>
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -374,8 +436,8 @@ export default function InviteInputCapture({
                                     {uploading
                                       ? 'Uploading...'
                                       : isDragActive
-                                        ? 'Drop your File here...'
-                                        : 'Drag and drop your File here or click to browse'}
+                                      ? 'Drop your File here...'
+                                      : 'Drag and drop your File here or click to browse'}
                                   </p>
 
                                   <div className="relative w-full mt-10 max-w-xl mx-auto">
@@ -458,6 +520,33 @@ export default function InviteInputCapture({
                       formData={formData}
                       handleChange={handleChange}
                     />
+
+                    <div key="実行間隔" className="mb-5 w-full">
+                      <Label
+                        htmlFor="実行間隔"
+                        className="block text-xs font-semibold mb-2"
+                      >
+                        実行間隔
+                      </Label>
+                      <Section
+                        title="Hours"
+                        items={hours}
+                        selected={selectedHours}
+                        setSelected={setSelectedHours}
+                      />
+                      <Section
+                        title="Days"
+                        items={days}
+                        selected={selectedDays}
+                        setSelected={setSelectedDays}
+                      />
+                      <Section
+                        title="Weekdays"
+                        items={weekdays}
+                        selected={selectedWeekdays}
+                        setSelected={setSelectedWeekdays}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="mb-5 flex justify-center">
@@ -483,12 +572,13 @@ export default function InviteInputCapture({
           )}
         </div>
         <div className="w-full md:w-1/2 mt-16">
+          {emptyStateComponent}
+          {/* 
           {toolConfig.type === 'gpt' ||
           toolConfig.type === 'grok' ||
           toolConfig.type === 'groq' ||
           toolConfig.type === 'claude' ||
           toolConfig.type === 'vision' ? (
-            emptyStateComponent
           ) : (toolConfig.type === 'sdxl' || toolConfig.type === 'dalle') &&
             !generatedImage ? (
             emptyStateComponent
@@ -504,8 +594,47 @@ export default function InviteInputCapture({
               </p>
             </AppInfo>
           ) : null}
+          */}
         </div>{' '}
       </div>
     </section>
+  )
+}
+
+function Section({
+  title,
+  items,
+  selected,
+  setSelected,
+}: {
+  title: string
+  items: string[] | number[]
+  selected: any[]
+  setSelected: (arg0: any) => void
+}) {
+  return (
+    <div className="mb-4">
+      <Label htmlFor={title} className="block text-xs mb-2">
+        {title}
+      </Label>
+      <div className="grid grid-cols-8 gap-2">
+        {items.map((item) => (
+          <label key={item} className="flex items-center space-x-2">
+            <Checkbox
+              checked={selected.includes(item)}
+              onCheckedChange={() =>
+                setSelected(
+                  selected.includes(item)
+                    ? selected.filter((v) => v !== item)
+                    : [...selected, item]
+                )
+              }
+              className="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+            />
+            <span>{item}</span>
+          </label>
+        ))}
+      </div>
+    </div>
   )
 }

@@ -1,15 +1,13 @@
 'use client'
 
-import { useState, ReactElement } from 'react'
+import { useState, ReactElement, useEffect } from 'react'
 import Upload from '@/components//input/ImageUpload'
 import { useFormData } from '@/lib/hooks/useFormData'
 import { RenderFields } from '@/components/input/FormFields'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import AppInfo from '@/components/input/AppInfo'
 import { LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { linkedInResponse } from '@/lib/hooks/linkedInResponpse'
-import { useRouter } from 'next/navigation'
+import { searchResponse } from '@/lib/hooks/SearchResponse'
 import Login from '@/components/input/login'
 import { motion } from 'framer-motion'
 import { FileIcon, UploadCloudIcon, LinkIcon, TextIcon } from 'lucide-react'
@@ -19,6 +17,10 @@ import { useDropzone } from 'react-dropzone'
 import Papa from 'papaparse'
 import { Input } from '../ui/input'
 import { IconBrandLinkedin } from '@tabler/icons-react'
+import { Checkbox } from '../ui/checkbox'
+import { createClient } from '@/lib/utils/supabase/client'
+import { providerAtom, userAtom } from '@/lib/atom'
+import { useAtom } from 'jotai'
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -63,10 +65,9 @@ export default function SearchProfileInputCapture({
   credits: initialCredits,
 }: SearchProfileInputCaptureProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null)
-  // const [credits, setCredits] = useState(initialCredits ?? undefined)
+  // const [generatedImage, setGeneratedImage] = useState<string | null>(null)
 
-  const [generateResponse, loading] = linkedInResponse(toolConfig)
+  const [generateResponse, loading] = searchResponse(toolConfig)
 
   const [formData, handleChange, customHandleChange] = useFormData(
     toolConfig.fields!
@@ -75,60 +76,6 @@ export default function SearchProfileInputCapture({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     await generateResponse(formData, event)
-  }
-
-  const [fileUrl, setFileUrl] = useState<string | null>(null)
-  const [fileName, setFileName] = useState<string | null>(null)
-  const [documentId, setDocumentId] = useState<string | null>(null)
-  const [response, setResponse] = useState<any>(null)
-  const [status, setStatus] = useState<string>('Idle')
-  const router = useRouter()
-
-  const handleUrlSubmit = async () => {
-    setStatus('Adding document...')
-
-    const addDocumentResponse = await fetch('/api/pdf/externaldoc', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ url: fileUrl, fileName }),
-    })
-
-    const addDocumentData = await addDocumentResponse.json()
-
-    if (addDocumentData.error) {
-      setStatus('Failed to add document.')
-      setResponse(addDocumentData)
-      return
-    }
-
-    setDocumentId(addDocumentData.documentId)
-    setFileUrl(addDocumentData.url)
-    setStatus('Generating embeddings...')
-
-    const res = await fetch('/api/pdf/vectorize', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        fileUrl: addDocumentData.url,
-        fileName,
-        documentId: addDocumentData.documentId,
-      }),
-    })
-
-    const data = await res.json()
-    setResponse(data)
-
-    if (data?.id) {
-      router.push(`/pdf/document/${data.id}`)
-    } else {
-      setStatus('Failed to generate embeddings.')
-    }
-
-    setStatus('Idle')
   }
 
   const [activeTab, setActiveTab] = useState<string>('search_url')
@@ -182,6 +129,19 @@ export default function SearchProfileInputCapture({
       </div>
     )
   }
+
+  const [user, setUser] = useAtom(userAtom)
+  const [provider, setProvider] = useAtom(providerAtom)
+  useEffect(() => {
+    const f = async () => {
+      console.log('user', user)
+      console.log('provider', provider)
+      customHandleChange('true', 'export_profile')
+      customHandleChange('true', 'manual')
+      if (provider) customHandleChange(provider.account_id, 'account_id')
+    }
+    f()
+  }, [user, provider])
 
   return (
     <section className="pb-20 w-full mx-auto">
@@ -262,13 +222,10 @@ export default function SearchProfileInputCapture({
                                     </label>
                                     <div className="relative mt-1">
                                       <Input
-                                        placeholder="https://www.linkedin.com/search/results/..."
+                                        placeholder="https://www.linkedin.com/search/results/profile/..."
                                         value={formData['search_url']}
                                         onChange={(e) =>
                                           handleChange(e, 'search_url')
-                                        }
-                                        disabled={
-                                          uploading || status !== 'Idle'
                                         }
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
@@ -279,7 +236,6 @@ export default function SearchProfileInputCapture({
                               </motion.div>
                             </div>
                           </TabsContent>
-
                           <TabsContent value="keywords">
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
@@ -307,6 +263,51 @@ export default function SearchProfileInputCapture({
                                       />
                                     </div>
                                   </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                      {'つながり'}
+                                    </label>
+                                    <div className="relative mt-1 grid grid-cols-4 gap-2">
+                                      {['1次', '2次', '3次'].map(
+                                        (searchType) => (
+                                          <label
+                                            key={searchType}
+                                            className="flex items-center space-x-2"
+                                          >
+                                            <Checkbox
+                                              checked={
+                                                formData['network_distance'] ==
+                                                searchType
+                                              }
+                                              onCheckedChange={(e) => {
+                                                if (e) {
+                                                  handleChange(
+                                                    {
+                                                      target: {
+                                                        value: { searchType },
+                                                      },
+                                                    } as any,
+                                                    'network_distance'
+                                                  )
+                                                } else {
+                                                  handleChange(
+                                                    {
+                                                      target: {
+                                                        value: { searchType },
+                                                      },
+                                                    } as any,
+                                                    'network_distance'
+                                                  )
+                                                }
+                                              }}
+                                              className="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                            />
+                                            <span>{searchType}</span>
+                                          </label>
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                               </motion.div>
                             </div>
@@ -330,9 +331,6 @@ export default function SearchProfileInputCapture({
                                         value={formData['file_url']}
                                         onChange={(e) =>
                                           handleChange(e, 'file_url')
-                                        }
-                                        disabled={
-                                          uploading || status !== 'Idle'
                                         }
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
@@ -363,8 +361,8 @@ export default function SearchProfileInputCapture({
                                     {uploading
                                       ? 'Uploading...'
                                       : isDragActive
-                                        ? 'Drop your File here...'
-                                        : 'Drag and drop your File here or click to browse'}
+                                      ? 'Drop your File here...'
+                                      : 'Drag and drop your File here or click to browse'}
                                   </p>
 
                                   <div className="relative w-full mt-10 max-w-xl mx-auto">
@@ -405,16 +403,6 @@ export default function SearchProfileInputCapture({
                             {error}
                           </motion.div>
                         )}
-
-                        {response?.error && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg"
-                          >
-                            {response.error}
-                          </motion.div>
-                        )}
                       </div>
                     </div>
                     {toolConfig.type === 'vision' && (
@@ -452,29 +440,7 @@ export default function SearchProfileInputCapture({
             </div>
           )}
         </div>
-        <div className="w-full md:w-1/2 mt-16">
-          {toolConfig.type === 'gpt' ||
-          toolConfig.type === 'grok' ||
-          toolConfig.type === 'groq' ||
-          toolConfig.type === 'claude' ||
-          toolConfig.type === 'vision' ? (
-            emptyStateComponent
-          ) : (toolConfig.type === 'sdxl' || toolConfig.type === 'dalle') &&
-            !generatedImage ? (
-            emptyStateComponent
-          ) : (toolConfig.type === 'sdxl' || toolConfig.type === 'dalle') &&
-            generatedImage ? (
-            <AppInfo title="Your image has been generated.">
-              <img
-                src={generatedImage}
-                className="mt-10 w-full group-hover:scale-105 duration-300 transition rounded-xl"
-              />
-              <p className="text-sm mt-4">
-                Fill in the form on the right to generate a different image.
-              </p>
-            </AppInfo>
-          ) : null}
-        </div>{' '}
+        <div className="w-full md:w-1/2 mt-16">{emptyStateComponent}</div>{' '}
       </div>
     </section>
   )

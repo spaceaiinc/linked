@@ -77,22 +77,6 @@ SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
---
--- Name: conversations; Type: TABLE; Schema: public; Owner: -
---
-
-
-CREATE TABLE public.conversations (
-    id uuid DEFAULT extensions.uuid_generate_v4() NOT NULL,
-    user_id uuid,
-    model_used text NOT NULL,
-    conversation jsonb DEFAULT '[]'::jsonb,
-    created_at timestamp without time zone DEFAULT now(),
-    updated_at timestamp without time zone DEFAULT now(),
-    title text,
-    type text
-);
-
 
 --
 -- Name: documents; Type: TABLE; Schema: public; Owner: -
@@ -165,8 +149,8 @@ CREATE TABLE public.profiles (
     first_name text,
     avatar_url text,
     email text,
-    purchase text,
     type smallint DEFAULT '0'::smallint,
+    is_superuser boolean DEFAULT false,
     credits smallint DEFAULT '20'::smallint
 );
 
@@ -177,9 +161,10 @@ CREATE TABLE public.profiles (
 
 CREATE TABLE public.purchases (
     id bigint NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
     user_email text,
     type text,
-    created_at timestamp with time zone DEFAULT now(),
     purchase_id text,
     payload jsonb,
     github_username text
@@ -263,39 +248,91 @@ CREATE TABLE public.providers (
     public_identifier TEXT,
     first_name TEXT,
     last_name TEXT,
-    invitation_message TEXT,
-    keywords TEXT,
-    industry TEXT,
-    location TEXT,
-    profile_language TEXT,
-    network_distance SMALLINT,
-    company TEXT,
-    past_company TEXT,
-    school TEXT,
-    service TEXT,
-    connections_of TEXT,
-    followers_of TEXT,
-    open_to TEXT,
-    advanced_keywords JSONB,
-    invite_hours SMALLINT NOT NULL DEFAULT 18,
     like_target_account_ids TEXT,
     like_target_account_hours SMALLINT NOT NULL DEFAULT 18,
-    check_reaction_hours SMALLINT NOT NULL DEFAULT 18,
-    daily_invite_usage SMALLINT NOT NULL DEFAULT 0,
-    weekly_invite_usage SMALLINT NOT NULL DEFAULT 0,
-    daily_invite_with_message_usage SMALLINT NOT NULL DEFAULT 0,
-    weekly_invite_with_message_usage SMALLINT NOT NULL DEFAULT 0,
-    daily_send_message_usage SMALLINT NOT NULL DEFAULT 0,
-    weekly_send_message_usage SMALLINT NOT NULL DEFAULT 0,
-    daily_retrieve_profile_usage SMALLINT NOT NULL DEFAULT 0,
-    weekly_retrieve_profile_usage SMALLINT NOT NULL DEFAULT 0,
-    daily_retrieve_post_usage SMALLINT NOT NULL DEFAULT 0,
-    weekly_retrieve_post_usage SMALLINT NOT NULL DEFAULT 0,
-    daily_retrieve_company_usage SMALLINT NOT NULL DEFAULT 0,
-    weekly_retrieve_company_usage SMALLINT NOT NULL DEFAULT 0
+    check_reaction_duration SMALLINT NOT NULL DEFAULT 1
+);
+
+--
+-- Name: providers; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.workflows (
+    id UUID DEFAULT extensions.UUID_generate_v4() NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
+    deleted_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NULL,
+    provider_id UUID NOT NULL,
+    type SMALLINT NOT NULL,
+    scheduled_hours SMALLINT[] NOT NULL DEFAULT '{18}',
+    scheduled_days SMALLINT[] NOT NULL DEFAULT '{0,1,2,3,4,5,6}',
+    scheduled_weekdays SMALLINT[] NOT NULL DEFAULT '{0,1,2,3,4,5,6}',
+    search_url TEXT,
+    file_url TEXT,
+    keywords TEXT,
+    network_distance SMALLINT,
+    target_account_ids TEXT,
+    message TEXT,
+    daily_usage SMALLINT NOT NULL DEFAULT 0,
+    weekly_usage SMALLINT NOT NULL DEFAULT 0
+    -- industry TEXT,
+    -- location TEXT,
+    -- profile_language TEXT,
+    -- company TEXT,
+    -- past_company TEXT,
+    -- school TEXT,
+    -- service TEXT,
+    -- connections_of TEXT,
+    -- followers_of TEXT,
+    -- open_to TEXT,
+    -- advanced_keywords JSONB,
+    -- invite_hours SMALLINT NOT NULL DEFAULT 18,
+    -- daily_invite_usage SMALLINT NOT NULL DEFAULT 0,
+    -- weekly_invite_usage SMALLINT NOT NULL DEFAULT 0,
+    -- daily_invite_with_message_usage SMALLINT NOT NULL DEFAULT 0,
+    -- weekly_invite_with_message_usage SMALLINT NOT NULL DEFAULT 0,
+    -- daily_send_message_usage SMALLINT NOT NULL DEFAULT 0,
+    -- weekly_send_message_usage SMALLINT NOT NULL DEFAULT 0,
+    -- daily_retrieve_profile_usage SMALLINT NOT NULL DEFAULT 0,
+    -- weekly_retrieve_profile_usage SMALLINT NOT NULL DEFAULT 0,
+    -- daily_retrieve_post_usage SMALLINT NOT NULL DEFAULT 0,
+    -- weekly_retrieve_post_usage SMALLINT NOT NULL DEFAULT 0,
+    -- daily_retrieve_company_usage SMALLINT NOT NULL DEFAULT 0,
+    -- weekly_retrieve_company_usage SMALLINT NOT NULL DEFAULT 0
 );
 
 -- ALTER TABLE ONLY public.providers FORCE ROW LEVEL SECURITY;
+
+--
+-- Name: Force Update updated_at Column
+--
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = timezone('UTC', now());
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_updated_at_profiles
+BEFORE UPDATE ON public.profiles
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER set_updated_at_providers
+BEFORE UPDATE ON public.providers
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER set_updated_at_workflows
+BEFORE UPDATE ON public.workflows
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER set_updated_at_purchases
+BEFORE UPDATE ON public.purchases
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
 
 
 --
@@ -400,6 +437,14 @@ ALTER TABLE ONLY public.providers
     ADD CONSTRAINT providers_pkey PRIMARY KEY (id);
 
 
+-- 
+-- Name: workflows_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflows
+    ADD CONSTRAINT workflows_pkey PRIMARY KEY (id);
+
+
 --
 -- Name: conversations conversations_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -470,6 +515,13 @@ ALTER TABLE ONLY public.transcripts
 
 ALTER TABLE ONLY public.providers
     ADD CONSTRAINT providers_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+--
+-- Name: workflows providers_provider_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.workflows
+    ADD CONSTRAINT workflows_provider_id_fkey FOREIGN KEY (provider_id) REFERENCES public.providers(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 --
 -- Name: generations AI responses are public and readable by anyone.; Type: POLICY; Schema: public; Owner: -
@@ -596,6 +648,14 @@ CREATE POLICY "Users can insert their own transcripts" ON public.transcripts FOR
 
 
 --
+-- Name: workflows Users can insert their own workflows; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can insert their own workflows" ON public.workflows FOR INSERT WITH CHECK ((auth.uid() = ( SELECT providers.user_id
+   FROM public.providers
+  WHERE (providers.id = workflows.provider_id))));
+
+--
 -- Name: conversations Users can select their own conversations; Type: POLICY; Schema: public; Owner: -
 --
 
@@ -649,6 +709,15 @@ CREATE POLICY "Users can select their own transcripts" ON public.transcripts FOR
 
 CREATE POLICY "Users can select their own providers" ON public.providers FOR SELECT USING ((auth.uid() = user_id));
 
+
+--
+-- Name: workflows Users can select their own workflows; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can select their own workflows" ON public.workflows FOR SELECT USING ((auth.uid() = ( SELECT providers.user_id
+   FROM public.providers
+  WHERE (providers.id = workflows.provider_id))));
+
 --
 -- Name: profiles Users can update own profile.; Type: POLICY; Schema: public; Owner: -
 --
@@ -685,6 +754,13 @@ CREATE POLICY "Users can update their own embeddings" ON public.embeddings FOR U
 
 CREATE POLICY "Users can update their own recordings" ON public.recordings FOR UPDATE USING ((auth.uid() = user_id));
 
+--
+-- Name: workflows Users can update their own workflows; Type: POLICY; Schema: public; Owner: -
+--
+
+CREATE POLICY "Users can update their own workflows" ON public.workflows FOR UPDATE USING ((auth.uid() = ( SELECT providers.user_id
+   FROM public.providers
+  WHERE (providers.id = workflows.provider_id))));
 
 --
 -- Name: conversations; Type: ROW SECURITY; Schema: public; Owner: -
@@ -755,6 +831,10 @@ ALTER TABLE public.transcripts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.providers ENABLE ROW LEVEL SECURITY;
 
 --
+-- Name: workflows; Type: ROW SECURITY; Schema: public; Owner: -
+--
+
+ALTER TABLE public.workflows ENABLE ROW LEVEL SECURITY;
 
 --
 -- PostgreSQL database dump complete

@@ -27,7 +27,8 @@ export async function POST(req: Request) {
       success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
       failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
       name: user.id,
-      notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
+      notify_url: `https://linked.spaceai.jp/api/provider/auth/callback`,
+      // notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
     })
 
     console.log('Url:', res.url)

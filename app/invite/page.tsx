@@ -134,14 +134,14 @@ export default function Page() {
           ) : (
             <div className="flex flex-col items-center justify-center min-h-[75vh]">
               <h1 className="text-2xl font-bold mb-8">
-                Connect Your LinkedIn Account
+                LinkedInアカウントを連携する
               </h1>
               <Button
                 onClick={() => handleConnect()}
                 disabled={provider ? true : false}
                 className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white"
               >
-                {'Connect'}
+                {'連携'}
               </Button>
               {/* {provider && (
           <p className="mt-4 text-sm text-gray-600">
