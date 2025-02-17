@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import { ProviderInvitePostParam } from '@/app/api/provider/invite/route'
+import { ProviderInvitePostParam } from '@/app/api/provider/search/route'
+import { convertJsonToCsv } from '../csv'
 
-export const linkedInResponse = (toolConfig: ToolConfig) => {
+export const searchResponse = (toolConfig: ToolConfig) => {
   const [loading, setLoading] = useState(false)
-  // const router = useRouter()
 
   const generateResponse = async (
     formData: { [key: string]: string },
@@ -15,14 +15,11 @@ export const linkedInResponse = (toolConfig: ToolConfig) => {
 
     try {
       const body: ProviderInvitePostParam = {
-        account_id: '0WvgW8VVQJeE42TefWMNPw',
-        limit: Number(formData.limit) || 10,
-        keywords: formData.keywords,
-        message: formData.message,
+        account_id: formData.account_id,
         ...formData,
       }
 
-      const response = await fetch(`/api/provider/invite`, {
+      const response = await fetch(`/api/provider/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,6 +43,9 @@ export const linkedInResponse = (toolConfig: ToolConfig) => {
 
       // const navigationPath = `/${baseUrl}/${responseData.slug}`
       // router.push(navigationPath)
+      const outputLink = `output_${formData.account_id}_${new Date().getTime()}.csv`
+      if (responseData.profile_list)
+        convertJsonToCsv(responseData.profile_list, outputLink)
     } catch (error) {
       console.error('Failed to generate responses:', error)
     } finally {

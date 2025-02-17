@@ -9,6 +9,7 @@ import {
   favicon,
   defaultKeywords,
 } from '@/config'
+import Renderer from './renderer'
 
 // SEO Optimization
 export const metadata = {
@@ -42,7 +43,9 @@ export default function RootLayout({
         className={GeistSans.className + ' text-base-content'}
         data-theme={companyConfig.company.theme}
       >
-        {children}
+        <Renderer>
+          {children}
+        </Renderer>
       </main>
     </Providers>
   )

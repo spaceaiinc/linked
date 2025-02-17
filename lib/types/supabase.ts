@@ -40,7 +40,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       pdf_documents: {
@@ -85,7 +85,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       conversations: {
@@ -126,7 +126,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       chat_documents: {
@@ -158,7 +158,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       embeddings: {
@@ -238,7 +238,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'chats'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       generations: {
@@ -315,7 +315,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'chats'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       profiles: {
@@ -325,9 +325,12 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
-          purchase: string | null
           updated_at: string | null
           username: string | null
+          fast_name: string | null
+          last_name: string | null
+          is_superuser: boolean | null
+          type: number | null
         }
         Insert: {
           avatar_url?: string | null
@@ -335,9 +338,11 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id: string
-          purchase?: string | null
           updated_at?: string | null
           username?: string | null
+          fast_name?: string | null
+          last_name?: string | null
+          type?: number | null
         }
         Update: {
           avatar_url?: string | null
@@ -348,6 +353,9 @@ export type Database = {
           purchase?: string | null
           updated_at?: string | null
           username?: string | null
+          fast_name?: string | null
+          last_name?: string | null
+          type?: number | null
         }
         Relationships: []
       }
@@ -413,7 +421,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       summaries: {
@@ -451,7 +459,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'recordings'
             referencedColumns: ['id']
-          },
+          }
         ]
       }
       transcripts: {
@@ -486,7 +494,134 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'recordings'
             referencedColumns: ['id']
-          },
+          }
+        ]
+      }
+      providers: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          user_id: string
+          type: number
+          status: number
+          account_id: string
+          public_identifier: string
+          first_name: string
+          last_name: string
+          like_target_account_ids: string
+          like_target_account_hours: number
+          check_reaction_duration: number
+        }
+        Insert: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          user_id: string
+          type: number
+          status: number
+          account_id: string
+          public_identifier: string
+          first_name: string
+          last_name: string
+          like_target_account_ids: string
+          like_target_account_hours: number
+          check_reaction_duration: number
+        }
+        Update: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          user_id: string
+          type: number
+          status: number
+          account_id: string
+          public_identifier: string
+          first_name: string
+          last_name: string
+          like_target_account_ids: string
+          like_target_account_hours: number
+          check_reaction_duration: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'provider_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+      workflows: {
+        Row: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          provider_id: string
+          type: number
+          scheduled_hours: number[]
+          scheduled_days: number[]
+          scheduled_weekdays: number[]
+          search_url: string
+          file_url: string
+          keywords: string
+          network_distance: number
+          target_account_ids: string
+          message: string
+          daily_usage: number
+          weekly_usage: number
+        }
+        Insert: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          provider_id: string
+          type: number
+          scheduled_hours: number[]
+          scheduled_days: number[]
+          scheduled_weekdays: number[]
+          search_url: string
+          file_url: string
+          keywords: string
+          network_distance: number
+          target_account_ids: string
+          message: string
+          daily_usage: number
+          weekly_usage: number
+        }
+        Update: {
+          id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          provider_id: string
+          type: number
+          scheduled_hours: number[]
+          scheduled_days: number[]
+          scheduled_weekdays: number[]
+          search_url: string
+          file_url: string
+          keywords: string
+          network_distance: number
+          target_account_ids: string
+          message: string
+          daily_usage: number
+          weekly_usage: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'workflows_provider_id_fkey'
+            columns: ['provider_id']
+            isOneToOne: false
+            referencedRelation: 'providers'
+            referencedColumns: ['id']
+          }
         ]
       }
     }
@@ -806,6 +941,9 @@ export function handleDatabaseError(error: PostgrestError | null) {
 // Add Document type
 export type Document = Database['public']['Tables']['chat_documents']['Row']
 export type Chat = Database['public']['Tables']['chats']['Row']
+export type Profile = Database['public']['Tables']['profiles']['Row']
+export type Provider = Database['public']['Tables']['providers']['Row']
+export type Workflow = Database['public']['Tables']['workflows']['Row']
 
 // Add DatabaseMessage type to match the database schema
 export interface DatabaseMessage {

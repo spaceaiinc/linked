@@ -9,10 +9,9 @@ import { createClient } from '@/lib/utils/supabase/server'
 
 export async function POST(req: Request) {
   try {
-    console.log('LinkedIn Callback:', req.body)
     const { status, account_id, name } = await req.json()
 
-    if (!status || account_id || name) {
+    if (!status || !account_id || !name) {
       return NextResponse.json(
         { error: 'params are required' },
         { status: 400 }
@@ -31,10 +30,18 @@ export async function POST(req: Request) {
     const account = {
       user_id: name,
       type: 0,
-      daily_limit: 10,
-      name,
       status: status_code,
       account_id,
+      // id: '',
+      // created_at: '',
+      // updated_at: '',
+      // deleted_at: '',
+      // public_identifier: '',
+      // first_name: '',
+      // last_name: '',
+      // like_target_account_ids: '',
+      // like_target_account_hours: 0,
+      // check_reaction_duration: 0
     }
 
     const supabase = createClient()
