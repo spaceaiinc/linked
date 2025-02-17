@@ -109,11 +109,15 @@
     "cobe": "^0.6.3",
     "daisyui": "^4.7.3",
     "encoding": "^0.1.13",
-    "eslint": "^9.20.1",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.18",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "framer-motion": "^11.1.9",
     "react-spring": "^9.7.3",
     "supabase": "^1.183.5",
     "tailwind-merge": "^2.3.0",
+    "prettier": "^3.3.3",
     "terser-webpack-plugin": "^5.3.10"
   },
   "overrides": {
