@@ -1,4 +1,6 @@
+import { extractColumnData } from '@/lib/csv'
 import { env } from '@/lib/env'
+import { Database, Workflow } from '@/lib/types/supabase'
 import { unipileClient } from '@/lib/unipile'
 import { createClient } from '@/lib/utils/supabase/server'
 import { NextResponse } from 'next/server'
@@ -10,14 +12,16 @@ export type ProviderInvitePostParam = {
 
   search_url?: string
   keywords?: string
-  file_url?: string
-  target_account_urls?: string[]
-  my_list_id?: string
+  target_public_identifiers?: string
+  mylist_id?: string
+  active_tab?: number // 0: search, 1: keywords, 2: file
 
-  manual?: boolean
-  schedule?: string
-  invite?: boolean
-  export_profile?: boolean
+  scheduled_hours?: number[]
+  scheduled_days?: number[]
+  scheduled_weekdays?: number[]
+  extract_column?: string
+
+  type?: string // 0: invite, 1: export
 
   limit?: number
   message?: string
@@ -43,16 +47,21 @@ export type ProviderInvitePostParam = {
 
 export async function POST(req: Request) {
   try {
-    const {
+    let {
       account_id,
+      type,
+
       search_url,
       keywords,
-      file_url,
-      target_account_urls,
-      manual,
-      schedule,
-      export_profile,
-      invite,
+      target_public_identifiers,
+      active_tab,
+      mylist_id,
+      extract_column,
+
+      scheduled_hours,
+      scheduled_days,
+      scheduled_weekdays,
+
       limit,
       message,
       network_distance,
@@ -68,17 +77,22 @@ export async function POST(req: Request) {
       open_to,
       advanced_keywords,
     }: ProviderInvitePostParam = await req.json()
-
+    active_tab = Number(active_tab)
     console.log('ProviderInvitePostParam', {
       account_id,
+      type,
+
+      active_tab,
       search_url,
       keywords,
-      file_url,
-      target_account_urls,
-      manual,
-      schedule,
-      export_profile,
-      invite,
+      target_public_identifiers,
+      mylist_id,
+      extract_column,
+
+      scheduled_hours,
+      scheduled_days,
+      scheduled_weekdays,
+
       limit,
       message,
       network_distance,
@@ -94,13 +108,18 @@ export async function POST(req: Request) {
       open_to,
       advanced_keywords,
     })
-
     if (
       !account_id &&
-      (!search_url || !keywords || !file_url || !target_account_urls)
+      ((!search_url && active_tab == 0) ||
+        (!keywords && active_tab == 1) ||
+        (!mylist_id && active_tab == 2) ||
+        (!target_public_identifiers && active_tab == 3))
     ) {
       return NextResponse.json(
-        { error: 'Invalid request parameters' },
+        {
+          error:
+            'Search URL or Keywords or Mylist ID or Target Public Identifiers is required',
+        },
         { status: 400 }
       )
     }
@@ -132,35 +151,85 @@ export async function POST(req: Request) {
       )
     }
 
-    if (search_url) {
-      search_url.replace(
-        'linkedin.com/search/results/?',
-        'linkedin.com/search/results/people/?'
+    if (target_public_identifiers) {
+      const publicIdentifiers = target_public_identifiers.trim().split(',')
+      const options = {
+        method: 'GET',
+        headers: {
+          'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+      }
+      const profilePromises = publicIdentifiers.map(
+        async (publicIdentifier: string) => {
+          console.log('item(', publicIdentifier, ')')
+          const url = `https://${env.UNIPILE_DNS}/api/v1/users/${publicIdentifier}?account_id=${account_id}&linkedin_sections=experience`
+
+          const responseOfGetProfile = await fetch(url, options)
+          console.log('responseOfGetProfile', responseOfGetProfile)
+          if (responseOfGetProfile.status !== 200) {
+            return null
+          }
+          const dataOfGetProfile = await responseOfGetProfile.json()
+          console.log('dataOfGetProfile', dataOfGetProfile)
+          return dataOfGetProfile
+        }
       )
-    }
 
-    const url = `https://${
-      env.UNIPILE_DNS
-    }/api/v1/linkedin/search?account_id=${account_id}&limit=${
-      limit ? limit : 5
-    }`
+      // Wait for all profile fetches to complete
+      const profileResults = await Promise.all(profilePromises)
+      const invitePromises = profileResults.map(async (profile) => {
+        console.log('profile', profile)
+        if (type?.includes('0')) {
+          const responseOfSendInvitation =
+            await unipileClient.users.sendInvitation({
+              account_id,
+              provider_id: profile.id,
+              message,
+            })
+          console.log('responseOfSendInvitation', responseOfSendInvitation)
+        }
+      })
 
-    const options = {
-      method: 'POST',
-      headers: {
-        'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
-        accept: 'application/json',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        api: 'classic',
-        category: 'people',
-        url: search_url,
-        keywords,
-      }),
-    }
+      const inviteResults = await Promise.all(invitePromises)
+      console.log('inviteResults', inviteResults)
 
-    try {
+      return NextResponse.json(
+        { profile_list: profileResults },
+        { status: 200 }
+      )
+
+      // target_public_identifiers なし
+    } else {
+      if (search_url) {
+        search_url.replace(
+          'linkedin.com/search/results/?',
+          'linkedin.com/search/results/people/?'
+        )
+      }
+
+      const url = `https://${
+        env.UNIPILE_DNS
+      }/api/v1/linkedin/search?account_id=${account_id}&limit=${
+        limit ? limit : 5
+      }`
+
+      const options = {
+        method: 'POST',
+        headers: {
+          'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
+          accept: 'application/json',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          api: 'classic',
+          category: 'people',
+          url: search_url,
+          keywords,
+        }),
+      }
+
       const responseOfSearch = await fetch(url, options)
 
       if (responseOfSearch.status !== 200) {
@@ -169,23 +238,22 @@ export async function POST(req: Request) {
           { status: 500 }
         )
       }
-
       const dataOfSearch = await responseOfSearch.json()
       const profilePromises = dataOfSearch.items.map(
         async (item: { id: string; public_identifier: string }) => {
           console.log('item', item)
 
-          try {
-            // if (invite) {
-            //   const responseOfSendInvitation = await unipileClient.users.sendInvitation({
-            //     account_id,
-            //     provider_id: item.id,
-            //     message,
-            //   })
-            //   console.log('responseOfSendInvitation', responseOfSendInvitation)
-            // }
+          if (type?.includes('0')) {
+            const responseOfSendInvitation =
+              await unipileClient.users.sendInvitation({
+                account_id,
+                provider_id: item.id,
+                message,
+              })
+            console.log('responseOfSendInvitation', responseOfSendInvitation)
+          }
 
-            // if (export_profile) {
+          if (type?.includes('1')) {
             const responseOfGetProfile = await unipileClient.users.getProfile({
               account_id,
               identifier: item.public_identifier,
@@ -198,13 +266,8 @@ export async function POST(req: Request) {
                 // 'about',
               ],
             })
-
             console.log('responseOfGetProfile', responseOfGetProfile)
             return responseOfGetProfile
-            // }
-          } catch (error) {
-            console.log(error)
-            return null
           }
         }
       )
@@ -215,25 +278,32 @@ export async function POST(req: Request) {
         (profile): profile is UserProfileApiResponse => profile !== null
       )
 
-      // if (validProfiles.length > 0) {
-      //   convertJsonToCsv(
-      //     validProfiles,
-      //     `output_${account_id}_${new Date().getTime()}.csv`
-      //   )
-      // }
+      const supabase = createClient()
+      const workflow: Database['public']['Tables']['workflows']['Insert'] = {
+        provider_id: provider.id,
+        type: 0,
+        scheduled_hours: scheduled_hours ? scheduled_hours : [],
+        scheduled_days: scheduled_days ? scheduled_days : [],
+        scheduled_weekdays: scheduled_weekdays ? scheduled_weekdays : [],
+        search_url: search_url ? search_url : null,
+        target_public_identifiers: [],
+        keywords: '',
+        network_distance: [],
+        message: '',
+        limit: 0
+      }
+
+      const responseOfInsertWorkflow = await supabase
+        .from('workflows')
+        .insert(workflow)
+      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
 
       return NextResponse.json({ profile_list: validProfiles }, { status: 200 })
-    } catch (error) {
-      console.error('Search or Profile Fetch Error:', error)
-      return NextResponse.json(
-        { error: 'An error occurred while processing the request' },
-        { status: 500 }
-      )
     }
   } catch (error) {
-    console.error('LinkedIn API Error:', error)
+    console.error('Error in POST /api/provider/invite:', error)
     return NextResponse.json(
-      { error: 'An error occurred while processing the request' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

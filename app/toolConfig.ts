@@ -4,17 +4,15 @@ import { ToolConfig } from '@/lib/types/toolconfig'
 export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
-    name: 'LinkedIn Automation',
+    name: 'Linked',
     theme: '',
     homeUrl: '/',
     appUrl: '/dashboard',
     description: 'LinkedIn Automation',
     logo: 'https://cdn2.iconfinder.com/data/icons/privacy-policy/512/privacy-data-policy-security-05-512.png',
     navbarLinks: [
-      { label: 'App', href: `/dashboard` },
-      { label: 'Home', href: '/' },
-      // { label: 'Other apps', href: '/apps' },
-      // { label: 'Blog', href: '/blog' },
+      // { label: 'App', href: `/dashboard` },
+      // { label: 'Home', href: '/' },
     ],
   },
   ////// SEO stuff
@@ -47,7 +45,7 @@ export const toolConfig: ToolConfig = {
   ////// UI config
   navbarLanding: {
     bgColor: 'primary',
-    textColor: 'text-neutral',
+    textColor: 'white',
     buttonColor: 'accent',
   },
 

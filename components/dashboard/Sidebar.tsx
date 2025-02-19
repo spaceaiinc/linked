@@ -4,27 +4,21 @@ import { usePathname } from 'next/navigation'
 import React, { useState, useCallback, useEffect } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { Heading } from './Heading'
-import {
-  IconCurrencyDollar,
-  IconLayoutSidebarRightCollapse,
-} from '@tabler/icons-react'
+import { IconLayoutSidebarRightCollapse } from '@tabler/icons-react'
 import { isMobile } from '@/lib/utils'
-import {
-  IconMicrophone,
-  IconFileText,
-  IconMessage,
-  IconPhoto,
-  IconEye,
-  IconBolt,
-  IconMessage2,
-  IconRobot,
-  IconLogout,
-  IconLogin,
-  IconHome,
-} from '@tabler/icons-react'
+import { IconFileText, IconLogout, IconLogin } from '@tabler/icons-react'
 import { User } from '@supabase/supabase-js'
-import { GitHubLogoIcon, LinkedInLogoIcon } from '@radix-ui/react-icons'
+import { navlinks } from './links'
 import { Button } from '../ui/button'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select'
+import { providerAtom, providersAtom } from '@/lib/atom'
+import { useAtom } from 'jotai'
 
 type Navlink = {
   href: string
@@ -33,41 +27,40 @@ type Navlink = {
   isExternal?: boolean
 }
 
-const navlinks = [
-  { href: '/dashboard', label: 'Dashboard', icon: IconHome },
-  { href: '/search', label: 'プロフィール検索', icon: IconMessage },
-  { href: '/invite', label: 'つながり申請', icon: IconMessage },
-  { href: '/target', label: 'キーマン投稿', icon: IconMessage },
-  { href: '/reaction', label: 'コメント反応', icon: IconMessage },
-  // { href: "/apps/audio/app", label: "Audio AI", icon: IconMicrophone },
-  // { href: "/apps/llama/app", label: "Groq Llama", icon: IconBolt },
-  // { href: "/apps/gpt/app", label: "OpenAI GPT", icon: IconMessage },
-  // { href: "/apps/dalle/app", label: "DALL-E", icon: IconPhoto },
-  // { href: "/apps/vision/app", label: "Vision AI", icon: IconEye },
-  // {
-  //   href: "/apps/sdxl/app",
-  //   label: "Stable Diffusion XL",
-  //   icon: IconPhoto,
-  // },
-  // {
-  //   href: "/apps/chat",
-  //   label: "Chat AI",
-  //   icon: IconMessage2,
-  //   isExternal: true,
-  // },
-  // { href: "/apps/claude", label: "Claude AI", icon: IconRobot },
-  // { href: "/apps/pdf", label: "PDF AI", icon: IconFileText },
-  // { href: "/apps/voice", label: "Voice AI", icon: IconMicrophone },
-]
+// 【具体のやりたいこと】
+// 確認済み：
+// つながり申請の自動化
+// 指定ユーザー（キーマン）の投稿のURL収集＆最新投稿へのいいね
+// 自身の投稿へいいねをくれた人へのコメントと投稿へのいいね
+// プロフィール内の職歴（Experience）の一括ダウンロード
+// 指定の検索条件（「人材紹介　CEO」など）に合致するユーザーのリストをCSVでエクスポートする
+// 特定のユーザーがいいね・コメントした対象投稿のリストアップ
+// 自身の投稿関連（自分の投稿へのコメントへのいいね、コメントは除ける）
+// 自分の投稿にいいねをくれたユーザーのリストアップ
+// 求人データのダウンロード（詳細の大きなテキスト含む）
 
-// const landingPages = [
-//   { href: "/apps/audio", label: "Audio AI", icon: IconMicrophone },
-//   { href: "/apps/llama", label: "Groq Llama", icon: IconBolt },
-//   { href: "/apps/gpt", label: "OpenAI GPT", icon: IconMessage },
-//   { href: "/apps/dalle", label: "DALL-E", icon: IconPhoto },
-//   { href: "/apps/vision", label: "Vision AI", icon: IconEye },
-//   { href: "/apps/sdxl", label: "Stable Diffusion XL", icon: IconPhoto },
-// ];
+// 確認中：
+// 外からプロフィールURLをCSVでアップロードしてそのユーザーにつながり申請をまとめて送る（＆100通を5日に分けて20通送る）
+// （他ユーザーのプロフィール閲覧自動化）
+
+// 今後やりたいこと
+// 中小以下向けセールスエージェント
+// つながり申請後に承認されたタイミングで通知する機能
+// 申請許可ユーザーのリストアップと営業ターゲットかどうかの判定&適切なタイミングのレコメンド(投稿直後、よく活動する時間など)
+// Googleアラートと連携して登録した関心分野のニュースを自動てレコメンド&投稿の素案をAIが作ってくれる機能(テイストを微調整)
+// LinkedInLiveとの連携機能
+// 潜在顧客のスコアリング機能
+// 自分からつながり申請・相手からつながり申請の可視化
+// 申請承認タイミングの明示
+// 直近投稿・およびいいね・コメント対象ポストから関心分野の特定
+// 直近投稿を分析して生成AIをかませて、「彼は今○○の分野に関心があります」的なポップアップをくれるイメージ。これはできそう
+// いいね・コメント対象投稿のリストが取れるといろいろ分析に使えそう
+// 適切なDMタイミングのレコメンド
+// 求人データのダウンロード
+// 大企業向け別サービス
+// 自社社員アカウントの登録・モニタリング機能
+// 社員のフォロワーリストの作成、マッピング
+// DM内容のモニタリング、コンプラ違反投稿のアラート
 
 const Navigation = React.memo(
   ({
@@ -86,33 +79,12 @@ const Navigation = React.memo(
 
     const otherLinks = [
       { href: '/', label: 'Landing', icon: IconFileText },
-      // {
-      //   href: "https://docs.spaceai.jp",
-      //   label: "Documentation",
-      //   icon: IconFileText,
-      // },
-      // {
-      //   href: "https://spaceai.jp",
-      //   label: "Organization",
-      //   icon: IconFileText,
-      // },
-      // {
-      //   href: "https://github.com/spaceaiinc",
-      //   label: "GitHub",
-      //   icon: GitHubLogoIcon,
-      // },
-      // {
-      //   href: "https://spaceai.lemonsqueezy.com/affiliates",
-      //   label: "Affiliates Program",
-      //   icon: IconCurrencyDollar,
-      // },
-      // {
-      //   href: "https://spaceai.jp/#media",
-      //   label: "Media",
-      //   icon: IconPencil,
-      // },
       user
-        ? { href: '/api/auth/signout', label: 'Logout', icon: IconLogout }
+        ? {
+            href: '/api/auth/signout',
+            label: `Logout (${user.email?.split('@')[0]})`,
+            icon: IconLogout,
+          }
         : { href: '/auth', label: 'Login', icon: IconLogin },
     ]
 
@@ -166,6 +138,9 @@ const Navigation = React.memo(
         {renderLinks(navlinks, 'Apps')}
         {/* {renderLinks(landingPages, "Landing pages", true)} */}
         {renderLinks(otherLinks, 'Other', true)}
+        {/* <p className="font-weight-bold text-primary text-sm px-2">
+          {user?.email ? <span>{user?.email}</span> : null}
+        </p> */}
       </div>
     )
   }
@@ -226,13 +201,16 @@ export const Sidebar = ({ user }: { user: User | null }) => {
       // push to url
       if (response.ok) {
         const { url } = await response.json()
-        // router.push(url)
-        window.open(url, '_blank')
+        if (url) window.open(url, '_blank')
       }
     } catch (error) {
       console.error('Error checking login status:', error)
     }
   }
+
+  // const [user, _] = useAtom(userAtom)
+  const [providers, _] = useAtom(providersAtom)
+  const [provider, __] = useAtom(providerAtom)
 
   return (
     <>
@@ -246,29 +224,48 @@ export const Sidebar = ({ user }: { user: User | null }) => {
             <SidebarHeader />
             <Navigation setOpen={handleSetOpen} user={user} />
           </div>
-          {/* <div className="space-y-2">
-            <div onClick={() => isMobile() && setOpen(false)}>
-              <Badge
-                href="https://spaceai.lemonsqueezy.com/buy/c1a15bd7-58b0-4174-8d1a-9bca6d8cb511"
-                text="Build your startup"
-                icon={IconChevronRight}
-                className="w-full"
-              />
-            </div>
-          </div> */}
           {user ? (
             <>
-              {/* <div className="flex justify-center mt-4">
-                <Button
-                  onClick={() => handleConnect()}
-                  className="bg-white hover:bg-white/10 text-black w-full border border-black"
-                >
-                  {'LinkedInアカウント追加'}
-                </Button>
-              </div> */}
-              <p className="text-sm font-semibold tracking-tight">
-                {user.email ? <span>{user.email}</span> : null}
-              </p>
+              <div className="flex justify-center mb-4">
+                {providers.length ? (
+                  <Select
+                    value={provider?.account_id}
+                    onValueChange={() => {
+                      console.log('provider?.account_id', provider?.account_id)
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue className="capitalize">
+                        {provider?.public_identifier || 'Select Provider'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {providers.map((key) => (
+                        <SelectItem
+                          key={key.account_id}
+                          value={key.account_id}
+                          className="capitalize data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
+                        >
+                          {key.public_identifier}
+                        </SelectItem>
+                      ))}
+                      <Button
+                        onClick={() => handleConnect()}
+                        className="bg-white hover:bg-white/10 text-black w-full"
+                      >
+                        {'LinkedInアカウント追加'}
+                      </Button>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Button
+                    onClick={() => handleConnect()}
+                    className="bg-white hover:bg-white/10 text-black w-full"
+                  >
+                    {'LinkedInアカウント追加'}
+                  </Button>
+                )}
+              </div>
             </>
           ) : null}
         </div>

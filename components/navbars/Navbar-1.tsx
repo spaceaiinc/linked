@@ -25,11 +25,11 @@ export default async function Navbar({
   navbarConfig: NavbarConfig
   companyConfig: CompanyConfig
 }) {
-  const supabase = createClient()
+  // const supabase = createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // const {
+  //   data: { user },
+  // } = await supabase.auth.getUser()
 
   return (
     <div className={`navbar bg-${navbarConfig.bgColor} px-12`}>
@@ -62,16 +62,16 @@ export default async function Navbar({
                 </Link>
               </li>
             ))}
-            {user && (
+            {/* {user && (
               <li className="text-base-content">
                 <SignOutButton />
               </li>
-            )}
+            )} */}
           </ul>
         </div>
         <a className="flex text-xl" href={companyConfig.homeUrl}>
           {' '}
-          <img src={companyConfig.logo} alt="Logo" className="h-8 w-8" />
+          {/* <img src={companyConfig.logo} alt="Logo" className="h-8 w-8" /> */}
           <span
             className={`text-lg text-${navbarConfig.textColor} font-bold ml-2`}
           >
@@ -92,14 +92,14 @@ export default async function Navbar({
       </div>
       <div className="navbar-end">
         <li className="sm:mr-10 ml-auto inline-flex items-center">
-          {supabase && (
-            <AuthButton
-              classProps={{
-                bgColor: navbarConfig.buttonColor,
-                primaryTextColor: navbarConfig.textColor,
-              }}
-            />
-          )}
+          {/* {supabase && ( */}
+          <AuthButton
+            classProps={{
+              bgColor: navbarConfig.buttonColor,
+              primaryTextColor: navbarConfig.textColor,
+            }}
+          />
+          {/* )} */}
         </li>
       </div>
     </div>

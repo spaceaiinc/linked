@@ -1,5 +1,5 @@
 'use client'
-import { providerAtom, userAtom } from '@/lib/atom'
+import { providerAtom, userAtom, providersAtom } from '@/lib/atom'
 import { Provider } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
 import { useAtom } from 'jotai'
@@ -12,6 +12,7 @@ interface Props {
 export default function Renderer({ children }: Props) {
   const [_, setUser] = useAtom(userAtom)
   const [__, setProvider] = useAtom(providerAtom)
+  const [___, setProviders] = useAtom(providersAtom)
   useEffect(() => {
     const f = async () => {
       // authenticate
@@ -26,19 +27,19 @@ export default function Renderer({ children }: Props) {
         return <>{children}</>
       }
 
-      const { data: provider } = await supabase
+      const { data: providers } = await supabase
         .from('providers')
-        .select('id, account_id')
+        .select('*')
         .eq('user_id', user?.id)
         .order('updated_at', { ascending: false })
-        .single()
 
-      setProvider(provider as Provider)
-
-      if (!provider || !provider?.id) {
+      if (!providers) {
         // return router.push('/auth')
         return <>{children}</>
       }
+
+      setProvider(providers[0] as Provider)
+      setProviders(providers as Provider[])
     }
     f()
   }, [])

@@ -40,7 +40,7 @@ export default async function AuthButton({ classProps }: AuthButtonProps) {
       <span
         className={`hidden sm:block text-${primaryTextColor} menu menu-horizontal px-1`}
       >
-        👋🏼 Hey, {username}
+        {username}
       </span>
       <form action={signOut} className={buttonClassName}>
         <button
