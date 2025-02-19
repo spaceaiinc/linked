@@ -290,7 +290,7 @@ export async function POST(req: Request) {
         keywords: '',
         network_distance: [],
         message: '',
-        limit: 0
+        limit: 0,
       }
 
       const responseOfInsertWorkflow = await supabase
