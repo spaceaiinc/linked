@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/utils/supabase/server'
+import { env } from '@/lib/env'
 
 // {
 //   "status":"CREATION_SUCCESS", // or "RECONNECTED" for reconnect type
@@ -10,6 +11,9 @@ import { createClient } from '@/lib/utils/supabase/server'
 export async function POST(req: Request) {
   try {
     const { status, account_id, name } = await req.json()
+    console.log('status:', status)
+    console.log('account_id:', account_id)
+    console.log('name:', name)
 
     if (!status || !account_id || !name) {
       return NextResponse.json(
@@ -27,27 +31,55 @@ export async function POST(req: Request) {
       status_code = 1
     }
 
-    const account = {
-      user_id: name,
-      type: 0,
-      status: status_code,
-      account_id,
-      // id: '',
-      // created_at: '',
-      // updated_at: '',
-      // deleted_at: '',
-      // public_identifier: '',
-      // first_name: '',
-      // last_name: '',
-      // like_target_account_ids: '',
-      // like_target_account_hours: 0,
-      // check_reaction_duration: 0
+    const url = `https://${
+      env.UNIPILE_DNS
+    }/api/v1/users/me?account_id=${account_id}`
+
+    const options = {
+      method: 'GET',
+      headers: {
+        'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
     }
 
-    const supabase = createClient()
-    const res = await supabase.from('providers').insert(account)
+    try {
+      const responseOfGetOwnProfile = await fetch(url, options)
 
-    return NextResponse.json(res)
+      if (responseOfGetOwnProfile.status !== 200) {
+        return NextResponse.json(
+          { error: 'An error occurred while searching' },
+          { status: 500 }
+        )
+      }
+
+      const dataOfGetOwnProfile = await responseOfGetOwnProfile.json()
+
+      const account = {
+        user_id: name,
+        type: 0,
+        status: status_code,
+        account_id,
+        public_identifier: dataOfGetOwnProfile.public_identifier,
+        first_name: dataOfGetOwnProfile.first_name,
+        last_name: dataOfGetOwnProfile.last_name,
+        email: dataOfGetOwnProfile.email,
+        // like_target_account_ids: '',
+        // like_target_account_hours: 0,
+        // check_reaction_duration: 0
+      }
+
+      const supabase = createClient()
+      const responseOfUpsertProviders = await supabase
+        .from('providers')
+        .upsert(account)
+      console.log('responseOfUpsertProviders:', responseOfUpsertProviders)
+
+      return NextResponse.json({ success: true })
+    } catch (error) {
+      console.log(error)
+    }
   } catch (error) {
     console.error('LinkedIn API Error:', error)
     return NextResponse.json(

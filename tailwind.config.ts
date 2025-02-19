@@ -123,7 +123,7 @@ const config = {
     themes: [
       {
         default: {
-          primary: '#18181b',
+          primary: '#185a7a',
           secondary: '#0f0f0f',
           accent: '#171717',
           neutral: '#707070',

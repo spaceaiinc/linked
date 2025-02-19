@@ -1,5 +1,5 @@
 import SocialProof from '@/components/socialproof/SocialProof'
-import { ArrowRight, Images } from 'lucide-react'
+import { ArrowRight, Images, MailIcon } from 'lucide-react'
 
 export default function Hero() {
   return (
@@ -18,36 +18,39 @@ export default function Hero() {
         </div>
         <div className="px-4 py-16 sm:max-w-xl md:max-w-4xl lg:max-w-4xl md:px-24 lg:px-16 lg:py-20">
           <h2 className="text-5xl font-bold leading-tight">
-            Beautiful images with Stable Diffusion XL
+            {' '}
+            LinkedIn Automation Tool
           </h2>
           <h1 className="mt-4 mb-8">
-            Build your own SDXL image generator in minutes with this demo app
-            that uses Replicate, Cloudflare R2 & Supabase.
+            {' '}
+            LinkedIn Automation Tool for Marketing, Sales, and Growth Hacking.
           </h1>
           <div className="max-w-md flex rounded-lg overflow-hidden">
             <div className="flex-grow flex-shrink flex items-center">
               <div className="flex md:flex-row flex-col items-center space-x-4">
                 <a
-                  className="btn btn-accent hover:bg-accent/80 w-64 text-accent-content"
-                  href="/apps/sdxl/app"
+                  className="btn btn-accent hover:bg-white/80 w-64 text-accent-content bg-transparent border border-white text-white"
+                  href="mailto:info@spaceai.jp"
                 >
-                  <Images className="w-6 h-6" />
-                  Generate images with SDXL
+                  <MailIcon className="w-6 h-6" />
+                  Contact
                 </a>
-                <a className="btn btn-ghost text-content" href="/apps">
-                  Other demo apps
+                <a className="btn btn-ghost text-content" href="/dashboard">
+                  Go to Dashboard
                   <ArrowRight className="w-4 h-4" />
                 </a>
               </div>
             </div>
           </div>
           <div className="mt-5 flex  ">
-            <SocialProof text={'Sam Altman who?'} color={'text-base-100'} />
+            <SocialProof
+              text={'Powered by Trusted Services'}
+              color={'text-base-100'}
+            />
           </div>
-          <p className="max-w-mdtext-xs font-thin tracking-wide sm:text-sm">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium.
-          </p>
+          {/* <p className="max-w-mdtext-xs font-thin tracking-wide sm:text-sm">
+            LinkedIn Automation Tool for Marketing, Sales, and Growth Hacking.
+          </p> */}
         </div>
 
         <div className="lg:w-full flex flex-col items-center justify-center gap-10">

@@ -1,18 +1,18 @@
 import React from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-  SelectValue,
-  SelectLabel,
-  SelectGroup,
-} from '@/components/ui/select'
+// import {
+//   Select,
+//   SelectTrigger,
+//   SelectContent,
+//   SelectItem,
+//   SelectValue,
+//   SelectLabel,
+//   SelectGroup,
+// } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { type FormFields } from '@/lib/types/toolconfig'
-import UploadDialog from '../pdf/pdf-upload'
+import CheckboxGroup from '../ui/checkbox-group'
 
 interface RenderFieldsProps {
   fields: FormFields[]
@@ -79,7 +79,7 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
                 className="p-2 text-xs w-full"
               />
             )}
-            {field.type === 'select' && (
+            {/* {field.type === 'select' && (
               <Select
                 value={formData[field.name!] || ''}
                 onValueChange={(value) => {
@@ -138,6 +138,13 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            )} */}
+            {field.type === 'checkbox' && (
+              <CheckboxGroup
+                field={field}
+                formData={formData}
+                handleChange={handleChange}
+              />
             )}
           </div>
         )

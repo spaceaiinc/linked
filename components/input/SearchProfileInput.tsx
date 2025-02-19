@@ -1,26 +1,24 @@
 'use client'
 
 import { useState, ReactElement, useEffect } from 'react'
-import Upload from '@/components//input/ImageUpload'
 import { useFormData } from '@/lib/hooks/useFormData'
 import { RenderFields } from '@/components/input/FormFields'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import { LoaderCircle } from 'lucide-react'
+import { ListIcon, LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { searchResponse } from '@/lib/hooks/SearchResponse'
+import { searchProfileResponse } from '@/lib/hooks/searchProfileResponse'
 import Login from '@/components/input/login'
 import { motion } from 'framer-motion'
 import { FileIcon, UploadCloudIcon, LinkIcon, TextIcon } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import Check from '@/components/alerts/Check'
 import { useDropzone } from 'react-dropzone'
-import Papa from 'papaparse'
 import { Input } from '../ui/input'
-import { IconBrandLinkedin } from '@tabler/icons-react'
+import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
 import { Checkbox } from '../ui/checkbox'
-import { createClient } from '@/lib/utils/supabase/client'
 import { providerAtom, userAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
+import { extractColumnData } from '@/lib/csv'
+import CheckboxGroup from '../ui/checkbox-group'
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -64,10 +62,7 @@ export default function SearchProfileInputCapture({
   userEmail,
   credits: initialCredits,
 }: SearchProfileInputCaptureProps) {
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  // const [generatedImage, setGeneratedImage] = useState<string | null>(null)
-
-  const [generateResponse, loading] = searchResponse(toolConfig)
+  const [generateResponse, loading] = searchProfileResponse(toolConfig)
 
   const [formData, handleChange, customHandleChange] = useFormData(
     toolConfig.fields!
@@ -75,73 +70,65 @@ export default function SearchProfileInputCapture({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const targetPublicIdentifiers = await extractColumnData(
+      fileUrl,
+      formData['extract_column'] || 'public_identifier'
+    )
+    console.log('targetPublicIdentifiers', targetPublicIdentifiers)
+    customHandleChange(
+      targetPublicIdentifiers.join(','),
+      'target_public_identifiers'
+    )
+    formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
     await generateResponse(formData, event)
   }
 
-  const [activeTab, setActiveTab] = useState<string>('search_url')
+  const [activeTab, setActiveTab] = useState<string>('0')
+  const [fileUrl, setFileUrl] = useState<string>('')
   const [uploading, setUploading] = useState<boolean>(false)
-  const [success, setSuccess] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleFileUpload = async (files: File[]) => {
+    setUploading(true)
     const file = files[0]
     if (!file) return
-
-    try {
-      // ファイルからlinkedin.com/inを含むURLを抽出　全行該当
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const csv = e.target?.result
-        if (typeof csv === 'string') {
-          Papa.parse(csv, {
-            complete: (result: { data: any[] }) => {
-              const urls = result.data
-                .map((row) => row[0])
-                .filter((url) => url.includes('linkedin.com/in'))
-              console.log(urls)
-              // [a, b, c]-> a,b,c
-              customHandleChange(urls.join(','), 'target_account_urls')
-            },
-          })
-        }
-      }
-    } catch (error) {
-      console.error('Upload error:', error)
-      setError((error as Error).message)
-    } finally {
-      setUploading(false)
-    }
+    const csvUrl = URL.createObjectURL(file)
+    setFileUrl(csvUrl)
+    setUploading(false)
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     multiple: false,
     onDrop: handleFileUpload,
     accept: {
-      'application/pdf': ['.pdf'],
+      'text/csv': ['.csv'],
     },
     maxSize: 10 * 1024 * 1024, // 10MB
   })
 
-  if (success) {
-    return (
-      <div className="w-full max-w-4xl mx-auto p-8">
-        <Check>Your File has been uploaded successfully.</Check>
-      </div>
-    )
-  }
+  const [user, _] = useAtom(userAtom)
+  const [provider, __] = useAtom(providerAtom)
 
-  const [user, setUser] = useAtom(userAtom)
-  const [provider, setProvider] = useAtom(providerAtom)
   useEffect(() => {
-    const f = async () => {
-      console.log('user', user)
-      console.log('provider', provider)
-      customHandleChange('true', 'export_profile')
-      customHandleChange('true', 'manual')
-      if (provider) customHandleChange(provider.account_id, 'account_id')
+    if (activeTab == '4') {
+      customHandleChange('3', 'active_tab')
+    } else {
+      customHandleChange(activeTab, 'active_tab')
     }
-    f()
-  }, [user, provider])
+  }, [activeTab])
+
+  useEffect(() => {
+    console.log('user', user, 'provider', provider)
+    if (provider) customHandleChange(provider.account_id, 'account_id')
+  }, [])
+
+  const keywordsField = toolConfig.fields?.find(
+    (field) => field.name === 'keywords'
+  )
+
+  const networkDistanceField = toolConfig.fields?.find(
+    (field) => field.name === 'network_distance'
+  )
 
   return (
     <section className="pb-20 w-full mx-auto">
@@ -164,9 +151,9 @@ export default function SearchProfileInputCapture({
                           className="w-full space-y-8"
                         >
                           <div className="flex justify-center">
-                            <TabsList className="flex w-[600px] h-12 items-center bg-neutral-100/50 dark:bg-neutral-900/50 backdrop-blur-sm rounded-full p-1">
+                            <TabsList className="flex w-[700px] h-12 items-center bg-neutral-100/50 dark:bg-neutral-900/50 backdrop-blur-sm rounded-full p-1">
                               <TabsTrigger
-                                value="search_url"
+                                value="0"
                                 className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
                               >
                                 <div className="flex items-center gap-2">
@@ -175,7 +162,7 @@ export default function SearchProfileInputCapture({
                                 </div>
                               </TabsTrigger>
                               <TabsTrigger
-                                value="keywords"
+                                value="1"
                                 className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
                               >
                                 <div className="flex items-center gap-2">
@@ -186,7 +173,18 @@ export default function SearchProfileInputCapture({
                                 </div>
                               </TabsTrigger>
                               <TabsTrigger
-                                value="url"
+                                value="2"
+                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <IconFile className="h-4 w-4" />
+                                  <span className="font-medium">
+                                    マイリスト
+                                  </span>
+                                </div>
+                              </TabsTrigger>
+                              <TabsTrigger
+                                value="3"
                                 className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
                               >
                                 <div className="flex items-center gap-2">
@@ -195,7 +193,7 @@ export default function SearchProfileInputCapture({
                                 </div>
                               </TabsTrigger>
                               <TabsTrigger
-                                value="upload"
+                                value="4"
                                 className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
                               >
                                 <div className="flex items-center gap-2">
@@ -207,7 +205,7 @@ export default function SearchProfileInputCapture({
                               </TabsTrigger>
                             </TabsList>
                           </div>
-                          <TabsContent value="search_url">
+                          <TabsContent value="0">
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -236,7 +234,7 @@ export default function SearchProfileInputCapture({
                               </motion.div>
                             </div>
                           </TabsContent>
-                          <TabsContent value="keywords">
+                          <TabsContent value="1">
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -247,72 +245,56 @@ export default function SearchProfileInputCapture({
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      {'keywords'}
+                                      {keywordsField?.label}
                                     </label>
                                     <div className="relative mt-1">
                                       <Input
-                                        value={formData['keywords']}
+                                        value={formData[keywordsField?.name!]}
                                         onChange={(e) =>
-                                          handleChange(e, 'keywords')
+                                          handleChange(e, keywordsField?.name!)
                                         }
                                         required={false}
                                         placeholder={'人材紹介 CEO'}
-                                        id={'keywords'}
-                                        name={'keywords'}
+                                        id={keywordsField?.name!}
+                                        name={keywordsField?.name!}
                                         className="p-2 text-xs w-full"
                                       />
                                     </div>
                                   </div>
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      {'つながり'}
+                                      {networkDistanceField?.label}
                                     </label>
-                                    <div className="relative mt-1 grid grid-cols-4 gap-2">
-                                      {['1次', '2次', '3次'].map(
-                                        (searchType) => (
-                                          <label
-                                            key={searchType}
-                                            className="flex items-center space-x-2"
-                                          >
-                                            <Checkbox
-                                              checked={
-                                                formData['network_distance'] ==
-                                                searchType
-                                              }
-                                              onCheckedChange={(e) => {
-                                                if (e) {
-                                                  handleChange(
-                                                    {
-                                                      target: {
-                                                        value: { searchType },
-                                                      },
-                                                    } as any,
-                                                    'network_distance'
-                                                  )
-                                                } else {
-                                                  handleChange(
-                                                    {
-                                                      target: {
-                                                        value: { searchType },
-                                                      },
-                                                    } as any,
-                                                    'network_distance'
-                                                  )
-                                                }
-                                              }}
-                                              className="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
-                                            />
-                                            <span>{searchType}</span>
-                                          </label>
-                                        )
-                                      )}
-                                    </div>
+                                    <CheckboxGroup
+                                      field={networkDistanceField!}
+                                      formData={formData}
+                                      handleChange={handleChange}
+                                    />
                                   </div>
                                 </div>
                               </motion.div>
                             </div>
                           </TabsContent>
-                          <TabsContent value="url">
+                          <TabsContent value="2">
+                            <div className="pb-10 w-full max-w-md mx-auto">
+                              <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="space-y-4 p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-[0_0_1px_1px_rgba(0,0,0,0.05)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)]"
+                              >
+                                <div className="space-y-3">
+                                  <div>
+                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                      マイリスト
+                                    </label>
+                                    <div className="relative mt-1">実装中</div>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            </div>
+                          </TabsContent>
+                          <TabsContent value="3">
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -328,13 +310,28 @@ export default function SearchProfileInputCapture({
                                     <div className="relative mt-1">
                                       <Input
                                         placeholder="https://example.com/data.csv"
-                                        value={formData['file_url']}
+                                        value={fileUrl}
                                         onChange={(e) =>
-                                          handleChange(e, 'file_url')
+                                          setFileUrl(e.target.value)
                                         }
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                      対象カラム名
+                                    </label>
+                                    <div className="relative mt-1">
+                                      <Input
+                                        placeholder="public_identifier"
+                                        value={formData['extract_column']}
+                                        onChange={(e) =>
+                                          handleChange(e, 'extract_column')
+                                        }
+                                        className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -342,7 +339,7 @@ export default function SearchProfileInputCapture({
                             </div>
                           </TabsContent>
 
-                          <TabsContent value="upload">
+                          <TabsContent value="4">
                             <div {...getRootProps()}>
                               <motion.div
                                 whileHover="animate"
@@ -361,8 +358,8 @@ export default function SearchProfileInputCapture({
                                     {uploading
                                       ? 'Uploading...'
                                       : isDragActive
-                                      ? 'Drop your File here...'
-                                      : 'Drag and drop your File here or click to browse'}
+                                        ? 'Drop your File here...'
+                                        : 'Drag and drop your File here or click to browse'}
                                   </p>
 
                                   <div className="relative w-full mt-10 max-w-xl mx-auto">
@@ -391,6 +388,21 @@ export default function SearchProfileInputCapture({
                                 </div>
                               </motion.div>
                             </div>
+                            <div>
+                              <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                対象カラム名
+                              </label>
+                              <div className="relative mt-1">
+                                <Input
+                                  placeholder="public_identifier"
+                                  value={formData['extract_column']}
+                                  onChange={(e) =>
+                                    handleChange(e, 'extract_column')
+                                  }
+                                  className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
+                                />
+                              </div>
+                            </div>
                           </TabsContent>
                         </Tabs>
 
@@ -405,12 +417,6 @@ export default function SearchProfileInputCapture({
                         )}
                       </div>
                     </div>
-                    {toolConfig.type === 'vision' && (
-                      <Upload
-                        uploadConfig={toolConfig.upload}
-                        setImageUrl={setImageUrl}
-                      />
-                    )}
                     <RenderFields
                       fields={toolConfig.fields!}
                       formData={formData}
@@ -420,9 +426,7 @@ export default function SearchProfileInputCapture({
                 </div>
                 <div className="mb-5 flex justify-center">
                   <Button
-                    disabled={
-                      (!imageUrl && toolConfig.type === 'vision') || loading
-                    }
+                    disabled={loading}
                     type="submit"
                     className="bg-accent hover:bg-accent/80 text-white w-full"
                   >

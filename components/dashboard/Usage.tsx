@@ -37,15 +37,15 @@ interface Generation {
   description: string | null
 }
 
-interface LinkedInUsageProps {
+interface DashboardUsageProps {
   generations: Generation[]
   generationType: 'llama' | 'gpt' | 'vision' | 'claude' | 'grok' | 'linkedin'
 }
 
-export function LinkedInUsage({
+export function DashboardUsage({
   generations,
   generationType,
-}: LinkedInUsageProps) {
+}: DashboardUsageProps) {
   const router = useRouter()
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [filterValue, setFilterValue] = React.useState('')

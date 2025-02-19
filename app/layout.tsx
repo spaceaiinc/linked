@@ -43,9 +43,7 @@ export default function RootLayout({
         className={GeistSans.className + ' text-base-content'}
         data-theme={companyConfig.company.theme}
       >
-        <Renderer>
-          {children}
-        </Renderer>
+        <Renderer>{children}</Renderer>
       </main>
     </Providers>
   )
