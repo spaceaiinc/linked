@@ -627,7 +627,7 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
-      },
+      }
       workflow_histories: {
         Row: {
           id: string
@@ -665,7 +665,7 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
-      },
+      }
     }
     Views: {
       [_ in never]: never
@@ -986,7 +986,8 @@ export type Chat = Database['public']['Tables']['chats']['Row']
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Provider = Database['public']['Tables']['providers']['Row']
 export type Workflow = Database['public']['Tables']['workflows']['Row']
-export type WorkflowHistory = Database['public']['Tables']['workflow_histories']['Row']
+export type WorkflowHistory =
+  Database['public']['Tables']['workflow_histories']['Row']
 
 // Add DatabaseMessage type to match the database schema
 export interface DatabaseMessage {
