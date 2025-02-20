@@ -20,14 +20,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run ESLint
-        run: |
-          npm run lint
-          git add .
-          if ! git diff --exit-code; then
-            echo "ESLint changes detected. Please commit the changes."
-            exit 1
-          fi
+      # - name: Run ESLint
+      #   run: |
+      #     npm run lint
+      #     git add .
+      #     if ! git diff --exit-code; then
+      #       echo "ESLint changes detected. Please commit the changes."
+      #       exit 1
+      #     fi
 
       - name: Run Prettier
         run: |

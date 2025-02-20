@@ -35,8 +35,10 @@ export async function saveChat({
   await mutateQuery(
     async (client, { id, userId, title }) => {
       const now = new Date().toISOString()
+      // TODO:
       const { error } = await client.from('chats').insert({
         id,
+        company_id: '',
         user_id: userId,
         title,
         created_at: now,
@@ -106,8 +108,12 @@ export async function saveMessages({
         }
       })
 
-      const { error } = await client.from('messages').insert(formattedMessages)
-      if (error) throw error
+      // TODO:
+      // const { error } = await client.from('messages').insert({
+      //   company_id: '',
+      //   ...formattedMessages,
+      // })
+      // if (error) throw error
     },
     [{ chatId, messages }],
     [`chat_${chatId}_messages`, `chat_${chatId}`]

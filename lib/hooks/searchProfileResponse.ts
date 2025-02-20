@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import { ProviderInvitePostParam } from '@/app/api/provider/invite/route'
+import { convertProfileJsonToCsv } from '../csv'
 
-export const linkedInResponse = (toolConfig: ToolConfig) => {
+export const searchProfileResponse = (toolConfig: ToolConfig) => {
   const [loading, setLoading] = useState(false)
-  // const router = useRouter()
 
   const generateResponse = async (
     formData: { [key: string]: string },
@@ -14,25 +13,23 @@ export const linkedInResponse = (toolConfig: ToolConfig) => {
     setLoading(true)
 
     try {
-      const body: ProviderInvitePostParam = {
-        account_id: '0WvgW8VVQJeE42TefWMNPw',
-        limit: Number(formData.limit) || 10,
-        keywords: formData.keywords,
-        message: formData.message,
-        ...formData,
-      }
+      // const body: ProviderSearchProfilePostParam = {
+      //   account_id: formData.account_id,
+      //   ...formData,
+      // }
 
-      const response = await fetch(`/api/provider/invite`, {
+      const response = await fetch(`/api/provider/search/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...body,
+          ...formData,
         }),
       })
 
       if (!response.ok) {
+        alert(await response.text())
         throw new Error('Network response was not ok')
       }
 
@@ -46,6 +43,16 @@ export const linkedInResponse = (toolConfig: ToolConfig) => {
 
       // const navigationPath = `/${baseUrl}/${responseData.slug}`
       // router.push(navigationPath)
+      if (responseData.profile_list && formData.type.includes('1')) {
+        const date = new Date()
+        const year = date.getFullYear()
+        const month = date.getMonth() + 1
+        const day = date.getDate()
+        const hours = date.getHours()
+        const minutes = date.getMinutes()
+        const outputFilePath = `linkedin_profile_${year}${month}${day}${hours}${minutes}.csv`
+        convertProfileJsonToCsv(responseData.profile_list, outputFilePath)
+      }
     } catch (error) {
       console.error('Failed to generate responses:', error)
     } finally {

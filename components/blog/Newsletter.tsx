@@ -21,17 +21,17 @@ export default function Newsletter() {
     }
     setLoading(true)
     const supabase = createClient()
-    const { error } = await supabase.from('newsletter').insert([{ email }])
-    if (error) {
-      if (error.code === '23505') {
-        setMessage("You're already subscribed to the newsletter!")
-      } else {
-        console.error('Error inserting email: ', error)
-      }
-    } else {
-      setMessage('You have subscribed!')
-      setSubscribed(true)
-    }
+    // const { error } = await supabase.from('newsletter').insert([{ email }])
+    // if (error) {
+    //   if (error.code === '23505') {
+    //     setMessage("You're already subscribed to the newsletter!")
+    //   } else {
+    //     console.error('Error inserting email: ', error)
+    //   }
+    // } else {
+    //   setMessage('You have subscribed!')
+    //   setSubscribed(true)
+    // }
     setLoading(false)
   }
 
