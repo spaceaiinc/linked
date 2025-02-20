@@ -38,62 +38,7 @@ export const toolConfig: ToolConfig = {
 
   ////// Form input
   type: 'groq',
-  fields: [
-    {
-      label: 'キーワード',
-      name: 'keywords',
-      type: 'textarea',
-      placeholder: '',
-      required: true,
-    },
-    {
-      label: '申請数',
-      name: 'limit',
-      type: 'input',
-      inputType: 'number',
-      placeholder: '10',
-      required: true,
-    },
-    // {
-    //   label: "つながり",
-    //   name: "connection_distance",
-    //   type: "select",
-    //   options: [
-    //     "1次",
-    //     "2次",
-    //     "3次",
-    //   ],
-    //   required: false,
-    //   multiple: true
-    // },
-    {
-      label: '申請時メッセージ',
-      name: 'message',
-      type: 'textarea',
-      placeholder: '',
-      required: false,
-    },
-    // {
-    //   label: "👥 Target Audience",
-    //   name: "targetAudience",
-    //   type: "input",
-    //   placeholder:
-    //     "Who do you want to reach with your personal brand? (e.g., entrepreneurs, marketers)",
-    //   required: true,
-    // },
-    // {
-    //   label: "💼 Desired Personal Brand Image",
-    //   name: "desiredPersonalBrandImage",
-    //   type: "select",
-    //   options: [
-    //     "Thought leader/expert",
-    //     "Creative/innovative thinker",
-    //     "Authentic/transparent storyteller",
-    //     "Inspirational/motivational figure",
-    //   ],
-    //   required: true,
-    // },
-  ],
+  fields: [],
   submitText: '実行',
   submitTextGenerating: '実行中',
   responseTitle: '処理が完了しました',

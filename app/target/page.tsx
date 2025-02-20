@@ -4,14 +4,9 @@ import { toolConfig } from './toolConfig'
 import AppInfo from '@/components/input/AppInfo'
 import { PaddingIcon } from '@radix-ui/react-icons'
 import { Database } from 'lucide-react'
-import { LinkedInUsage } from '@/components/dashboard/LinkedInUsage'
-import LinkedInInputCapture from '@/components/input/InviteInput'
-import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/utils/supabase/client'
 import { User } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
-import Login from '@/components/input/login'
-import Info from '@/components/alerts/Info'
 
 export default function Page() {
   const [user, setUser] = useState<User | null>()
@@ -40,7 +35,7 @@ export default function Page() {
             .eq('id', user.id)
             .single()
 
-          credits = profile.credits
+          credits = profile?.credits
 
           // console.table(profile)
 

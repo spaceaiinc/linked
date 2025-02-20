@@ -1,4 +1,4 @@
-import { LinkedInLayout } from '@/components/dashboard/LinkedInLayout'
+import { DashboardLayout } from '@/components/dashboard/Layout'
 import { toolConfig } from './toolConfig'
 
 export const metadata = {
@@ -17,5 +17,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <LinkedInLayout toolConfig={toolConfig}>{children}</LinkedInLayout>
+  return <DashboardLayout toolConfig={toolConfig}>{children}</DashboardLayout>
 }

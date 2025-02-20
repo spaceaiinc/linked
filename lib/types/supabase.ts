@@ -11,8 +11,188 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      companies: {
+        Row: {
+          id: string
+          name: string
+          domain: string
+          plan: number
+        }
+        Insert: {
+          id?: string
+          name: string
+          domain: string
+          plan: number
+        }
+        Update: {
+          id: string
+          name: string
+          domain: string
+          plan: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          id: string
+          company_id: string
+          updated_at: string | null
+          full_name: string
+          username: string
+          first_name: string | null
+          last_name: string | null
+          avatar_url: string | null
+          email: string | null
+          type: number | null
+          status: number | null
+          role: number | null
+          is_superuser: number | null
+          credits: number | null
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          updated_at?: string | null
+          full_name: string
+          username: string
+          first_name?: string | null
+          last_name?: string | null
+          avatar_url?: string | null
+          email?: string | null
+          type?: number | null
+          status?: number | null
+          role?: number | null
+          is_superuser?: number | null
+          credits: number | null
+        }
+        Update: {
+          id: string
+          company_id: string
+          updated_at?: string | null
+          full_name: string
+          username: string
+          first_name?: string | null
+          last_name?: string | null
+          avatar_url?: string | null
+          email?: string | null
+          type?: number | null
+          status?: number | null
+          role?: number | null
+          is_superuser?: number | null
+          credits: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'profiles_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+          user_id: string
+          service: number
+          service_id: string | null
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          user_id: string
+          service: number
+          service_id: string | null
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          user_id: string
+          service: number
+          service_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'customers_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'customers_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      purchases: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+          customer_id: string
+          expires_at: string | null
+          plan: number
+          purchase_id: string | null
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          customer_id: string
+          expires_at: string | null
+          plan: number
+          purchase_id: string | null
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+          customer_id: string
+          expires_at: string | null
+          plan: number
+          purchase_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'purchases_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'purchases_customer_id_fkey'
+            columns: ['customer_id']
+            isOneToOne: false
+            referencedRelation: 'customers'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       chats: {
         Row: {
+          company_id: string
           created_at: string
           id: string
           title: string | null
@@ -20,6 +200,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id: string
           created_at?: string
           id?: string
           title?: string | null
@@ -27,6 +208,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id: string
           created_at?: string
           id?: string
           title?: string | null
@@ -34,6 +216,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'chats_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'chats_user_id_fkey'
             columns: ['user_id']
@@ -43,94 +232,9 @@ export type Database = {
           },
         ]
       }
-      pdf_documents: {
-        Row: {
-          conversation_id: string | null
-          created_at: string | null
-          file_name: string | null
-          file_url: string | null
-          id: string
-          size: number | null
-          user_id: string | null
-        }
-        Insert: {
-          conversation_id?: string | null
-          created_at?: string | null
-          file_name?: string | null
-          file_url?: string | null
-          id?: string
-          size?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          conversation_id?: string | null
-          created_at?: string | null
-          file_name?: string | null
-          file_url?: string | null
-          id?: string
-          size?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'pdf_documents_conversation_fkey'
-            columns: ['conversation_id']
-            isOneToOne: false
-            referencedRelation: 'conversations'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'pdf_documents_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      conversations: {
-        Row: {
-          conversation: Json | null
-          created_at: string | null
-          id: string
-          model_used: string
-          title: string | null
-          type: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          conversation?: Json | null
-          created_at?: string | null
-          id?: string
-          model_used: string
-          title?: string | null
-          type?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          conversation?: Json | null
-          created_at?: string | null
-          id?: string
-          model_used?: string
-          title?: string | null
-          type?: string | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'conversations_user_id_fkey'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'profiles'
-            referencedColumns: ['id']
-          },
-        ]
-      }
       chat_documents: {
         Row: {
+          company_id: string
           content: string | null
           created_at: string
           id: string
@@ -138,6 +242,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_id: string
           content?: string | null
           created_at?: string
           id?: string
@@ -145,6 +250,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_id: string
           content?: string | null
           created_at?: string
           id?: string
@@ -152,6 +258,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: 'chat_documents_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
           {
             foreignKeyName: 'chat_documents_user_id_fkey'
             columns: ['user_id']
@@ -161,130 +274,9 @@ export type Database = {
           },
         ]
       }
-      embeddings: {
-        Row: {
-          content: string | null
-          created_at: string | null
-          document_id: string | null
-          embedding: string | null
-          id: string
-          metadata: Json | null
-        }
-        Insert: {
-          content?: string | null
-          created_at?: string | null
-          document_id?: string | null
-          embedding?: string | null
-          id?: string
-          metadata?: Json | null
-        }
-        Update: {
-          content?: string | null
-          created_at?: string | null
-          document_id?: string | null
-          embedding?: string | null
-          id?: string
-          metadata?: Json | null
-        }
-        Relationships: []
-      }
-      file_uploads: {
-        Row: {
-          bucket_id: string
-          chat_id: string
-          content_type: string
-          created_at: string
-          filename: string
-          id: string
-          original_name: string
-          size: number
-          storage_path: string
-          url: string
-          user_id: string
-          version: number
-        }
-        Insert: {
-          bucket_id?: string
-          chat_id: string
-          content_type: string
-          created_at?: string
-          filename: string
-          id?: string
-          original_name: string
-          size: number
-          storage_path: string
-          url: string
-          user_id: string
-          version?: number
-        }
-        Update: {
-          bucket_id?: string
-          chat_id?: string
-          content_type?: string
-          created_at?: string
-          filename?: string
-          id?: string
-          original_name?: string
-          size?: number
-          storage_path?: string
-          url?: string
-          user_id?: string
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: 'file_uploads_chat_id_fkey'
-            columns: ['chat_id']
-            isOneToOne: false
-            referencedRelation: 'chats'
-            referencedColumns: ['id']
-          },
-        ]
-      }
-      generations: {
-        Row: {
-          created_at: string
-          description: string | null
-          email: string | null
-          id: string
-          input_data: Json | null
-          model: string | null
-          output_data: Json | null
-          slug: string | null
-          subtitle: string | null
-          title: string | null
-          type: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          email?: string | null
-          id?: string
-          input_data?: Json | null
-          model?: string | null
-          output_data?: Json | null
-          slug?: string | null
-          subtitle?: string | null
-          title?: string | null
-          type?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          email?: string | null
-          id?: string
-          input_data?: Json | null
-          model?: string | null
-          output_data?: Json | null
-          slug?: string | null
-          subtitle?: string | null
-          title?: string | null
-          type?: string | null
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
+          company_id: string
           chat_id: string
           content: Json
           created_at: string
@@ -293,6 +285,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id: string
           chat_id: string
           content: Json
           created_at?: string
@@ -301,6 +294,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id: string
           chat_id?: string
           content?: Json
           created_at?: string
@@ -316,99 +310,80 @@ export type Database = {
             referencedRelation: 'chats'
             referencedColumns: ['id']
           },
+          {
+            foreignKeyName: 'messages_chat_id_fkey'
+            columns: ['chat_id']
+            isOneToOne: false
+            referencedRelation: 'chats'
+            referencedColumns: ['id']
+          },
         ]
       }
-      profiles: {
+      providers: {
         Row: {
-          avatar_url: string | null
-          credits: number | null
-          email: string | null
-          full_name: string | null
           id: string
-          purchase: string | null
-          updated_at: string | null
-          username: string | null
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          user_id: string
+          type: number
+          status: number
+          account_id: string
+          public_identifier: string
+          first_name: string
+          last_name: string
+          email: string
+          like_target_account_ids: string[]
+          like_target_account_hours: number[]
+          check_reaction_hours: number[]
         }
         Insert: {
-          avatar_url?: string | null
-          credits?: number | null
-          email?: string | null
-          full_name?: string | null
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          user_id: string
+          type: number
+          status: number
+          account_id: string
+          public_identifier: string
+          first_name: string
+          last_name: string
+          email: string
+          like_target_account_ids: string[]
+          like_target_account_hours: number[]
+          check_reaction_hours: number[]
+        }
+        Update: {
           id: string
-          purchase?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          credits?: number | null
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          purchase?: string | null
-          updated_at?: string | null
-          username?: string | null
-        }
-        Relationships: []
-      }
-      purchases: {
-        Row: {
-          created_at: string | null
-          github_username: string | null
-          id: number
-          payload: Json | null
-          provider: string | null
-          purchase_id: string | null
-          type: string | null
-          user_email: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          github_username?: string | null
-          id?: number
-          payload?: Json | null
-          provider?: string | null
-          purchase_id?: string | null
-          type?: string | null
-          user_email?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          github_username?: string | null
-          id?: number
-          payload?: Json | null
-          provider?: string | null
-          purchase_id?: string | null
-          type?: string | null
-          user_email?: string | null
-        }
-        Relationships: []
-      }
-      recordings: {
-        Row: {
-          created_at: string | null
-          file_url: string
-          id: string
-          title: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          file_url: string
-          id?: string
-          title?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          file_url?: string
-          id?: string
-          title?: string | null
-          user_id?: string | null
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          user_id: string
+          type: number
+          status: number
+          account_id: string
+          public_identifier: string
+          first_name: string
+          email: string
+          last_name: string
+          like_target_account_ids: string[]
+          like_target_account_hours: number[]
+          check_reaction_hours: number[]
         }
         Relationships: [
           {
-            foreignKeyName: 'recordings_user_id_fkey'
+            foreignKeyName: 'providers_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'provider_user_id_fkey'
             columns: ['user_id']
             isOneToOne: false
             referencedRelation: 'profiles'
@@ -416,75 +391,128 @@ export type Database = {
           },
         ]
       }
-      summaries: {
+      workflows: {
         Row: {
-          action_items: string | null
-          created_at: string | null
           id: string
-          model: string
-          recording_id: string | null
-          summary: string
-          title: string | null
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          closed_at: string
+          provider_id: string
+          type: number
+          scheduled_hours: number[]
+          scheduled_days: number[]
+          scheduled_weekdays: number[]
+          search_url: string
+          target_account_ids: string
+          keywords: string
+          network_distance: number[]
+          message: string
+          limit_count: number
         }
         Insert: {
-          action_items?: string | null
-          created_at?: string | null
           id?: string
-          model: string
-          recording_id?: string | null
-          summary: string
-          title?: string | null
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          closed_at?: string
+          provider_id: string
+          type: number
+          scheduled_hours?: number[]
+          scheduled_days?: number[]
+          scheduled_weekdays?: number[]
+          search_url?: string
+          target_public_identifiers?: string[]
+          keywords?: string
+          network_distance?: number[]
+          message?: string
+          limit_count: number
         }
         Update: {
-          action_items?: string | null
-          created_at?: string | null
-          id?: string
-          model?: string
-          recording_id?: string | null
-          summary?: string
-          title?: string | null
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          closed_at?: string
+          provider_id: string
+          type: number
+          scheduled_hours?: number[]
+          scheduled_days?: number[]
+          scheduled_weekdays?: number[]
+          search_url?: string
+          target_public_identifiers?: string[]
+          keywords?: string
+          network_distance?: number[]
+          message?: string
+          limit_count: number
         }
         Relationships: [
           {
-            foreignKeyName: 'summaries_recording_id_fkey'
-            columns: ['recording_id']
+            foreignKeyName: 'workflows_company_id_fkey'
+            columns: ['company_id']
             isOneToOne: false
-            referencedRelation: 'recordings'
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'workflows_provider_id_fkey'
+            columns: ['provider_id']
+            isOneToOne: false
+            referencedRelation: 'providers'
             referencedColumns: ['id']
           },
         ]
       }
-      transcripts: {
+      workflow_histories: {
         Row: {
-          chunks: Json | null
-          created_at: string | null
           id: string
-          model: string
-          recording_id: string | null
-          transcript: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          workflow_id: string
+          status: number
+          target_account_ids: string[]
+          cursor: string
         }
         Insert: {
-          chunks?: Json | null
-          created_at?: string | null
           id?: string
-          model: string
-          recording_id?: string | null
-          transcript: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          workflow_id: string
+          status: number
+          target_account_ids?: string[]
+          cursor: string
         }
         Update: {
-          chunks?: Json | null
-          created_at?: string | null
-          id?: string
-          model?: string
-          recording_id?: string | null
-          transcript?: string
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          workflow_id: string
+          status: number
+          target_account_ids?: string[]
+          cursor: string
         }
         Relationships: [
           {
-            foreignKeyName: 'transcripts_recording_id_fkey'
-            columns: ['recording_id']
+            foreignKeyName: 'workflow_histories_company_id_fkey'
+            columns: ['company_id']
             isOneToOne: false
-            referencedRelation: 'recordings'
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'workflow_histories_workflow_id_fkey'
+            columns: ['workflow_id']
+            isOneToOne: false
+            referencedRelation: 'workflows'
             referencedColumns: ['id']
           },
         ]
@@ -806,6 +834,11 @@ export function handleDatabaseError(error: PostgrestError | null) {
 // Add Document type
 export type Document = Database['public']['Tables']['chat_documents']['Row']
 export type Chat = Database['public']['Tables']['chats']['Row']
+export type Profile = Database['public']['Tables']['profiles']['Row']
+export type Provider = Database['public']['Tables']['providers']['Row']
+export type Workflow = Database['public']['Tables']['workflows']['Row']
+export type WorkflowHistory =
+  Database['public']['Tables']['workflow_histories']['Row']
 
 // Add DatabaseMessage type to match the database schema
 export interface DatabaseMessage {

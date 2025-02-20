@@ -1,20 +1,27 @@
 export const tools = [
   {
-    href: '/search',
+    href: '/search/profile',
     title: 'プロフィール検索',
     tags: [],
     image: '/apps/claude.webp',
     description:
-      'キーワードまたは、ユーザーIDのCSVからCSVエクスポートを行います。',
+      'キーワードまたは、ユーザーIDのCSVからつながり申請・CSVエクスポートを行います。',
   },
   {
-    href: '/invite',
-    title: 'つながり申請',
+    href: '/search/job',
+    title: '求人検索',
     tags: [],
     image: '/apps/claude.webp',
-    description:
-      'キーワードまたは、ユーザーIDのCSVからつながり申請を行います。',
+    description: 'キーワードまたはCSVからCSVエクスポートを行います。',
   },
+  // {
+  //   href: '/invite',
+  //   title: 'つながり申請',
+  //   tags: [],
+  //   image: '/apps/claude.webp',
+  //   description:
+  //     'キーワードまたは、ユーザーIDのCSVからつながり申請を行います。',
+  // },
   {
     href: '/target',
     title: 'キーマン投稿へのいいね',

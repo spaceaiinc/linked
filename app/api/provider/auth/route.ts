@@ -17,11 +17,13 @@ export async function POST(req: Request) {
       )
     }
 
+    // TODO: add check reconect or create
+
     const res = await unipileClient.account.createHostedAuthLink({
       // or reconnect
       type: 'create',
-      // TODO
-      expiresOn: '2026-02-01T12:00:00.701Z',
+      // after 1 year fmt:'2026-02-01T12:00:00.701Z'
+      expiresOn: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString(),
       api_url: `https://${env.UNIPILE_DNS}`,
       providers: ['LINKEDIN'],
       success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
@@ -30,7 +32,6 @@ export async function POST(req: Request) {
       notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
     })
 
-    console.log('Url:', res.url)
     res.url = res.url.replace('account.unipile.com', 'provider.spaceai.jp')
 
     return NextResponse.json(res)

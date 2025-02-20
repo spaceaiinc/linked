@@ -106,7 +106,10 @@ export interface FormFields {
   placeholder?: string
   required: boolean
   inputType?: string
-  options?: string[]
+  options?: {
+    label: string
+    value: string
+  }[]
   initialValue?: string
   multiple?: boolean
   custom?: boolean

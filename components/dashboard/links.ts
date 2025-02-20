@@ -47,28 +47,11 @@ export const overviewLinks: NavLink[] = [
 
 export const navlinks: NavLink[] = [
   { href: '/dashboard', label: 'Dashboard', icon: IconHome },
-  { href: '/search', label: 'プロフィール検索', icon: IconMessage },
-  { href: '/invite', label: 'つながり申請', icon: IconMessage },
+  { href: '/search/profile', label: 'プロフィール検索', icon: IconMessage },
+  { href: '/search/job', label: '求人検索', icon: IconMessage },
   { href: '/target', label: 'キーマン投稿', icon: IconMessage },
   { href: '/reaction', label: 'コメント反応', icon: IconMessage },
-  { href: '/chat', label: 'Chat', icon: IconMessage },
+  // { href: '/chat', label: 'Chat', icon: IconMessage },
 ]
 
-export const otherLinks = [
-  { href: '/', label: 'Landing', icon: IconFileText },
-  // {
-  //   href: "https://docs.anotherwrapper.com",
-  //   label: "Documentation",
-  //   icon: IconFileText,
-  // },
-  // {
-  //   href: "https://anotherwrapper.lemonsqueezy.com/affiliates",
-  //   label: "Affiliates Program",
-  //   icon: IconCurrencyDollar,
-  // },
-  // {
-  //   href: "https://anotherwrapper.com/blog",
-  //   label: "Blog",
-  //   icon: IconPencil,
-  // },
-]
+export const otherLinks = [{ href: '/', label: 'Landing', icon: IconFileText }]
