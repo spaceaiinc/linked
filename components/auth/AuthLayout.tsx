@@ -5,7 +5,6 @@ import AuthForm from '@/components/auth/AuthForm'
 import MessageDisplay from '@/components/auth/MessageDisplay'
 import React, { useState } from 'react'
 import Logo from '@/components/Logo'
-import SocialProof from '@/components/socialproof/SocialProof'
 import { tosUrl, privacyPolicyUrl } from '@/config'
 
 export default function AuthComponent() {
@@ -56,7 +55,23 @@ export default function AuthComponent() {
                 <p className="mt-4 text-sm text-base-content">
                   Please login or sign up to continue.
                 </p>
-                <div className="py-12">
+                <div className="py-6">
+                  <AuthForm
+                    next={'/dashboard'}
+                    onSuccess={(msg) => {
+                      setMessage(msg)
+                      setMessageType('success')
+                    }}
+                    onError={(msg) => {
+                      setMessage(msg)
+                      setMessageType('error')
+                    }}
+                  />
+                </div>
+                <div className="flex items-center justify-center">
+                  <span className="text-xs text-gray-400">Or</span>
+                </div>
+                <div className="py-6">
                   <div className="relative group">
                     <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg filter group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 "></div>
                     <GoogleSignInButton />
