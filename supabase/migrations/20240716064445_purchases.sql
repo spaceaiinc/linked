@@ -7,10 +7,10 @@ CREATE TABLE public.customers (
     company_id UUID NOT NULL REFERENCES public.companies(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
-    deleted_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NULL,
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     user_id UUID NOT NULL REFERENCES public.profiles(id),
     service SMALLINT NOT NULL,
-    service_id TEXT NULL
+    service_id TEXT NOT NULL DEFAULT ''
 );
 
 -- Create purchases table
@@ -20,11 +20,11 @@ create table
     company_id UUID NOT NULL REFERENCES public.companies(id),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
-    deleted_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NULL,
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     customer_id UUID NOT NULL REFERENCES public.customers(id),
-    expires_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     plan SMALLINT NOT NULL,
-    purchase_id TEXT NULL
+    purchase_id TEXT NOT NULL DEFAULT ''
   ) tablespace pg_default;
 
 

@@ -121,7 +121,7 @@ export const toolConfig: ToolConfig = {
     },
     {
       label: '検索数',
-      name: 'limit',
+      name: 'limit_count',
       type: 'input',
       inputType: 'number',
       placeholder: '10',

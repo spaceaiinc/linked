@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import { ProviderInvitePostParam } from '@/app/api/provider/search/route'
 import { convertProfileJsonToCsv } from '../csv'
 
 export const searchProfileResponse = (toolConfig: ToolConfig) => {
@@ -14,18 +13,18 @@ export const searchProfileResponse = (toolConfig: ToolConfig) => {
     setLoading(true)
 
     try {
-      const body: ProviderInvitePostParam = {
-        account_id: formData.account_id,
-        ...formData,
-      }
+      // const body: ProviderSearchProfilePostParam = {
+      //   account_id: formData.account_id,
+      //   ...formData,
+      // }
 
-      const response = await fetch(`/api/provider/search`, {
+      const response = await fetch(`/api/provider/search/profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...body,
+          ...formData,
         }),
       })
 

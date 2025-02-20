@@ -4,8 +4,8 @@ create table
     id uuid NOT NULL PRIMARY KEY,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
     name TEXT NOT NULL,
-    domain TEXT,
-    plan SMALLINT NOT NULL DEFAULT '0'::SMALLINT
+    domain TEXT NOT NULL DEFAULT ''::TEXT,
+    plan SMALLINT NOT NULL DEFAULT 0::SMALLINT
   ) tablespace pg_default;
 
 -- Create indexes for better performance
