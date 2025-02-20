@@ -79,13 +79,17 @@ const Navigation = React.memo(
 
     const otherLinks = [
       { href: '/', label: 'Landing', icon: IconFileText },
-      user
-        ? {
-            href: '/api/auth/signout',
-            label: `Logout (${user.email?.split('@')[0]})`,
-            icon: IconLogout,
-          }
-        : { href: '/auth', label: 'Login', icon: IconLogin },
+      // user
+      //   ? {
+      //       href: '/api/auth/signout',
+      //       label: `Login: (${user?.email?.split('@')[0]})`,
+      //       icon: IconLogout,
+      //     }
+      {
+        href: '/auth',
+        label: `Login: (${user?.email?.split('@')[0]})`,
+        icon: IconLogin,
+      },
     ]
 
     const renderLinks = useCallback(
@@ -138,9 +142,6 @@ const Navigation = React.memo(
         {renderLinks(navlinks, 'Apps')}
         {/* {renderLinks(landingPages, "Landing pages", true)} */}
         {renderLinks(otherLinks, 'Other', true)}
-        {/* <p className="font-weight-bold text-primary text-sm px-2">
-          {user?.email ? <span>{user?.email}</span> : null}
-        </p> */}
       </div>
     )
   }
@@ -180,14 +181,6 @@ export const Sidebar = ({ user }: { user: User | null }) => {
     },
     []
   )
-
-  /* // 最初の三文字以降を****マスク xxx*****@gmail以降は表示 */
-  // const emailWithMask = ((user?.email
-  //   ?.split('@')[0]
-  //   .replace(/./g, '*') + '@' +
-  //   user?.email?.split('@')[1]) as string
-  // )
-
   const handleConnect = async () => {
     try {
       // Try to get LinkedIn cookies

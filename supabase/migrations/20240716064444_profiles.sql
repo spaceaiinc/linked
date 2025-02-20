@@ -4,18 +4,17 @@ create table
     id UUID NOT NULL PRIMARY KEY REFERENCES auth.users(id),
     company_id UUID NOT NULL REFERENCES public.companies(id),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
-    username TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE CHECK (char_length(username) >= 3),
     full_name TEXT NOT NULL,
-    email TEXT NULL,
-    avatar_url TEXT NULL,
-    first_name TEXT NULL,
-    last_name TEXT NULL,
-    type SMALLINT DEFAULT '0'::SMALLINT,
-    status SMALLINT DEFAULT '0'::SMALLINT,
-    is_superuser SMALLINT DEFAULT '0'::SMALLINT,
-    credits SMALLINT null default '20'::SMALLINT,
-    constraint profiles_username_key unique (username),
-    constraint username_length check ((char_length(username) >= 3))
+    email TEXT NOT NULL UNIQUE,
+    avatar_url TEXT NOT NULL DEFAULT '',
+    first_name TEXT NOT NULL DEFAULT '',
+    last_name TEXT NOT NULL DEFAULT '',
+    type SMALLINT NOT NULL DEFAULT 0::SMALLINT,
+    status SMALLINT NOT NULL DEFAULT 0::SMALLINT,
+    role SMALLINT NOT NULL DEFAULT 0::SMALLINT,
+    is_superuser SMALLINT NOT NULL DEFAULT 0::SMALLINT,
+    credits SMALLINT NOT NULL default 20::SMALLINT
   ) tablespace pg_default;
 
 -- Create indexes for better performance
@@ -34,6 +33,8 @@ EXECUTE FUNCTION update_updated_at();
 -- Link authenticated users to profiles table
 create function public.handle_new_user()
 returns trigger as $$
+declare
+  new_company_id UUID;
 begin
   -- 新しいcompany_idを生成
   new_company_id := extensions.UUID_generate_v4();
@@ -49,58 +50,14 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
--- Enable Row Level Security
-alter table profiles
-  enable row level security;
-
-create policy "Users can select their own profile." on profiles
-  for select using (exists (
-    select 1
-    from profiles as sub_profiles
-    where sub_profiles.id = auth.uid()
-    and sub_profiles.company_id = profiles.company_id
-  ));
+create policy "Users can select their own profile" on profiles
+  for select using (auth.uid() = id);;
 
 create policy "Users can insert their own profile." on profiles
-  for insert with check (exists (
-    select 1
-    from profiles as sub_profiles
-    where sub_profiles.id = auth.uid()
-    and sub_profiles.company_id = profiles.company_id
-  ));
+  for insert with check (auth.uid() = id);
 
 create policy "Users can update own profile." on profiles
-  for update using (exists (
-    select 1
-    from profiles as sub_profiles
-    where sub_profiles.id = auth.uid()
-    and sub_profiles.company_id = profiles.company_id
-  ));
-
-
-  CREATE POLICY "Users can select their own company." ON companies
-  FOR SELECT USING (exists (
-    select 1
-    from profiles as sub_profiles
-    where sub_profiles.id = auth.uid()
-    and sub_profiles.company_id = id
-  ));
-
-CREATE POLICY "Users can insert their own company." ON companies
-  FOR SELECT USING (exists (
-    select 1
-    from profiles as sub_profiles
-    where sub_profiles.id = auth.uid()
-    and sub_profiles.company_id = id
-  ));
-
-
-CREATE POLICY "Users can update their own company." ON companies
-  FOR SELECT USING (exists (
-    select 1
-    from profiles as sub_profiles
-    where sub_profiles.id = auth.uid()
-    and sub_profiles.company_id = id
-  ));
+  for update using (auth.uid() = id);
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.companies ENABLE ROW LEVEL SECURITY;

@@ -1,5 +1,5 @@
 'use client'
-import { providerAtom, userAtom, providersAtom } from '@/lib/atom'
+import { providerAtom, userAtom, providersAtom, profileAtom } from '@/lib/atom'
 import { Provider } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
 import { useAtom } from 'jotai'
@@ -11,8 +11,9 @@ interface Props {
 
 export default function Renderer({ children }: Props) {
   const [_, setUser] = useAtom(userAtom)
-  const [__, setProvider] = useAtom(providerAtom)
-  const [___, setProviders] = useAtom(providersAtom)
+  const [__, setProfile] = useAtom(profileAtom)
+  const [___, setProvider] = useAtom(providerAtom)
+  const [____, setProviders] = useAtom(providersAtom)
   useEffect(() => {
     const f = async () => {
       // authenticate
@@ -27,10 +28,19 @@ export default function Renderer({ children }: Props) {
         return <>{children}</>
       }
 
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user?.id)
+        .single()
+
+      setProfile(profile)
+
       const { data: providers } = await supabase
         .from('providers')
         .select('*')
         .eq('user_id', user?.id)
+        .eq('company_id', profile?.company_id)
         .order('updated_at', { ascending: false })
 
       if (!providers) {

@@ -3,9 +3,10 @@ CREATE TABLE IF NOT EXISTS public.chats (
     id UUID DEFAULT extensions.UUID_generate_v4() NOT NULL PRIMARY KEY,
     company_id UUID NOT NULL REFERENCES public.companies(id),
     user_id UUID NOT NULL REFERENCES public.profiles(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
-    title TEXT
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
+    title TEXT NOT NULL DEFAULT ''
 );
 
 -- Enable RLS
@@ -32,9 +33,10 @@ CREATE TABLE IF NOT EXISTS public.chat_documents (
     id UUID DEFAULT extensions.UUID_generate_v4() NOT NULL PRIMARY KEY,
     company_id UUID NOT NULL REFERENCES public.companies(id),
     user_id UUID NOT NULL REFERENCES public.profiles(id),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     title TEXT NOT NULL,
-    content TEXT,
+    content TEXT NOT NULL DEFAULT '',
     UNIQUE (id, created_at)
 );
 
@@ -171,6 +173,7 @@ CREATE TABLE IF NOT EXISTS public.messages (
     chat_id UUID NOT NULL REFERENCES public.chats(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL, 
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
+    deleted_at TIMESTAMP WITH TIME ZONE DEFAULT '-infinity' NOT NULL,
     role TEXT NOT NULL,
     content JSONB NOT NULL
 );

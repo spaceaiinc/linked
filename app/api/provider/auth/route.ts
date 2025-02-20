@@ -17,6 +17,8 @@ export async function POST(req: Request) {
       )
     }
 
+    // TODO: add check reconect or create
+
     const res = await unipileClient.account.createHostedAuthLink({
       // or reconnect
       type: 'create',
@@ -27,8 +29,7 @@ export async function POST(req: Request) {
       success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
       failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
       name: user.id,
-      notify_url: `https://linked.spaceai.jp/api/provider/auth/callback`,
-      // notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
+      notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
     })
 
     res.url = res.url.replace('account.unipile.com', 'provider.spaceai.jp')

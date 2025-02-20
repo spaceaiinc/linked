@@ -4,7 +4,7 @@ import { useState, ReactElement, useEffect } from 'react'
 import { useFormData } from '@/lib/hooks/useFormData'
 import { RenderFields } from '@/components/input/FormFields'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import { ListIcon, LoaderCircle } from 'lucide-react'
+import { LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { searchProfileResponse } from '@/lib/hooks/searchProfileResponse'
 import Login from '@/components/input/login'
@@ -14,7 +14,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useDropzone } from 'react-dropzone'
 import { Input } from '../ui/input'
 import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
-import { Checkbox } from '../ui/checkbox'
 import { providerAtom, userAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractColumnData } from '@/lib/csv'
@@ -70,6 +69,14 @@ export default function SearchProfileInputCapture({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    const formType = formData['type']
+    if (formType.includes('0') && formType.includes('1')) {
+      formData['type'] = '2'
+    } else if (formType.includes('0')) {
+      formData['type'] = '1'
+    } else if (formType.includes('1')) {
+      formData['type'] = '1'
+    }
     const targetPublicIdentifiers = await extractColumnData(
       fileUrl,
       formData['extract_column'] || 'public_identifier'

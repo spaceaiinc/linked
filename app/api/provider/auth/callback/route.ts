@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/utils/supabase/server'
 import { env } from '@/lib/env'
+import { Database } from '@/lib/types/supabase'
 
 // {
 //   "status":"CREATION_SUCCESS", // or "RECONNECTED" for reconnect type
@@ -20,6 +21,13 @@ export async function POST(req: Request) {
         { error: 'params are required' },
         { status: 400 }
       )
+    }
+    const supabase = createClient()
+    const {
+      data: { profile },
+    } = await supabase.from('profiles').select('*').eq('user_id', name).single()
+    if (!profile) {
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
     if (status !== 'CREATION_SUCCESS' && status !== 'RECONNECTED') {
@@ -56,7 +64,7 @@ export async function POST(req: Request) {
 
       const dataOfGetOwnProfile = await responseOfGetOwnProfile.json()
 
-      const account = {
+      const account: Database['public']['Tables']['providers']['Insert'] = {
         user_id: name,
         type: 0,
         status: status_code,
@@ -65,9 +73,10 @@ export async function POST(req: Request) {
         first_name: dataOfGetOwnProfile.first_name,
         last_name: dataOfGetOwnProfile.last_name,
         email: dataOfGetOwnProfile.email,
-        // like_target_account_ids: '',
-        // like_target_account_hours: 0,
-        // check_reaction_duration: 0
+        company_id: profile.company_id,
+        like_target_account_ids: [],
+        like_target_account_hours: [],
+        check_reaction_hours: [],
       }
 
       const supabase = createClient()

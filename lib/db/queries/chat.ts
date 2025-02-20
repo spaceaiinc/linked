@@ -14,8 +14,10 @@ export async function saveChatQuery(
     title: string
   }
 ) {
+  // TODO:
   const { error } = await client.from('chats').insert({
     id,
+    company_id: '',
     user_id: userId,
     title,
   })
@@ -100,14 +102,14 @@ export async function saveDocumentQuery(
     userId: string
   }
 ) {
-  const { error } = await client.from('chat_documents').insert({
-    id,
-    title,
-    content,
-    user_id: userId,
-  })
-
-  if (error) throw error
+  // TODO:
+  // const { error } = await client.from('chat_documents').insert({
+  //   id,
+  //   title,
+  //   content,
+  //   user_id: userId,
+  // })
+  // if (error) throw error
 }
 
 export async function deleteDocumentsByIdAfterTimestampQuery(
