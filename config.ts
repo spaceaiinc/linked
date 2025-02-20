@@ -51,3 +51,12 @@ const getRedirectUrl = (next: string) => {
 }
 
 export const redirectTo = getRedirectUrl
+
+// Modal redirect with specific next path
+export const redirectToModal = (next?: string) => {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_PRODUCTION_URL || 'https://linked.spaceai.jp'
+  return next
+    ? `${baseUrl}/auth/confirm?next=${next}`
+    : `${baseUrl}/auth/confirm?next=/dashboard`
+}
