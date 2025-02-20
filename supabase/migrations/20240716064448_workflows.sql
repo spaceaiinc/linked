@@ -99,4 +99,4 @@ UPDATE USING (company_id = (select company_id from public.profiles where id = au
 --
 
 ALTER TABLE public.workflows ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.workflow_histories FORCE ROW LEVEL SECURITY;
+ALTER TABLE public.workflow_histories ENABLE ROW LEVEL SECURITY;
