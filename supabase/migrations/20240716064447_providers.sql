@@ -18,7 +18,7 @@ CREATE TABLE public.providers (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT NOT NULL,
-    like_target_account_ids TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+    like_target_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     like_target_account_hours SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     check_reaction_hours SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[]
 );
