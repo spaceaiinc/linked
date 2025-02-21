@@ -72,6 +72,7 @@ export async function POST(req: Request) {
         type: 0,
         status: status_code,
         account_id,
+        private_identifier: dataOfGetOwnProfile.provider_id,
         public_identifier: dataOfGetOwnProfile.public_identifier,
         first_name: dataOfGetOwnProfile.first_name,
         last_name: dataOfGetOwnProfile.last_name,
