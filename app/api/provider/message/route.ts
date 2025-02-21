@@ -6,15 +6,15 @@ export async function POST(req: Request) {
   try {
     const {
       account_id,
-      target_account_ids,
+      target_private_identifiers,
       message,
     }: {
       account_id: string
-      target_account_ids: string[]
+      target_private_identifiers: string[]
       message: string
     } = await req.json()
 
-    if (!account_id || !target_account_ids || !message) {
+    if (!account_id || !target_private_identifiers || !message) {
       return NextResponse.json(
         { error: 'Keyword and message are required' },
         { status: 400 }
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     }
 
     try {
-      target_account_ids.forEach(async (target_account_id) => {
+      target_private_identifiers.forEach(async (target_account_id) => {
         // get all chats
         const responseOfGetAllChats = await unipileClient.messaging.getAllChats(
           {

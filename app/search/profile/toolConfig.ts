@@ -120,13 +120,15 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: '検索数',
+      label: '検索数(1回毎の実行数)',
       name: 'limit_count',
       type: 'input',
       inputType: 'number',
       placeholder: '10',
       initialValue: '10',
       required: false,
+      max: 50,
+      min: 1,
     },
     {
       label: '申請時メッセージ',

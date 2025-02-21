@@ -330,11 +330,12 @@ export type Database = {
           type: number
           status: number
           account_id: string
+          private_identifier: string
           public_identifier: string
           first_name: string
           last_name: string
           email: string
-          like_target_account_ids: string[]
+          like_target_private_identifiers: string[]
           like_target_account_hours: number[]
           check_reaction_hours: number[]
         }
@@ -348,11 +349,12 @@ export type Database = {
           type: number
           status: number
           account_id: string
+          private_identifier: string
           public_identifier: string
           first_name: string
           last_name: string
           email: string
-          like_target_account_ids: string[]
+          like_target_private_identifiers: string[]
           like_target_account_hours: number[]
           check_reaction_hours: number[]
         }
@@ -366,11 +368,12 @@ export type Database = {
           type: number
           status: number
           account_id: string
+          private_identifier: string
           public_identifier: string
           first_name: string
           email: string
           last_name: string
-          like_target_account_ids: string[]
+          like_target_private_identifiers: string[]
           like_target_account_hours: number[]
           check_reaction_hours: number[]
         }
@@ -405,7 +408,7 @@ export type Database = {
           scheduled_days: number[]
           scheduled_weekdays: number[]
           search_url: string
-          target_account_ids: string
+          target_private_identifiers: string
           keywords: string
           network_distance: number[]
           message: string
@@ -475,7 +478,7 @@ export type Database = {
           deleted_at: string
           workflow_id: string
           status: number
-          target_account_ids: string[]
+          target_private_identifiers: string[]
           cursor: string
         }
         Insert: {
@@ -486,7 +489,7 @@ export type Database = {
           deleted_at?: string
           workflow_id: string
           status: number
-          target_account_ids?: string[]
+          target_private_identifiers?: string[]
           cursor: string
         }
         Update: {
@@ -497,7 +500,7 @@ export type Database = {
           deleted_at?: string
           workflow_id: string
           status: number
-          target_account_ids?: string[]
+          target_private_identifiers?: string[]
           cursor: string
         }
         Relationships: [
