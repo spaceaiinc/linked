@@ -118,21 +118,23 @@ export async function POST(req: Request) {
 
     // 招待含むかつscheduleなしに実行する
     if (
-      (param.type === 0 || param.type === 2) &&
-      (param.scheduled_days ||
-        param.scheduled_hours ||
-        param.scheduled_weekdays) &&
+      // (param.type === 0 || param.type === 2) &&
+      // param.scheduled_days?.length ||
+      param.scheduled_hours?.length &&
+      param.scheduled_weekdays?.length &&
       !param.workflow_id
     ) {
       const workflow: Database['public']['Tables']['workflows']['Insert'] = {
         company_id: provider.company_id,
         provider_id: provider.id,
-        type: param.type,
+        type: param.type || 1,
         scheduled_hours: param.scheduled_hours,
         scheduled_days: param.scheduled_days,
         scheduled_weekdays: param.scheduled_weekdays,
         search_url: param.search_url,
         target_public_identifiers: param.target_public_identifiers,
+        keywords: param.keywords,
+        network_distance: param.network_distance,
         limit_count: Number(param.limit_count),
       }
 
@@ -169,6 +171,8 @@ export async function POST(req: Request) {
           }
           const dataOfGetProfile = await responseOfGetProfile.json()
           console.log('dataOfGetProfile', dataOfGetProfile)
+          // 2 sec wait for each profile fetch
+          await new Promise((resolve) => setTimeout(resolve, 1000))
           return dataOfGetProfile
         }
       )
@@ -191,21 +195,45 @@ export async function POST(req: Request) {
       const inviteResults = await Promise.all(invitePromises)
       console.log('inviteResults', inviteResults)
 
-      const workflow: Database['public']['Tables']['workflows']['Insert'] = {
-        company_id: provider.company_id,
-        provider_id: provider.id,
-        type: Number(param.type),
-        scheduled_hours: param.scheduled_hours || undefined,
-        scheduled_days: param.scheduled_days || undefined,
-        scheduled_weekdays: param.scheduled_weekdays || undefined,
-        target_public_identifiers: param.target_public_identifiers || undefined,
-        limit_count: Number(param.limit_count),
-      }
+      if (!param.workflow_id) {
+        const workflow: Database['public']['Tables']['workflows']['Insert'] = {
+          company_id: provider.company_id,
+          provider_id: provider.id,
+          type: Number(param.type),
+          scheduled_hours: param.scheduled_hours || undefined,
+          scheduled_days: param.scheduled_days || undefined,
+          scheduled_weekdays: param.scheduled_weekdays || undefined,
+          target_public_identifiers:
+            param.target_public_identifiers || undefined,
+          limit_count: Number(param.limit_count),
+        }
 
-      const responseOfInsertWorkflow = await supabase
-        .from('workflows')
-        .insert(workflow)
-      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
+        const responseOfInsertWorkflow = await supabase
+          .from('workflows')
+          .insert(workflow)
+          .select('id')
+          .single()
+        console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
+        param.workflow_id = responseOfInsertWorkflow.data?.id
+      }
+      if (param.workflow_id) {
+        const workflowHistories: Database['public']['Tables']['workflow_histories']['Insert'] =
+          {
+            company_id: provider.company_id,
+            workflow_id: param.workflow_id,
+            target_private_identifiers: [],
+            cursor: '',
+            status: 1,
+          }
+
+        const responseOfInsertWorkflowHistory = await supabase
+          .from('workflow_histories')
+          .insert(workflowHistories)
+        console.log(
+          'responseOfInsertWorkflowHistory:',
+          responseOfInsertWorkflowHistory
+        )
+      }
 
       return NextResponse.json(
         { profile_list: profileResults },
@@ -220,6 +248,29 @@ export async function POST(req: Request) {
           'linkedin.com/search/results/people/?'
         )
       }
+
+      // 50超える場合は、５0ずつに分けて実行　cursorを取得して、次のリクエストを送る
+      // let excuteSearchCount = 1
+      // let nextCursor = ''
+      // if (param.limit_count && param.limit_count > 50) {
+      //   excuteSearchCount = Math.ceil(param.limit_count / 50)
+      // }
+      // console.log('excuteSearchCount', excuteSearchCount)
+
+      // for (let i = 0; i < excuteSearchCount; i++) {
+      //   const nowLimitCount = param.limit_count
+      //     ? param.limit_count - i * 50
+      //     : 50
+      //   const url = `https://${
+      //     env.UNIPILE_DNS
+      //   }/api/v1/linkedin/search?account_id=${param.account_id}&limit=${
+      //     nowLimitCount > 50 ? 50 : nowLimitCount
+      //   }&${nextCursor ? `cursor=${nextCursor}` : ''}`
+
+      //   const options = {
+      //     method: 'POST',
+      //     headers: {
+      //       'X-API-KEY': env.UN
 
       const url = `https://${
         env.UNIPILE_DNS
@@ -279,6 +330,8 @@ export async function POST(req: Request) {
               ],
             })
             console.log('responseOfGetProfile', responseOfGetProfile)
+            // 2 sec wait for each profile fetch
+            await new Promise((resolve) => setTimeout(resolve, 1000))
             return responseOfGetProfile
           }
         }
@@ -289,22 +342,45 @@ export async function POST(req: Request) {
       const validProfiles = profileResults.filter(
         (profile): profile is UserProfileApiResponse => profile !== null
       )
-      const workflow: Database['public']['Tables']['workflows']['Insert'] = {
-        company_id: provider.company_id,
-        provider_id: provider.id,
-        type: Number(param.type),
-        scheduled_hours: param.scheduled_hours,
-        scheduled_days: param.scheduled_days,
-        scheduled_weekdays: param.scheduled_weekdays,
-        search_url: param.search_url,
-        keywords: param.keywords,
-        limit_count: Number(param.limit_count),
-      }
+      if (!param.workflow_id) {
+        const workflow: Database['public']['Tables']['workflows']['Insert'] = {
+          company_id: provider.company_id,
+          provider_id: provider.id,
+          type: Number(param.type),
+          scheduled_hours: param.scheduled_hours,
+          scheduled_days: param.scheduled_days,
+          scheduled_weekdays: param.scheduled_weekdays,
+          search_url: param.search_url,
+          keywords: param.keywords,
+          limit_count: Number(param.limit_count),
+        }
 
-      const responseOfInsertWorkflow = await supabase
-        .from('workflows')
-        .insert(workflow)
-      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
+        const responseOfInsertWorkflow = await supabase
+          .from('workflows')
+          .insert(workflow)
+          .select('id')
+          .single()
+        console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
+        param.workflow_id = responseOfInsertWorkflow.data?.id
+      }
+      if (param.workflow_id) {
+        const workflowHistories: Database['public']['Tables']['workflow_histories']['Insert'] =
+          {
+            company_id: provider.company_id,
+            workflow_id: param.workflow_id,
+            target_private_identifiers: [],
+            cursor: '',
+            status: 1,
+          }
+
+        const responseOfInsertWorkflowHistory = await supabase
+          .from('workflow_histories')
+          .insert(workflowHistories)
+        console.log(
+          'responseOfInsertWorkflowHistory:',
+          responseOfInsertWorkflowHistory
+        )
+      }
 
       return NextResponse.json({ profile_list: validProfiles }, { status: 200 })
     }
