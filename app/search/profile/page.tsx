@@ -42,8 +42,26 @@ export default function Page() {
             <IconPoint className="w-4 h-4" />
           </span>
           <span className="ml-2">
-            時間と曜日の入力がない場合は即時実行。
-            つながり申請のみ時間・曜日指定が有効です。
+            時間と曜日の入力がない場合は即時で処理が実行します。
+            ※現在は時間指定機能は未実装です(時間指定した場合、処理は行われません)。
+          </span>
+        </li>
+        <li className="text-l flex">
+          <span className="w-4 h-4 mt-1">
+            <IconPoint className="w-4 h-4" />
+          </span>
+          <span className="ml-2">
+            1回毎の検索数は、現在50件まで可能です。
+            {/* 1回毎の検索数は、SalesNavigatorアカウントは100件まで、通常アカウントの場合、50件までです。 */}
+          </span>
+        </li>
+        <li className="text-l flex">
+          <span className="w-4 h-4 mt-1">
+            <IconPoint className="w-4 h-4" />
+          </span>
+          <span className="ml-2">
+            CSV入力の場合は、該当のアカウントID(Public
+            Identifier)全てが対象になります。
           </span>
         </li>
       </ul>
