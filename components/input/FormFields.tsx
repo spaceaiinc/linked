@@ -53,6 +53,8 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
                 id={field.name}
                 name={field.name}
                 className="w-full"
+                max={field.max}
+                min={field.min}
               />
             )}
 

@@ -35,10 +35,10 @@ CREATE INDEX providers_user_id_index ON public.providers (user_id);
 -- Name: providers Users can select their own providers; Type: POLICY; Schema: public; Owner: -
 --
 
-CREATE POLICY "Users can select providers their company has" ON public.providers FOR SELECT 
-USING (company_id = (select company_id from public.profiles where id = auth.uid()));
+-- CREATE POLICY "Users can select providers their company has" ON public.providers FOR SELECT 
+-- USING (company_id = (select company_id from public.profiles where id = auth.uid()));
 
 -- Name: providers; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
-ALTER TABLE public.providers ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE public.providers ENABLE ROW LEVEL SECURITY;
