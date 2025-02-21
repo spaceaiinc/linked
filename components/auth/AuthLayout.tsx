@@ -50,11 +50,11 @@ export default function AuthComponent() {
               )}
               <div>
                 <h1 className="text-xl font-medium mt-8 text-base-content">
-                  Welcome to Linked
+                  Please signin to continue.
                 </h1>
-                <p className="mt-4 text-sm text-base-content">
+                {/* <p className="mt-4 text-sm text-base-content">
                   Please login or sign up to continue.
-                </p>
+                </p> */}
                 <div className="py-6">
                   <AuthForm
                     next={'/dashboard'}
@@ -69,7 +69,7 @@ export default function AuthComponent() {
                   />
                 </div>
                 <div className="flex items-center justify-center">
-                  <span className="text-xs text-gray-400">Or</span>
+                  <span className="text-xs text-gray-400">or</span>
                 </div>
                 <div className="py-6">
                   <div className="relative group">
