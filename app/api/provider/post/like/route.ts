@@ -7,13 +7,13 @@ export async function POST(req: Request) {
   try {
     const {
       account_id,
-      target_account_ids,
+      target_private_identifiers,
     }: {
       account_id: string
-      target_account_ids: string[]
+      target_private_identifiers: string[]
     } = await req.json()
 
-    if (!account_id || !target_account_ids) {
+    if (!account_id || !target_private_identifiers) {
       return NextResponse.json(
         { error: 'Keyword and message are required' },
         { status: 400 }
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           api: 'classic',
           category: 'posts',
-          posted_by: { member: target_account_ids },
+          posted_by: { member: target_private_identifiers },
           sort_by: 'date',
         }),
       }

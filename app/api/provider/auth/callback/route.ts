@@ -78,7 +78,7 @@ export async function POST(req: Request) {
         last_name: dataOfGetOwnProfile.last_name,
         email: dataOfGetOwnProfile.email,
         company_id: 'b2f62c00-a76c-4dd3-bc44-b1ce238cb512',
-        like_target_account_ids: [],
+        like_target_private_identifiers: [],
         like_target_account_hours: [],
         check_reaction_hours: [],
       }
