@@ -43,7 +43,10 @@ export const searchProfileResponse = (toolConfig: ToolConfig) => {
 
       // const navigationPath = `/${baseUrl}/${responseData.slug}`
       // router.push(navigationPath)
-      if (responseData.profile_list && formData.type.includes('1')) {
+      if (
+        responseData.profile_list &&
+        (formData.type == '1' || formData.type == '2')
+      ) {
         const date = new Date()
         const year = date.getFullYear()
         const month = date.getMonth() + 1
