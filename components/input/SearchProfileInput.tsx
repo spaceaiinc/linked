@@ -127,7 +127,7 @@ export default function SearchProfileInputCapture({
   useEffect(() => {
     console.log('user', user, 'provider', provider)
     if (provider) customHandleChange(provider.account_id, 'account_id')
-  }, [])
+  }, [provider])
 
   const keywordsField = toolConfig.fields?.find(
     (field) => field.name === 'keywords'
