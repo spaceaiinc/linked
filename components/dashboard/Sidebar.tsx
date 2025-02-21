@@ -261,6 +261,9 @@ export const Sidebar = ({ user }: { user: User | null }) => {
               </div>
             </>
           ) : null}
+          <span className="text-xs text-neutral-400 text-center">
+            version@0.1.0
+          </span>
         </div>
       </div>
       <button
