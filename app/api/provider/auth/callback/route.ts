@@ -25,8 +25,10 @@ export async function POST(req: Request) {
     const supabase = createClient()
     const {
       data: { profile },
-    } = await supabase.from('profiles').select('*').eq('user_id', name).single()
-    if (!profile) {
+      error,
+    } = await supabase.from('profiles').select('*').eq('id', name).single()
+    if (!profile || error) {
+      console.log('error:', error)
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
     }
 
