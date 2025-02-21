@@ -330,6 +330,7 @@ export type Database = {
           type: number
           status: number
           account_id: string
+          private_identifier: string
           public_identifier: string
           first_name: string
           last_name: string
@@ -348,6 +349,7 @@ export type Database = {
           type: number
           status: number
           account_id: string
+          private_identifier: string
           public_identifier: string
           first_name: string
           last_name: string
@@ -366,6 +368,7 @@ export type Database = {
           type: number
           status: number
           account_id: string
+          private_identifier: string
           public_identifier: string
           first_name: string
           email: string

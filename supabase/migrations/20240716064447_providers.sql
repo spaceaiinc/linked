@@ -13,6 +13,7 @@ CREATE TABLE public.providers (
     type SMALLINT NOT NULL,
     status SMALLINT NOT NULL,
     account_id TEXT NOT NULL,
+    private_identifier TEXT NOT NULL,
     public_identifier TEXT NOT NULL,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
