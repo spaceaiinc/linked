@@ -243,7 +243,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
 
   // const [user, _] = useAtom(userAtom)
   const [providers, _] = useAtom(providersAtom)
-  const [provider, __] = useAtom(providerAtom)
+  const [provider, setProvider] = useAtom(providerAtom)
 
   return (
     <>
@@ -263,8 +263,14 @@ export const Sidebar = ({ user }: { user: User | null }) => {
                 {providers.length ? (
                   <Select
                     value={provider?.account_id}
-                    onValueChange={() => {
-                      console.log('provider?.account_id', provider?.account_id)
+                    onValueChange={(value) => {
+                      if (value === 'none') return
+                      const findedProvider = providers.find(
+                        (p) => p.account_id === value
+                      )
+                      if (findedProvider === undefined || !findedProvider)
+                        return
+                      setProvider(findedProvider)
                     }}
                   >
                     <SelectTrigger className="w-full">
