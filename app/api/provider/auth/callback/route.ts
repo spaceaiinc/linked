@@ -23,14 +23,14 @@ export async function POST(req: Request) {
       )
     }
     const supabase = createClient()
-    const {
-      data: { profile },
-      error,
-    } = await supabase.from('profiles').select('*').eq('id', name).single()
-    if (!profile || error) {
-      console.log('error:', error)
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    }
+    // const {
+    //   data: { profile },
+    //   error,
+    // } = await supabase.from('profiles').select('*').eq('id', name).single()
+    // if (error) {
+    //   console.log('error:', error)
+    //   return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    // }
 
     if (status !== 'CREATION_SUCCESS' && status !== 'RECONNECTED') {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
@@ -65,23 +65,24 @@ export async function POST(req: Request) {
       }
 
       const dataOfGetOwnProfile = await responseOfGetOwnProfile.json()
+      console.log('dataOfGetOwnProfile:', dataOfGetOwnProfile)
 
       const account: Database['public']['Tables']['providers']['Insert'] = {
         user_id: name,
         type: 0,
         status: status_code,
         account_id,
+        private_identifier: dataOfGetOwnProfile.provider_id,
         public_identifier: dataOfGetOwnProfile.public_identifier,
         first_name: dataOfGetOwnProfile.first_name,
         last_name: dataOfGetOwnProfile.last_name,
         email: dataOfGetOwnProfile.email,
-        company_id: profile.company_id,
-        like_target_account_ids: [],
+        company_id: 'b2f62c00-a76c-4dd3-bc44-b1ce238cb512',
+        like_target_private_identifiers: [],
         like_target_account_hours: [],
         check_reaction_hours: [],
       }
 
-      const supabase = createClient()
       const responseOfUpsertProviders = await supabase
         .from('providers')
         .upsert(account)

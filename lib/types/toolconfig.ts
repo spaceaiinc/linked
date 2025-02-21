@@ -113,4 +113,6 @@ export interface FormFields {
   initialValue?: string
   multiple?: boolean
   custom?: boolean
+  max?: number
+  min?: number
 }

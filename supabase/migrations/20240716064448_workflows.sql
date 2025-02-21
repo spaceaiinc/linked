@@ -36,7 +36,7 @@ CREATE TABLE public.workflow_histories (
     workflow_id UUID NOT NULL REFERENCES public.workflows(id),
     status SMALLINT NOT NULL,
     cursor TEXT NOT NULL DEFAULT '',
-    target_account_ids TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]
+    target_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]
 );
 
 --
