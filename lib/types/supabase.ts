@@ -336,7 +336,7 @@ export type Database = {
           last_name: string
           email: string
           like_target_private_identifiers: string[]
-          like_target_account_hours: number[]
+          like_target_hours: number[]
           check_reaction_hours: number[]
         }
         Insert: {
@@ -355,7 +355,7 @@ export type Database = {
           last_name: string
           email: string
           like_target_private_identifiers: string[]
-          like_target_account_hours: number[]
+          like_target_hours: number[]
           check_reaction_hours: number[]
         }
         Update: {
@@ -374,7 +374,7 @@ export type Database = {
           email: string
           last_name: string
           like_target_private_identifiers: string[]
-          like_target_account_hours: number[]
+          like_target_hours: number[]
           check_reaction_hours: number[]
         }
         Relationships: [
@@ -408,8 +408,9 @@ export type Database = {
           scheduled_days: number[]
           scheduled_weekdays: number[]
           search_url: string
-          target_private_identifiers: string
+          target_public_identifiers: string
           keywords: string
+          company_private_identifiers: string[]
           network_distance: number[]
           message: string
           limit_count: number
@@ -429,6 +430,7 @@ export type Database = {
           search_url?: string
           target_public_identifiers?: string[]
           keywords?: string
+          company_private_identifiers?: string[]
           network_distance?: number[]
           message?: string
           limit_count: number
@@ -448,6 +450,7 @@ export type Database = {
           search_url?: string
           target_public_identifiers?: string[]
           keywords?: string
+          company_private_identifiers?: string[]
           network_distance?: number[]
           message?: string
           limit_count: number
@@ -516,6 +519,568 @@ export type Database = {
             columns: ['workflow_id']
             isOneToOne: false
             referencedRelation: 'workflows'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          workflow_id: string
+          status: number
+          private_identifier: string
+          public_profile_url: string
+          profile_picture_url: string
+          first_name: string
+          last_name: string
+          headline: string
+          summary: string
+          emails: string[]
+          phones: string[]
+          addresses: string[]
+          socials: string[]
+          birth_month: string
+          birth_day: string
+          primary_locale_country: string
+          primary_locale_language: string
+          location: string
+          websites: string[]
+          can_send_inmail: boolean
+          is_influencer: boolean
+          is_creator: boolean
+          is_hiring: boolean
+          is_open_to_work: boolean
+          network_distance: number
+          connections_count: number
+          follower_count: number
+          shared_connections_count: number
+          keywords: string
+          invitation_message: string
+          generated_invitation_message: string
+          invitation_sent_at: string
+          invitation_replied_at: string
+          first_message: string
+          generated_first_message: string
+          first_message_sent_at: string
+          first_message_replied_at: string
+          thread: string
+          last_imported_at: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          workflow_id: string
+          status: number
+          private_identifier: string
+          public_profile_url: string
+          profile_picture_url: string
+          first_name: string
+          last_name: string
+          headline: string
+          summary?: string
+          emails?: string[]
+          phones?: string[]
+          addresses?: string[]
+          socials?: string[]
+          birth_month?: string
+          birth_day?: string
+          primary_locale_country?: string
+          primary_locale_language?: string
+          location: string
+          websites?: string[]
+          can_send_inmail?: boolean
+          is_influencer?: boolean
+          is_creator?: boolean
+          is_hiring?: boolean
+          is_open_to_work?: boolean
+          network_distance?: number
+          connections_count?: number
+          follower_count?: number
+          shared_connections_count?: number
+          keywords?: string
+          invitation_message?: string
+          generated_invitation_message?: string
+          invitation_sent_at?: string
+          invitation_replied_at?: string
+          first_message?: string
+          generated_first_message?: string
+          first_message_sent_at?: string
+          first_message_replied_at?: string
+          thread?: string
+          last_imported_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          workflow_id?: string
+          status?: number
+          private_identifier?: string
+          public_profile_url?: string
+          profile_picture_url?: string
+          first_name?: string
+          last_name?: string
+          headline?: string
+          summary?: string
+          emails?: string[]
+          phones?: string[]
+          addresses?: string[]
+          socials?: string[]
+          birth_month?: string
+          birth_day?: string
+          primary_locale_country?: string
+          primary_locale_language?: string
+          location?: string
+          websites?: string[]
+          can_send_inmail?: boolean
+          is_influencer?: boolean
+          is_creator?: boolean
+          is_hiring?: boolean
+          is_open_to_work?: boolean
+          network_distance?: number
+          connections_count?: number
+          follower_count?: number
+          shared_connections_count?: number
+          keywords?: string
+          invitation_message?: string
+          generated_invitation_message?: string
+          invitation_sent_at?: string
+          invitation_replied_at?: string
+          first_message?: string
+          generated_first_message?: string
+          first_message_sent_at?: string
+          first_message_replied_at?: string
+          thread?: string
+          last_imported_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'leads_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'leads_workflow_id_fkey'
+            columns: ['workflow_id']
+            isOneToOne: false
+            referencedRelation: 'workflows'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_work_experiences: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          position: string
+          company: string
+          location: string
+          description: string
+          skills: string[]
+          current: boolean
+          status: string
+          start_date: string
+          end_date: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          position: string
+          company: string
+          location: string
+          description?: string
+          skills?: string[]
+          current?: boolean
+          status?: string
+          start_date?: string
+          end_date?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          position?: string
+          company?: string
+          location?: string
+          description?: string
+          skills?: string[]
+          current?: boolean
+          status?: string
+          start_date?: string
+          end_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_work_experiences_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_work_experiences_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_volunteering_experiences: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          company: string
+          description: string
+          role: string
+          cause: string
+          start_date: string
+          end_date: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          company: string
+          description?: string
+          role: string
+          cause: string
+          start_date?: string
+          end_date?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          company?: string
+          description?: string
+          role?: string
+          cause?: string
+          start_date?: string
+          end_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_volunteering_experiences_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_volunteering_experiences_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_educations: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          degree: string
+          school: string
+          field_of_study: string
+          start_date: string
+          end_date: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          degree: string
+          school: string
+          field_of_study: string
+          start_date?: string
+          end_date?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          degree?: string
+          school?: string
+          field_of_study?: string
+          start_date?: string
+          end_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_educations_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_educations_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_skills: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          name: string
+          endorsement_count: number
+          endorsement_id: number
+          insights: string[]
+          endorsed: boolean
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          name: string
+          endorsement_count?: number
+          endorsement_id?: number
+          insights?: string[]
+          endorsed?: boolean
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          name?: string
+          endorsement_count?: number
+          endorsement_id?: number
+          insights?: string[]
+          endorsed?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_skills_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_skills_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_languages: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          name: string
+          proficiency: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          name: string
+          proficiency: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          name?: string
+          proficiency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_languages_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_languages_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_certifications: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          name: string
+          organization: string
+          url: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          name: string
+          organization: string
+          url: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          name?: string
+          organization?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_certifications_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_certifications_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
+      lead_projects: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          name: string
+          description: string
+          skills: string[]
+          start_date: string
+          end_date: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          name: string
+          description?: string
+          skills?: string[]
+          start_date?: string
+          end_date?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          name?: string
+          description?: string
+          skills?: string[]
+          start_date?: string
+          end_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_projects_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_projects_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
             referencedColumns: ['id']
           },
         ]
@@ -676,10 +1241,36 @@ export type Database = {
 }
 
 type PublicSchema = Database[Extract<keyof Database, 'public'>]
+type PublicSchemaTables = PublicSchema['Tables']
+
+// Add Document type
+export type Document = PublicSchemaTables['chat_documents']['Row']
+export type Chat = PublicSchemaTables['chats']['Row']
+export type Profile = PublicSchemaTables['profiles']['Row']
+export type Provider = PublicSchemaTables['providers']['Row']
+export type Workflow = PublicSchemaTables['workflows']['Row']
+export type WorkflowHistory = PublicSchemaTables['workflow_histories']['Row']
+
+export type Lead = PublicSchemaTables['leads']['Row']
+export type LeadWorkExperience =
+  PublicSchemaTables['lead_work_experiences']['Row']
+
+export type LeadVolunteeringExperience =
+  PublicSchemaTables['lead_volunteering_experiences']['Row']
+
+export type LeadEducation = PublicSchemaTables['lead_educations']['Row']
+
+export type LeadSkill = PublicSchemaTables['lead_skills']['Row']
+
+export type LeadLanguage = PublicSchemaTables['lead_languages']['Row']
+
+export type LeadCertification = PublicSchemaTables['lead_certifications']['Row']
+
+export type LeadProject = PublicSchemaTables['lead_projects']['Row']
 
 export type Tables<
   PublicTableNameOrOptions extends
-    | keyof (PublicSchema['Tables'] & PublicSchema['Views'])
+    | keyof (PublicSchemaTables & PublicSchema['Views'])
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
@@ -692,9 +1283,9 @@ export type Tables<
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] &
+  : PublicTableNameOrOptions extends keyof (PublicSchemaTables &
         PublicSchema['Views'])
-    ? (PublicSchema['Tables'] &
+    ? (PublicSchemaTables &
         PublicSchema['Views'])[PublicTableNameOrOptions] extends {
         Row: infer R
       }
@@ -704,7 +1295,7 @@ export type Tables<
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
+    | keyof PublicSchemaTables
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
@@ -715,8 +1306,8 @@ export type TablesInsert<
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchemaTables
+    ? PublicSchemaTables[PublicTableNameOrOptions] extends {
         Insert: infer I
       }
       ? I
@@ -725,7 +1316,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
-    | keyof PublicSchema['Tables']
+    | keyof PublicSchemaTables
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
@@ -736,8 +1327,8 @@ export type TablesUpdate<
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
+  : PublicTableNameOrOptions extends keyof PublicSchemaTables
+    ? PublicSchemaTables[PublicTableNameOrOptions] extends {
         Update: infer U
       }
       ? U
@@ -833,15 +1424,6 @@ export function handleDatabaseError(error: PostgrestError | null) {
       throw error
   }
 }
-
-// Add Document type
-export type Document = Database['public']['Tables']['chat_documents']['Row']
-export type Chat = Database['public']['Tables']['chats']['Row']
-export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Provider = Database['public']['Tables']['providers']['Row']
-export type Workflow = Database['public']['Tables']['workflows']['Row']
-export type WorkflowHistory =
-  Database['public']['Tables']['workflow_histories']['Row']
 
 // Add DatabaseMessage type to match the database schema
 export interface DatabaseMessage {

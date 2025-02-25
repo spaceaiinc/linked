@@ -16,6 +16,7 @@ CREATE TABLE public.workflows (
     search_url TEXT NOT NULL DEFAULT '',
     target_public_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     keywords TEXT NOT NULL DEFAULT '',
+    company_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     network_distance SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     message TEXT NOT NULL DEFAULT '',
     limit_count SMALLINT NOT NULL DEFAULT 10,
