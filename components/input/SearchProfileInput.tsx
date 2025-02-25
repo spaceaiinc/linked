@@ -3,7 +3,7 @@
 import { useState, ReactElement, useEffect } from 'react'
 import { useFormData } from '@/lib/hooks/useFormData'
 import { RenderFields } from '@/components/input/FormFields'
-import { type ToolConfig } from '@/lib/types/toolconfig'
+import { FormFields, type ToolConfig } from '@/lib/types/toolconfig'
 import { LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { searchProfileResponse } from '@/lib/hooks/searchProfileResponse'
@@ -129,13 +129,18 @@ export default function SearchProfileInputCapture({
     if (provider) customHandleChange(provider.account_id, 'account_id')
   }, [provider])
 
-  const keywordsField = toolConfig.fields?.find(
-    (field) => field.name === 'keywords'
-  )
-
-  const networkDistanceField = toolConfig.fields?.find(
-    (field) => field.name === 'network_distance'
-  )
+  let keywordsField: FormFields | undefined
+  let companyUrlsField: FormFields | undefined
+  let networkDistanceField: FormFields | undefined
+  toolConfig.fields?.forEach((field) => {
+    if (field.name === 'keywords') {
+      keywordsField = field
+    } else if (field.name === 'company_urls') {
+      companyUrlsField = field
+    } else if (field.name === 'network_distance') {
+      networkDistanceField = field
+    }
+  })
 
   return (
     <section className="pb-20 w-full mx-auto">
@@ -264,6 +269,31 @@ export default function SearchProfileInputCapture({
                                         placeholder={'人材紹介 CEO'}
                                         id={keywordsField?.name!}
                                         name={keywordsField?.name!}
+                                        className="p-2 text-xs w-full"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                      {companyUrlsField?.label}
+                                    </label>
+                                    <div className="relative mt-1">
+                                      <Input
+                                        value={
+                                          formData[companyUrlsField?.name!]
+                                        }
+                                        onChange={(e) =>
+                                          handleChange(
+                                            e,
+                                            companyUrlsField?.name!
+                                          )
+                                        }
+                                        required={false}
+                                        placeholder={
+                                          'https://www.linkedin.com/company/...'
+                                        }
+                                        id={companyUrlsField?.name!}
+                                        name={companyUrlsField?.name!}
                                         className="p-2 text-xs w-full"
                                       />
                                     </div>

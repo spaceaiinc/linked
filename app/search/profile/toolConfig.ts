@@ -107,6 +107,14 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
+      label: '企業URL',
+      name: 'company_urls',
+      type: 'input',
+      placeholder: '',
+      required: false,
+      custom: true,
+    },
+    {
       label: 'つながり',
       name: 'network_distance',
       type: 'checkbox',

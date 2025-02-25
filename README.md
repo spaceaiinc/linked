@@ -107,3 +107,5 @@ Please read the [official documentation to get started.](https://docs.spaceai.jp
 - Like
 - Reaction
 - Stripe
+
+<!-- rename like_target_account_hours -->

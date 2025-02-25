@@ -64,6 +64,15 @@ export default function Page() {
             Identifier)全てが対象になります。
           </span>
         </li>
+        <li className="text-l flex">
+          <span className="w-4 h-4 mt-1">
+            <IconPoint className="w-4 h-4" />
+          </span>
+          <span className="ml-2">
+            キーワードは"A" or "B"、"A" and "B"、"A" not
+            "B"の形式で絞り込むことが可能です。(https://www.linkedin.com/help/linkedin/answer/a524335?lang=ja)
+          </span>
+        </li>
       </ul>
     </AppInfo>
   )
