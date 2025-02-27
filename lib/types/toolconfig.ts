@@ -115,4 +115,5 @@ export interface FormFields {
   custom?: boolean
   max?: number
   min?: number
+  validation?: any
 }

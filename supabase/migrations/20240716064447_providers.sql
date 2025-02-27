@@ -12,7 +12,7 @@ CREATE TABLE public.providers (
     user_id UUID NOT NULL REFERENCES public.profiles(id),
     type SMALLINT NOT NULL,
     status SMALLINT NOT NULL,
-    account_id TEXT NOT NULL,
+    account_id TEXT NOT NULL UNIQUE,
     private_identifier TEXT NOT NULL,
     public_identifier TEXT NOT NULL,
     first_name TEXT NOT NULL,

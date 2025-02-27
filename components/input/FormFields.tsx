@@ -1,15 +1,6 @@
 import React from 'react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-// import {
-//   Select,
-//   SelectTrigger,
-//   SelectContent,
-//   SelectItem,
-//   SelectValue,
-//   SelectLabel,
-//   SelectGroup,
-// } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { type FormFields } from '@/lib/types/toolconfig'
 import CheckboxGroup from '../ui/checkbox-group'
@@ -30,6 +21,30 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
   formData,
   handleChange,
 }) => {
+  //   const validationSchema = generateValidationSchema(formFields);
+
+  // const MyForm = () => {
+  //   const {
+  //     register,
+  //     handleSubmit,
+  //     formState: { errors },
+  //     setValue,
+  //     watch
+  //   } = useForm({
+  //     resolver: yupResolver(validationSchema),
+  //     mode: 'onChange' // バリデーションを変更時に実行
+  //   });
+
+  //   const onSubmit = (data) => {
+  //     console.log('Form data:', data);
+  //     // データ送信処理
+  //   };
+
+  //   // ファイル入力の特別な処理
+  //   const handleFileChange = (e, name) => {
+  //     setValue(name, e.target.files);
+  //   };
+
   return (
     <>
       {fields.map((field) => {
@@ -81,66 +96,6 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
                 className="p-2 text-xs w-full"
               />
             )}
-            {/* {field.type === 'select' && (
-              <Select
-                value={formData[field.name!] || ''}
-                onValueChange={(value) => {
-                  if (field.multiple) {
-                    const currentValue = formData[field.name!] || ''
-                    const currentValues = currentValue
-                      ? currentValue.split(',')
-                      : []
-                    console.log(currentValue)
-                    const newValues = currentValues.includes(value)
-                      ? currentValues.filter((v) => v !== value)
-                      : [...currentValues, value]
-                    const newValue = newValues.join(',')
-                    handleChange(
-                      {
-                        target: { value: newValue },
-                      } as React.ChangeEvent<HTMLSelectElement>,
-                      field.name!
-                    )
-                  } else {
-                    handleChange(
-                      {
-                        target: { value },
-                      } as React.ChangeEvent<HTMLSelectElement>,
-                      field.name!
-                    )
-                  }
-                }}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue>
-                    {field.multiple
-                      ? formData[field.name!] || 'Please make a selection'
-                      : undefined}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>{field.label}</SelectLabel>
-                    {field.options?.map((option) => {
-                      const isSelected = field.multiple
-                        ? (formData[field.name!] || '')
-                            .split(',')
-                            .includes(option)
-                        : formData[field.name!] === option
-                      return (
-                        <SelectItem
-                          key={option}
-                          value={option}
-                          className={isSelected ? 'bg-accent/10' : ''}
-                        >
-                          {option}
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            )} */}
             {field.type === 'checkbox' && (
               <CheckboxGroup
                 field={field}
@@ -148,6 +103,12 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
                 handleChange={handleChange}
               />
             )}
+            {/* エラーメッセージの表示 */}
+            {/* {field.name && errors[field.name] && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors[field.name].message}
+              </p>
+            )} */}
           </div>
         )
       })}

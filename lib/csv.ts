@@ -1,4 +1,6 @@
 import Papa from 'papaparse'
+import { LeadInsert } from './types/supabase'
+import { LeadStatus } from './types/master'
 
 export const convertProfileJsonToCsv = (
   inputData: any[],
@@ -8,44 +10,93 @@ export const convertProfileJsonToCsv = (
     console.log('No data to convert')
     return
   }
-  const rows = inputData.map((profile) => {
+  const rows = inputData.map((profile: LeadInsert) => {
     const baseInfo = {
-      provider: profile.provider || '',
-      provider_id: profile.provider_id || '',
-      public_identifier: profile?.public_identifier || '',
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-      headline: profile.headline || '',
-      location: profile.location || '',
-      follower_count: profile.follower_count || 0,
-      connections_count: profile.connections_count || 0,
-      work_experience: '',
+      public_profile_url: `https://www.linkedin.com/in/${profile.public_identifier}`,
+      ...profile,
+      statuses: '',
+      work_experiences: '',
+      volunteering_experiences: '',
+      educations: '',
+      skills: '',
+      languages: '',
+      certifications: '',
+      projects: '',
     }
+    if (profile.statuses?.length)
+      baseInfo.statuses = LeadStatus[profile.statuses[0].status]
 
-    if (profile.work_experience) {
-      const workExperiencesText = profile.work_experience
-        .map(
-          (exp: {
-            company: any
-            position: any
-            location: any
-            description: any
-            skills: any
-            start: any
-            end: any
-          }) => {
-            return `会社: ${exp.company || ''}\n役職: ${
-              exp.position || ''
-            }\n場所: ${exp.location || ''}\n説明: ${
-              exp.description || ''
-            }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
-              exp.start || ''
-            }\n終了: ${exp.end || ''}`
-          }
-        )
+    if (profile.work_experiences?.length) {
+      const workExperiencesText = profile.work_experiences
+        .map((exp) => {
+          return `会社: ${exp.company || ''}\n役職: ${
+            exp.position || ''
+          }\n場所: ${exp.location || ''}\n説明: ${
+            exp.description || ''
+          }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
+            exp.start_date?.toLocaleDateString() || ''
+          }\n終了: ${exp.end_date?.toLocaleDateString() || ''}`
+        })
         .join('\n\n')
 
-      baseInfo.work_experience = workExperiencesText
+      baseInfo.work_experiences = workExperiencesText
+    }
+    if (profile.volunteering_experiences?.length) {
+      const volunteerExperiencesText = profile.volunteering_experiences
+        .map((exp) => {
+          return `会社: ${exp.company || ''}\n詳細: ${
+            exp.description || ''
+          }\n役職: ${exp.role || ''}\nCause: ${exp.cause || ''}\n開始: ${
+            exp.start_date?.toLocaleDateString() || ''
+          }\n終了: ${exp.end_date?.toLocaleDateString() || ''}`
+        })
+        .join('\n\n')
+
+      baseInfo.volunteering_experiences = volunteerExperiencesText
+    }
+    if (profile.educations?.length) {
+      const educationsText = profile.educations
+        .map((edu) => {
+          return `学校: ${edu.school || ''}\n学位: ${
+            edu.degree || ''
+          }\n専攻: ${edu.field_of_study || ''}\n開始: ${
+            edu.start_date?.toLocaleDateString() || ''
+          }\n終了: ${edu.end_date?.toLocaleDateString() || ''}`
+        })
+        .join('\n\n')
+      baseInfo.educations = educationsText
+    }
+    if (profile.skills) {
+      const skillsText = profile.skills
+        .map((skill) => {
+          return `${skill.name || ''}`
+        })
+        .join(', ')
+      baseInfo.skills = skillsText
+    }
+    if (profile.languages) {
+      const languagesText = profile.languages
+        .map((lang) => {
+          return `言語: ${lang.name || ''}\nレベル: ${lang.proficiency || ''}`
+        })
+        .join('\n\n')
+      baseInfo.languages = languagesText
+    }
+    if (profile.certifications) {
+      const certificationsText = profile.certifications
+        .map((cert) => {
+          return `認定: ${cert.name || ''}\n機関: ${cert.organization || ''}\nURL: ${cert.url || ''}`
+        })
+        .join('\n\n')
+      baseInfo.certifications = certificationsText
+    }
+    if (profile.projects) {
+      const projectsText = profile.projects
+        .map((proj) => {
+          return `プロジェクト名: ${proj.name || ''}\n説明: ${proj.description || ''}\nスキル: ${proj.skills || ''}\n開始: ${proj.start_date?.toLocaleDateString() || ''}\n終了: ${proj.end_date?.toLocaleDateString() || ''}`
+        })
+        .join('\n\n')
+      baseInfo.projects = projectsText
     }
 
     return baseInfo

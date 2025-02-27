@@ -95,6 +95,7 @@
     "unipile-node-sdk": "^1.9.2",
     "usehooks-ts": "^3.1.1",
     "uuidv7": "^1.0.0",
+    "yup": "^1.6.1",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.23.0"
   },

@@ -9,12 +9,12 @@ CREATE TABLE public.leads (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
     deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     workflow_id UUID NOT NULL REFERENCES public.workflows(id),
-    status SMALLINT NOT NULL, -- In queue, Invited, Accepted, Follow-up sent, Replied, Not sent
     private_identifier TEXT NOT NULL,
-    public_profile_url TEXT NOT NULL,
+    public_identifier TEXT NOT NULL,
     profile_picture_url TEXT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    first_name TEXT NOT NULL DEFAULT '',
+    last_name TEXT NOT NULL DEFAULT '',
     headline TEXT NOT NULL,
     summary TEXT NOT NULL DEFAULT '',
     emails TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
@@ -32,7 +32,7 @@ CREATE TABLE public.leads (
     is_creator BOOLEAN NOT NULL DEFAULT FALSE,
     is_hiring BOOLEAN NOT NULL DEFAULT FALSE,
     is_open_to_work BOOLEAN NOT NULL DEFAULT FALSE,
-    network_distance SMALLINT NOT NULL DEFAULT 0,
+    network_distance SMALLINT NOT NULL,
     connections_count INT NOT NULL DEFAULT 0,
     follower_count INT NOT NULL DEFAULT 0,
     shared_connections_count INT NOT NULL DEFAULT 0,
@@ -49,7 +49,15 @@ CREATE TABLE public.leads (
     last_imported_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE ('UTC', NOW())
 );
 
-
+CREATE TABLE public.lead_statuses (
+    id UUID DEFAULT extensions.UUID_generate_v4() NOT NULL PRIMARY KEY,
+    company_id UUID NOT NULL REFERENCES public.companies(id),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
+    deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
+    lead_id UUID NOT NULL REFERENCES public.leads(id),
+    status SMALLINT NOT NULL -- In queue, Invited, Accepted, Follow-up sent, Replied, Not sent
+);
 
 --
 -- Name: lead_work_experiences; Type: TABLE; Schema: public; Owner: -
@@ -192,6 +200,11 @@ BEFORE UPDATE ON public.leads
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
 
+CREATE TRIGGER set_updated_at_lead_statuses
+BEFORE UPDATE ON public.lead_statuses
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at();
+
 CREATE TRIGGER set_updated_at_lead_work_experiences
 BEFORE UPDATE ON public.lead_work_experiences
 FOR EACH ROW
@@ -230,6 +243,9 @@ EXECUTE FUNCTION update_updated_at();
 
 CREATE INDEX leads_company_id_index ON public.leads (company_id);
 CREATE INDEX leads_workflow_id_index ON public.leads (workflow_id);
+
+CREATE INDEX lead_statuses_company_id_index ON public.lead_statuses (company_id);
+CREATE INDEX lead_statuses_lead_id_index ON public.lead_statuses (lead_id);
 
 CREATE INDEX lead_work_experiences_company_id_index ON public.lead_work_experiences (company_id);
 CREATE INDEX lead_work_experiences_lead_id_index ON public.lead_work_experiences (lead_id);
@@ -274,6 +290,18 @@ FOR SELECT USING (company_id = (select company_id from public.profiles where id 
 
 CREATE POLICY "Users can update their own leads" ON public.leads
 FOR UPDATE USING (company_id = (select company_id from public.profiles where id = auth.uid()));
+
+
+CREATE POLICY "Users can insert their own lead_statuses" ON public.lead_statuses FOR
+INSERT WITH CHECK (company_id = (select company_id from public.profiles where id = auth.uid()));
+
+
+CREATE POLICY "Users can select their own lead_statuses" ON public.lead_statuses FOR
+SELECT USING (company_id = (select company_id from public.profiles where id = auth.uid()));
+
+
+CREATE POLICY "Users can update their own lead_statuses" ON public.lead_statuses FOR
+UPDATE USING (company_id = (select company_id from public.profiles where id = auth.uid()));
 
 
 CREATE POLICY "Users can insert their own lead_work_experiences" ON public.lead_work_experiences FOR
@@ -351,6 +379,7 @@ UPDATE USING (company_id = (select company_id from public.profiles where id = au
 --
 
 ALTER TABLE public.leads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.lead_statuses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_work_experiences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_volunteering_experiences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lead_educations ENABLE ROW LEVEL SECURITY;
