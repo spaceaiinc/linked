@@ -1,5 +1,6 @@
 // Please read the @/lib/types/toolconfig file for more details on each field.
 import { ToolConfig } from '@/lib/types/toolconfig'
+import * as yup from 'yup'
 
 export const toolConfig: ToolConfig = {
   ////// Base config
@@ -45,6 +46,7 @@ export const toolConfig: ToolConfig = {
       placeholder: '',
       required: true,
       custom: true,
+      // validation: yup.string().required('アカウントIDは必須です'),
     },
     {
       label: '処理',
@@ -135,8 +137,9 @@ export const toolConfig: ToolConfig = {
       placeholder: '10',
       initialValue: '10',
       required: false,
-      max: 50,
+      max: 150,
       min: 1,
+      // validation: yup.number().required('検索数は必須です'),
     },
     {
       label: '申請時メッセージ',

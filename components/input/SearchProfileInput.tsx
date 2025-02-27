@@ -73,9 +73,12 @@ export default function SearchProfileInputCapture({
     if (formType.includes('0') && formType.includes('1')) {
       formData['type'] = '2'
     } else if (formType.includes('0')) {
-      formData['type'] = '1'
+      formData['type'] = '0'
     } else if (formType.includes('1')) {
       formData['type'] = '1'
+    } else {
+      alert('Please select at least one type')
+      return
     }
     const targetPublicIdentifiers = await extractColumnData(
       fileUrl,
@@ -117,11 +120,7 @@ export default function SearchProfileInputCapture({
   const [provider, __] = useAtom(providerAtom)
 
   useEffect(() => {
-    if (activeTab == '4') {
-      customHandleChange('3', 'active_tab')
-    } else {
-      customHandleChange(activeTab, 'active_tab')
-    }
+    customHandleChange(activeTab, 'active_tab')
   }, [activeTab])
 
   useEffect(() => {
@@ -129,11 +128,14 @@ export default function SearchProfileInputCapture({
     if (provider) customHandleChange(provider.account_id, 'account_id')
   }, [provider])
 
+  let searchUrlField: FormFields | undefined
   let keywordsField: FormFields | undefined
   let companyUrlsField: FormFields | undefined
   let networkDistanceField: FormFields | undefined
   toolConfig.fields?.forEach((field) => {
-    if (field.name === 'keywords') {
+    if (field.name === 'search_url') {
+      searchUrlField = field
+    } else if (field.name === 'keywords') {
       keywordsField = field
     } else if (field.name === 'company_urls') {
       companyUrlsField = field
@@ -228,15 +230,16 @@ export default function SearchProfileInputCapture({
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      検索URL
+                                      {searchUrlField?.label}
                                     </label>
                                     <div className="relative mt-1">
                                       <Input
                                         placeholder="https://www.linkedin.com/search/results/profile/..."
-                                        value={formData['search_url']}
+                                        value={formData[searchUrlField?.name!]}
                                         onChange={(e) =>
                                           handleChange(e, 'search_url')
                                         }
+                                        required={activeTab === '0'}
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -265,7 +268,6 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           handleChange(e, keywordsField?.name!)
                                         }
-                                        required={false}
                                         placeholder={'人材紹介 CEO'}
                                         id={keywordsField?.name!}
                                         name={keywordsField?.name!}
@@ -288,7 +290,6 @@ export default function SearchProfileInputCapture({
                                             companyUrlsField?.name!
                                           )
                                         }
-                                        required={false}
                                         placeholder={
                                           'https://www.linkedin.com/company/...'
                                         }
@@ -325,7 +326,9 @@ export default function SearchProfileInputCapture({
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
                                       マイリスト
                                     </label>
-                                    <div className="relative mt-1">実装中</div>
+                                    <div className="relative mt-1">
+                                      Coming Soon...
+                                    </div>
                                   </div>
                                 </div>
                               </motion.div>
@@ -351,6 +354,7 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           setFileUrl(e.target.value)
                                         }
+                                        required={activeTab === '3'}
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -367,6 +371,7 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           handleChange(e, 'extract_column')
                                         }
+                                        required={activeTab === '3'}
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                     </div>
@@ -386,7 +391,10 @@ export default function SearchProfileInputCapture({
                                   <GridPattern />
                                 </div>
                                 <div className="flex flex-col items-center justify-center">
-                                  <input {...getInputProps()} />
+                                  <input
+                                    {...getInputProps()}
+                                    required={activeTab === '4'}
+                                  />
 
                                   <p className="relative z-20 font-sans font-bold text-neutral-700 dark:text-neutral-300 text-base">
                                     ファイルをアップロード
@@ -436,6 +444,7 @@ export default function SearchProfileInputCapture({
                                   onChange={(e) =>
                                     handleChange(e, 'extract_column')
                                   }
+                                  required={activeTab === '4'}
                                   className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                 />
                               </div>

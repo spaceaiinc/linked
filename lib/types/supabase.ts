@@ -408,7 +408,7 @@ export type Database = {
           scheduled_days: number[]
           scheduled_weekdays: number[]
           search_url: string
-          target_public_identifiers: string
+          target_public_identifiers: string[]
           keywords: string
           company_private_identifiers: string[]
           network_distance: number[]
@@ -424,15 +424,15 @@ export type Database = {
           closed_at?: string
           provider_id: string
           type: number
-          scheduled_hours?: number[]
-          scheduled_days?: number[]
-          scheduled_weekdays?: number[]
-          search_url?: string
-          target_public_identifiers?: string[]
-          keywords?: string
-          company_private_identifiers?: string[]
-          network_distance?: number[]
-          message?: string
+          scheduled_hours: number[]
+          scheduled_days: number[]
+          scheduled_weekdays: number[]
+          search_url: string
+          target_public_identifiers: string[]
+          keywords: string
+          company_private_identifiers: string[]
+          network_distance: number[]
+          message: string
           limit_count: number
         }
         Update: {
@@ -531,10 +531,10 @@ export type Database = {
           updated_at: string
           deleted_at: string
           workflow_id: string
-          status: number
           private_identifier: string
-          public_profile_url: string
+          public_identifier?: string
           profile_picture_url: string
+          full_name: string
           first_name: string
           last_name: string
           headline: string
@@ -577,10 +577,10 @@ export type Database = {
           updated_at?: string
           deleted_at?: string
           workflow_id: string
-          status: number
           private_identifier: string
-          public_profile_url: string
-          profile_picture_url: string
+          public_identifier: string
+          profile_picture_url?: string
+          full_name: string
           first_name: string
           last_name: string
           headline: string
@@ -600,7 +600,7 @@ export type Database = {
           is_creator?: boolean
           is_hiring?: boolean
           is_open_to_work?: boolean
-          network_distance?: number
+          network_distance: number
           connections_count?: number
           follower_count?: number
           shared_connections_count?: number
@@ -623,10 +623,10 @@ export type Database = {
           updated_at?: string
           deleted_at?: string
           workflow_id?: string
-          status?: number
           private_identifier?: string
-          public_profile_url?: string
+          public_identifier?: string
           profile_picture_url?: string
+          full_name?: string
           first_name?: string
           last_name?: string
           headline?: string
@@ -680,6 +680,51 @@ export type Database = {
         ]
       }
 
+      lead_statuses: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          status: number
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          status: number
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          status: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_statuses_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_statuses_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       lead_work_experiences: {
         Row: {
           id: string
@@ -695,8 +740,8 @@ export type Database = {
           skills: string[]
           current: boolean
           status: string
-          start_date: string
-          end_date: string
+          start_date: Date
+          end_date: Date
         }
         Insert: {
           id?: string
@@ -712,8 +757,8 @@ export type Database = {
           skills?: string[]
           current?: boolean
           status?: string
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Update: {
           id?: string
@@ -729,8 +774,8 @@ export type Database = {
           skills?: string[]
           current?: boolean
           status?: string
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Relationships: [
           {
@@ -762,8 +807,8 @@ export type Database = {
           description: string
           role: string
           cause: string
-          start_date: string
-          end_date: string
+          start_date: Date
+          end_date: Date
         }
         Insert: {
           id?: string
@@ -776,8 +821,8 @@ export type Database = {
           description?: string
           role: string
           cause: string
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Update: {
           id?: string
@@ -790,8 +835,8 @@ export type Database = {
           description?: string
           role?: string
           cause?: string
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Relationships: [
           {
@@ -822,8 +867,8 @@ export type Database = {
           degree: string
           school: string
           field_of_study: string
-          start_date: string
-          end_date: string
+          start_date: Date
+          end_date: Date
         }
         Insert: {
           id?: string
@@ -835,8 +880,8 @@ export type Database = {
           degree: string
           school: string
           field_of_study: string
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Update: {
           id?: string
@@ -848,8 +893,8 @@ export type Database = {
           degree?: string
           school?: string
           field_of_study?: string
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Relationships: [
           {
@@ -1039,8 +1084,8 @@ export type Database = {
           name: string
           description: string
           skills: string[]
-          start_date: string
-          end_date: string
+          start_date: Date
+          end_date: Date
         }
         Insert: {
           id?: string
@@ -1052,8 +1097,8 @@ export type Database = {
           name: string
           description?: string
           skills?: string[]
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Update: {
           id?: string
@@ -1065,8 +1110,8 @@ export type Database = {
           name?: string
           description?: string
           skills?: string[]
-          start_date?: string
-          end_date?: string
+          start_date?: Date
+          end_date?: Date
         }
         Relationships: [
           {
@@ -1241,17 +1286,48 @@ export type Database = {
 }
 
 type PublicSchema = Database[Extract<keyof Database, 'public'>]
-type PublicSchemaTables = PublicSchema['Tables']
+export type PublicSchemaTables = PublicSchema['Tables']
 
 // Add Document type
 export type Document = PublicSchemaTables['chat_documents']['Row']
 export type Chat = PublicSchemaTables['chats']['Row']
 export type Profile = PublicSchemaTables['profiles']['Row']
 export type Provider = PublicSchemaTables['providers']['Row']
-export type Workflow = PublicSchemaTables['workflows']['Row']
+export type Workflow = PublicSchemaTables['workflows']['Row'] & {
+  workflow_histories: WorkflowHistory[]
+}
+
 export type WorkflowHistory = PublicSchemaTables['workflow_histories']['Row']
 
-export type Lead = PublicSchemaTables['leads']['Row']
+export type LeadInsert = PublicSchemaTables['leads']['Insert'] & {
+  statuses?: PublicSchemaTables['lead_statuses']['Insert'][] | undefined
+  work_experiences?:
+    | PublicSchemaTables['lead_work_experiences']['Insert'][]
+    | undefined
+  volunteering_experiences?:
+    | PublicSchemaTables['lead_volunteering_experiences']['Insert'][]
+    | undefined
+  educations?: PublicSchemaTables['lead_educations']['Insert'][] | undefined
+  skills?: PublicSchemaTables['lead_skills']['Insert'][] | undefined
+  languages?: PublicSchemaTables['lead_languages']['Insert'][] | undefined
+  certifications?:
+    | PublicSchemaTables['lead_certifications']['Insert'][]
+    | undefined
+  projects?: PublicSchemaTables['lead_projects']['Insert'][] | undefined
+}
+
+export type Lead = PublicSchemaTables['leads']['Row'] & {
+  statuses: LeadStatuses[]
+  work_experiences: LeadWorkExperience[]
+  volunteering_experiences: LeadVolunteeringExperience[]
+  educations: LeadEducation[]
+  skills: LeadSkill[]
+  languages: LeadLanguage[]
+  certifications: LeadCertification[]
+  projects: LeadProject[]
+}
+
+export type LeadStatuses = PublicSchemaTables['lead_statuses']['Row']
 export type LeadWorkExperience =
   PublicSchemaTables['lead_work_experiences']['Row']
 
