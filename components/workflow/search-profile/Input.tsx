@@ -90,12 +90,11 @@ export default function SearchProfileInputCapture({
         customHandleChange(workflow.search_url, 'search_url')
         customHandleChange(workflow.keywords, 'keywords')
         // customHandleChange(workflow.company_urls, 'company_urls')
-        customHandleChange(workflow.network_distance.join(','), 'network_distance')
         customHandleChange(
-          workflow.target_public_identifiers.join(','),
-          'target_public_identifiers'
+          workflow.network_distance.join(','),
+          'network_distance'
         )
-        // customHandleChange(workflow.target_workflow_id, 'target_workflow_id')
+        customHandleChange(workflow.target_workflow_id, 'target_workflow_id')
         customHandleChange(workflow.limit_count.toString(), 'limit_count')
         customHandleChange(workflow.invitation_message, 'invitation_message')
         customHandleChange(
@@ -242,9 +241,7 @@ export default function SearchProfileInputCapture({
                               >
                                 <div className="flex items-center gap-2">
                                   <IconFile className="h-4 w-4" />
-                                  <span className="font-medium">
-                                    リード
-                                  </span>
+                                  <span className="font-medium">リード</span>
                                 </div>
                               </TabsTrigger>
                               <TabsTrigger
