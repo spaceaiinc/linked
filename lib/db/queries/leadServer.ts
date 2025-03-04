@@ -1,7 +1,7 @@
 import { UserProfileApiResponse } from 'unipile-node-sdk/dist/types/users/user-profile.types'
-import { LeadStatus, NetworkDistance, WorkflowType } from './types/master'
-import { LeadInsert, PublicSchemaTables } from './types/supabase'
-import { createClient } from './utils/supabase/server'
+import { LeadStatus, NetworkDistance, WorkflowType } from '../../types/master'
+import { LeadInsert, PublicSchemaTables } from '../../types/supabase'
+import { createClient } from '../../utils/supabase/server'
 
 export type searchProfileBodyType = {
   api: string
@@ -12,12 +12,385 @@ export type searchProfileBodyType = {
   network_distance?: number[]
 }
 
-export async function convertProfileToSupabaseLeadsInsert(
-  unipileProfile: UserProfileApiResponse,
-  companyId: string,
-  workflowId: string,
+export async function upsertLead({
+  leadId,
+  leadStatus,
+  lead,
+  companyId,
+  providerId,
+  workflowId,
+  type,
+  scheduled_hours,
+  scheduled_days,
+  scheduled_months,
+  scheduled_weekdays,
+}: {
+  leadId: string
+  leadStatus: LeadStatus
+  lead: LeadInsert
+  companyId: string
+  providerId: string
+  workflowId: string
   type: WorkflowType
-): Promise<LeadInsert | null> {
+  scheduled_hours: number[]
+  scheduled_days: number[]
+  scheduled_months: number[]
+  scheduled_weekdays: number[]
+}): Promise<LeadInsert | null> {
+  const supabase = createClient()
+  lead.id = leadId
+  const { data: responseOfInsertLead, error: errorOfInsertLead } =
+    await supabase
+      .from('leads')
+      .upsert(lead, { onConflict: 'id' })
+      .select(
+        '*, lead_workflows(*), lead_statuses(*), lead_workexperiences(*), lead_volunteering_experiences(*), lead_educations(*), lead_skills(*), lead_languages(*), lead_certifications(*), lead_projects(*)'
+      )
+      .single()
+  if (errorOfInsertLead) {
+    console.error('Error in insert lead:', errorOfInsertLead)
+    return lead
+  }
+
+  // update lead workflows
+  lead.workflows = [
+    {
+      workflow_id: workflowId,
+      lead_id: responseOfInsertLead?.id,
+      company_id: companyId,
+    },
+  ]
+
+  const { error: errorOfInsertLeadWorkflow } = await supabase
+    .from('lead_workflows')
+    .upsert(lead.workflows, { onConflict: 'workflow_id, lead_id' })
+  if (errorOfInsertLeadWorkflow) {
+    console.error('Error in insert lead workflow:', errorOfInsertLeadWorkflow)
+    return lead
+  }
+
+  // update lead status
+  const { data: responseOfFindLeadStatus, error: errorOfFindLeadStatus } =
+    await supabase
+      .from('lead_statuses')
+      .select('*')
+      .eq('lead_id', responseOfInsertLead.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+  if (errorOfFindLeadStatus) {
+    console.error('Error in find lead status:', errorOfFindLeadStatus)
+    return lead
+  }
+  if (
+    responseOfFindLeadStatus.status < leadStatus &&
+    responseOfFindLeadStatus.status == LeadStatus.IN_QUEUE
+  ) {
+    lead.statuses = [
+      {
+        status: leadStatus,
+        lead_id: responseOfInsertLead?.id,
+        company_id: companyId,
+      },
+    ]
+    const { error: errorOfInsertLeadStatus } = await supabase
+      .from('lead_statuses')
+      .insert(lead.statuses)
+    if (errorOfInsertLeadStatus) {
+      console.error('Error in insert lead status:', errorOfInsertLeadStatus)
+      return lead
+    }
+  }
+
+  // update work experience
+  // Initialize with empty array if work_experience is undefined
+  if (!responseOfInsertLead.work_experiences.length) {
+    const workExperiencePromises = lead?.work_experiences?.map(
+      async (workExperience) => {
+        if (!workExperience || !responseOfInsertLead?.id) {
+          return
+        }
+        try {
+          const { error: errorOfInsertWorkExperience } = await supabase
+            .from('lead_work_experiences')
+            .insert(workExperience)
+
+          if (errorOfInsertWorkExperience) {
+            console.error(
+              'Error in insert work experience:',
+              errorOfInsertWorkExperience
+            )
+            return
+          }
+          return workExperience
+        } catch (error) {
+          console.error('Error processing work experience:', error)
+          return
+        }
+      }
+    )
+    try {
+      // Only await if there are promises to wait for
+      if (
+        workExperiencePromises !== undefined &&
+        workExperiencePromises.length > 0
+      ) {
+        await Promise.all(workExperiencePromises)
+      }
+    } catch (error) {
+      console.error('Error in work experience promises:', error)
+    }
+  }
+
+  // update volunteer experience
+  if (!responseOfInsertLead.volunteering_experiences.length) {
+    const volunteerExperiencePromises = lead?.volunteering_experiences?.map(
+      async (volunteerExperience) => {
+        console.log('volunteerExperience:', volunteerExperience)
+        if (!volunteerExperience || !responseOfInsertLead?.id) {
+          return
+        }
+
+        try {
+          const { error: errorOfInsertVolunteerExperience } = await supabase
+            .from('lead_volunteering_experiences')
+            .insert(volunteerExperience)
+
+          if (errorOfInsertVolunteerExperience) {
+            console.error(
+              'Error in insert volunteer experience:',
+              errorOfInsertVolunteerExperience
+            )
+            return
+          }
+
+          return volunteerExperience
+        } catch (error) {
+          console.error('Error processing volunteer experience:', error)
+          return
+        }
+      }
+    )
+
+    try {
+      // Only await if there are promises to wait for
+      if (
+        volunteerExperiencePromises !== undefined &&
+        volunteerExperiencePromises.length > 0
+      ) {
+        await Promise.all(volunteerExperiencePromises)
+      }
+    } catch (error) {
+      console.error('Error in volunteer experience promises:', error)
+    }
+  }
+
+  // update educations
+  if (!responseOfInsertLead.educations.length) {
+    const educationPromises = lead?.educations?.map(async (education) => {
+      if (!education || !responseOfInsertLead?.id) {
+        return
+      }
+
+      try {
+        const { error: errorOfInsertEducation } = await supabase
+          .from('lead_educations')
+          .insert(education)
+
+        if (errorOfInsertEducation) {
+          console.error('Error in insert education:', errorOfInsertEducation)
+          return
+        }
+
+        return education
+      } catch (error) {
+        console.error('Error processing education:', error)
+        return
+      }
+    })
+
+    try {
+      // Only await if there are promises to wait for
+      if (educationPromises !== undefined && educationPromises.length > 0) {
+        await Promise.all(educationPromises)
+      }
+    } catch (error) {
+      console.error('Error in education promises:', error)
+    }
+  }
+
+  // update skills
+  if (!responseOfInsertLead.skills.length) {
+    const skillsPromises = lead?.skills?.map(async (skill) => {
+      if (!skill.name || !responseOfInsertLead?.id) {
+        return
+      }
+
+      try {
+        const { error: errorOfInsertSkill } = await supabase
+          .from('lead_skills')
+          .insert(skill)
+
+        if (errorOfInsertSkill) {
+          console.error('Error in insert skill:', errorOfInsertSkill)
+          return
+        }
+
+        return skill
+      } catch (error) {
+        console.error('Error processing skill:', error)
+        return
+      }
+    })
+
+    try {
+      // Only await if there are promises to wait for
+      if (skillsPromises !== undefined && skillsPromises.length > 0) {
+        await Promise.all(skillsPromises)
+      }
+    } catch (error) {
+      console.error('Error in skills promises:', error)
+    }
+  }
+
+  // update languages
+  if (!responseOfInsertLead.languages.length) {
+    const languagesPromises = lead?.languages?.map(async (language) => {
+      if (!language || !responseOfInsertLead?.id) {
+        return
+      }
+
+      try {
+        const { error: errorOfInsertLanguage } = await supabase
+          .from('lead_languages')
+          .insert(language)
+
+        if (errorOfInsertLanguage) {
+          console.error('Error in insert language:', errorOfInsertLanguage)
+          return
+        }
+
+        return language
+      } catch (error) {
+        console.error('Error processing language:', error)
+        return
+      }
+    })
+
+    try {
+      // Only await if there are promises to wait for
+      if (languagesPromises !== undefined && languagesPromises.length > 0) {
+        await Promise.all(languagesPromises)
+      }
+    } catch (error) {
+      console.error('Error in languages promises:', error)
+    }
+  }
+
+  // update certifications
+  if (!responseOfInsertLead.certifications.length) {
+    const certificationsPromises = lead?.certifications?.map(
+      async (certification) => {
+        if (!certification || !responseOfInsertLead?.id) {
+          return
+        }
+
+        try {
+          const { error: errorOfInsertCertification } = await supabase
+            .from('lead_certifications')
+            .insert(certification)
+
+          if (errorOfInsertCertification) {
+            console.error(
+              'Error in insert certification:',
+              errorOfInsertCertification
+            )
+            return
+          }
+
+          return certification
+        } catch (error) {
+          console.error('Error processing certification:', error)
+          return
+        }
+      }
+    )
+
+    try {
+      // Only await if there are promises to wait for
+      if (
+        certificationsPromises !== undefined &&
+        certificationsPromises.length > 0
+      ) {
+        await Promise.all(certificationsPromises)
+      }
+    } catch (error) {
+      console.error('Error in certifications promises:', error)
+    }
+  }
+
+  // update projects
+  if (!responseOfInsertLead.projects.length) {
+    const projectsPromises = lead?.projects?.map(async (project) => {
+      if (!project || !responseOfInsertLead?.id) {
+        return
+      }
+
+      try {
+        const { error: errorOfInsertProject } = await supabase
+          .from('lead_projects')
+          .insert(project)
+
+        if (errorOfInsertProject) {
+          console.error('Error in insert project:', errorOfInsertProject)
+          return
+        }
+
+        return project
+      } catch (error) {
+        console.error('Error processing project:', error)
+        return
+      }
+    })
+
+    try {
+      // Only await if there are promises to wait for
+      if (projectsPromises !== undefined && projectsPromises.length > 0) {
+        await Promise.all(projectsPromises)
+      }
+    } catch (error) {
+      console.error('Error in projects promises:', error)
+    }
+  }
+
+  return lead
+}
+
+export async function upsertLeadByUnipileProfileDetail({
+  leadId,
+  leadStatus,
+  unipileProfile,
+  companyId,
+  providerId,
+  workflowId,
+  type,
+  scheduled_hours,
+  scheduled_days,
+  scheduled_months,
+  scheduled_weekdays,
+}: {
+  leadId: string
+  leadStatus: LeadStatus
+  unipileProfile: UserProfileApiResponse
+  companyId: string
+  providerId: string
+  workflowId: string
+  type: WorkflowType
+  scheduled_hours: number[]
+  scheduled_days: number[]
+  scheduled_months: number[]
+  scheduled_weekdays: number[]
+}): Promise<LeadInsert | null> {
   const supabase = createClient()
 
   if (
@@ -30,24 +403,18 @@ export async function convertProfileToSupabaseLeadsInsert(
     'headline' in unipileProfile &&
     'location' in unipileProfile &&
     'network_distance' in unipileProfile &&
-    unipileProfile.provider_id &&
-    unipileProfile.public_identifier
+    unipileProfile.provider_id
   ) {
-    let leadStatus = LeadStatus.IN_QUEUE
-    if (
-      type === WorkflowType.INVITE ||
-      type === WorkflowType.INVITE_AND_EXPORT
-    ) {
-      leadStatus = LeadStatus.INVITED
-    }
     const lead: LeadInsert = {
+      id: leadId,
       company_id: companyId,
-      workflow_id: workflowId,
+      provider_id: providerId,
       private_identifier: unipileProfile.provider_id,
-      public_identifier: unipileProfile.public_identifier,
+      public_identifier: unipileProfile.public_identifier || '',
       full_name: unipileProfile.first_name + ' ' + unipileProfile.last_name,
       first_name: unipileProfile.first_name || '',
       last_name: unipileProfile.last_name || '',
+      profile_picture_url: '',
       headline: unipileProfile.headline || '',
       location: unipileProfile.location || '',
       network_distance: unipileProfile.network_distance
@@ -75,29 +442,66 @@ export async function convertProfileToSupabaseLeadsInsert(
       lead.shared_connections_count = unipileProfile.shared_connections_count
 
     const { data: responseOfInsertLead, error: errorOfInsertLead } =
-      await supabase.from('leads').insert(lead).select('id').single()
+      await supabase
+        .from('leads')
+        .upsert(lead, { onConflict: 'id' })
+        .select('id')
+        .single()
     if (errorOfInsertLead) {
       console.error('Error in insert lead:', errorOfInsertLead)
       return lead
     }
 
-    // update lead status
-    lead.statuses = [
+    // update lead workflows
+    lead.workflows = [
       {
-        status: leadStatus,
+        workflow_id: workflowId,
         lead_id: responseOfInsertLead?.id,
         company_id: companyId,
       },
     ]
 
-    const { error: errorOfInsertLeadStatus } = await supabase
-      .from('lead_statuses')
-      .insert(lead.statuses)
-    if (errorOfInsertLeadStatus) {
-      console.error('Error in insert lead status:', errorOfInsertLeadStatus)
+    const { error: errorOfInsertLeadWorkflow } = await supabase
+      .from('lead_workflows')
+      .upsert(lead.workflows, { onConflict: 'workflow_id, lead_id' })
+    if (errorOfInsertLeadWorkflow) {
+      console.error('Error in insert lead workflow:', errorOfInsertLeadWorkflow)
       return lead
     }
 
+    const { data: responseOfFindLeadStatus, error: errorOfFindLeadStatus } =
+      await supabase
+        .from('lead_statuses')
+        .select('*')
+        .eq('lead_id', responseOfInsertLead.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+    if (errorOfFindLeadStatus) {
+      console.error('Error in find lead status:', errorOfFindLeadStatus)
+      return lead
+    }
+    if (
+      responseOfFindLeadStatus.status < leadStatus &&
+      responseOfFindLeadStatus.status == LeadStatus.IN_QUEUE
+    ) {
+      lead.statuses = [
+        {
+          status: leadStatus,
+          lead_id: responseOfInsertLead?.id,
+          company_id: companyId,
+        },
+      ]
+      const { error: errorOfInsertLeadStatus } = await supabase
+        .from('lead_statuses')
+        .insert(lead.statuses)
+      if (errorOfInsertLeadStatus) {
+        console.error('Error in insert lead status:', errorOfInsertLeadStatus)
+        return lead
+      }
+    }
+
+    // TODO: delete or non update
     // update work experience
     if (
       'work_experience' in unipileProfile &&
@@ -572,24 +976,41 @@ export type SearchProfile = {
   shared_connections_count: number
 }
 
-export async function convertSearchProfileToSupabaseLeadsInsert(
-  unipileProfile: SearchProfile,
-  companyId: string,
+export async function upsertLeadByUnipileProfile({
+  unipileProfile,
+  leadStatus,
+  companyId,
+  workflowId,
+  providerId,
+  type,
+  scheduled_hours,
+  scheduled_days,
+  scheduled_months,
+  scheduled_weekdays,
+}: {
+  unipileProfile: SearchProfile
+  leadStatus: LeadStatus
+  companyId: string
   workflowId: string
-): Promise<LeadInsert> {
+  providerId: string
+  type: WorkflowType
+  scheduled_hours: number[]
+  scheduled_days: number[]
+  scheduled_months: number[]
+  scheduled_weekdays: number[]
+}): Promise<LeadInsert> {
   const lead: LeadInsert = {
     company_id: companyId,
-    workflow_id: workflowId,
+    provider_id: providerId,
     private_identifier: unipileProfile.id,
-    public_identifier: unipileProfile.public_identifier,
-    profile_picture_url: unipileProfile.profile_picture_url,
-    full_name: unipileProfile.name,
-    headline: unipileProfile.headline,
-    location: unipileProfile.location,
+    public_identifier: unipileProfile.public_identifier || '',
+    profile_picture_url: unipileProfile.profile_picture_url || '',
+    full_name: unipileProfile.name || '',
+    headline: unipileProfile.headline || '',
+    location: unipileProfile.location || '',
     network_distance: NetworkDistance[unipileProfile.network_distance],
     first_name: '',
     last_name: '',
-    statuses: [],
   }
 
   const supabase = createClient()
@@ -600,5 +1021,185 @@ export async function convertSearchProfileToSupabaseLeadsInsert(
     return lead
   }
   console.log('responseOfInsertLead.id:', responseOfInsertLead.id)
+
+  // update lead workflows
+  lead.workflows = [
+    {
+      workflow_id: workflowId,
+      lead_id: responseOfInsertLead?.id,
+      company_id: companyId,
+    },
+  ]
+
+  const { error: errorOfInsertLeadWorkflow } = await supabase
+    .from('lead_workflows')
+    .upsert(lead.workflows, { onConflict: 'workflow_id, lead_id' })
+  if (errorOfInsertLeadWorkflow) {
+    console.error('Error in insert lead workflow:', errorOfInsertLeadWorkflow)
+    return lead
+  }
+
+  // update lead status
+  const { data: responseOfFindLeadStatus, error: errorOfFindLeadStatus } =
+    await supabase
+      .from('lead_statuses')
+      .select('*')
+      .eq('lead_id', responseOfInsertLead.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+  if (errorOfFindLeadStatus) {
+    console.error('Error in find lead status:', errorOfFindLeadStatus)
+    return lead
+  }
+  if (
+    responseOfFindLeadStatus.status < leadStatus &&
+    responseOfFindLeadStatus.status == LeadStatus.IN_QUEUE
+  ) {
+    lead.statuses = [
+      {
+        status: leadStatus,
+        lead_id: responseOfInsertLead?.id,
+        company_id: companyId,
+      },
+    ]
+    const { error: errorOfInsertLeadStatus } = await supabase
+      .from('lead_statuses')
+      .insert(lead.statuses)
+    if (errorOfInsertLeadStatus) {
+      console.error('Error in insert lead status:', errorOfInsertLeadStatus)
+      return lead
+    }
+  }
+  return lead
+}
+
+export async function findSupabaseLeadByProviderIdAndPrivateIdentifier({
+  providerId,
+  privateIdentifier,
+}: {
+  providerId: string
+  privateIdentifier: string
+}): Promise<LeadInsert | null> {
+  const supabase = createClient()
+  const { data: leadData, error } = await supabase
+    .from('leads')
+    .select('*')
+    .eq('provider_id', providerId)
+    .eq('private_identifier', privateIdentifier)
+
+  if (error) {
+    console.error('Error in find lead:', error)
+    return null
+  }
+
+  if (!leadData || !Array.isArray(leadData) || !leadData.length) {
+    return null
+  }
+  const lead = leadData[0] as LeadInsert
+
+  // find lead statuses
+  const { data: leadStatusData, error: errorOfFindLeadStatus } = await supabase
+    .from('lead_statuses')
+    .select('*')
+    .eq('lead_id', lead.id)
+
+  if (errorOfFindLeadStatus) {
+    console.error('Error in find lead status:', errorOfFindLeadStatus)
+    return lead
+  }
+
+  lead.statuses = leadStatusData
+
+  // work experiences
+  const { data: workExperienceData, error: errorOfWorkExperience } =
+    await supabase
+      .from('lead_work_experiences')
+      .select('*')
+      .eq('lead_id', lead.id)
+
+  if (errorOfWorkExperience) {
+    console.error('Error in find work experience:', errorOfWorkExperience)
+  }
+  if (workExperienceData) lead.work_experiences = workExperienceData
+
+  // volunteering experiences
+  const {
+    data: volunteeringExperienceData,
+    error: errorOfVolunteeringExperience,
+  } = await supabase
+    .from('lead_volunteering_experiences')
+    .select('*')
+    .eq('lead_id', lead.id)
+
+  if (errorOfVolunteeringExperience) {
+    console.error(
+      'Error in find volunteering experience:',
+      errorOfVolunteeringExperience
+    )
+  }
+  if (volunteeringExperienceData)
+    lead.volunteering_experiences = volunteeringExperienceData
+
+  // educations
+  const { data: educationData, error: errorOfEducation } = await supabase
+    .from('lead_educations')
+    .select('*')
+    .eq('lead_id', lead.id)
+
+  if (errorOfEducation) {
+    console.error('Error in find education:', errorOfEducation)
+  }
+  if (educationData) lead.educations = educationData
+
+  // skills
+  const { data: skillData, error: errorOfSkill } = await supabase
+    .from('lead_skills')
+    .select('*')
+    .eq('lead_id', lead.id)
+
+  if (errorOfSkill) {
+    console.error('Error in find skill:', errorOfSkill)
+  }
+
+  if (skillData) lead.skills = skillData
+
+  // languages
+  const { data: languageData, error: errorOfLanguage } = await supabase
+    .from('lead_languages')
+    .select('*')
+    .eq('lead_id', lead.id)
+
+  if (errorOfLanguage) {
+    console.error('Error in find language:', errorOfLanguage)
+  }
+
+  if (languageData) lead.languages = languageData
+
+  // certifications
+  const { data: certificationData, error: errorOfCertification } =
+    await supabase
+      .from('lead_certifications')
+      .select('*')
+      .eq('lead_id', lead.id)
+
+  if (errorOfCertification) {
+    console.error('Error in find certification:', errorOfCertification)
+  }
+
+  if (certificationData) lead.certifications = certificationData
+
+  // projects
+  const { data: projectData, error: errorOfProject } = await supabase
+    .from('lead_projects')
+    .select('*')
+    .eq('lead_id', lead.id)
+
+  if (errorOfProject) {
+    console.error('Error in find project:', errorOfProject)
+  }
+
+  if (projectData) lead.projects = projectData
+
   return lead
 }

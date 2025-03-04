@@ -1,20 +1,45 @@
 import Papa from 'papaparse'
-import { LeadInsert } from './types/supabase'
-import { LeadStatus } from './types/master'
+import { Lead, LeadInsert, PublicSchemaTables } from './types/supabase'
+import { LeadStatus, NetworkDistance } from './types/master'
 
-export const convertProfileJsonToCsv = (
-  inputData: any[],
-  outputFilePath: string
-): void => {
-  if (!inputData || inputData.length === 0) {
+export type LeadForDisplay = Omit<
+  PublicSchemaTables['leads']['Insert'],
+  | 'id'
+  | 'network_distance'
+  | 'created_at'
+  | 'updated_at'
+  | 'deleted_at'
+  | 'statuses'
+> & {
+  public_profile_url: string
+  network_distance: string
+  latest_status: string
+  work_experiences: string
+  volunteering_experiences: string
+  educations: string
+  skills: string
+  languages: string
+  certifications: string
+  projects: string
+  created_at?: string
+}
+
+export const convertToDisplay = (
+  inputData: Lead[] | LeadInsert[]
+): LeadForDisplay[] => {
+  if (!inputData || inputData.length === 0 || !Array.isArray(inputData)) {
     console.log('No data to convert')
-    return
+    return []
   }
-  const rows = inputData.map((profile: LeadInsert) => {
-    const baseInfo = {
-      public_profile_url: `https://www.linkedin.com/in/${profile.public_identifier}`,
+  const rows = inputData.map((profile: Lead | LeadInsert) => {
+    if (!profile || profile === undefined) {
+      return
+    }
+    const baseInfo: LeadForDisplay = {
+      public_profile_url: `https://www.linkedin.com/in/${profile?.public_identifier}`,
       ...profile,
-      statuses: '',
+      network_distance: NetworkDistance[profile?.network_distance] || '',
+      latest_status: LeadStatus[LeadStatus.NOT_SENT],
       work_experiences: '',
       volunteering_experiences: '',
       educations: '',
@@ -24,7 +49,18 @@ export const convertProfileJsonToCsv = (
       projects: '',
     }
     if (profile.statuses?.length)
-      baseInfo.statuses = LeadStatus[profile.statuses[0].status]
+      baseInfo.latest_status =
+        LeadStatus[
+          profile.statuses.sort((a, b) => {
+            if (!a.created_at || !b.created_at) {
+              return 0
+            }
+            return (
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+            )
+          })[0].status
+        ]
 
     if (profile.work_experiences?.length) {
       const workExperiencesText = profile.work_experiences
@@ -34,8 +70,8 @@ export const convertProfileJsonToCsv = (
           }\n場所: ${exp.location || ''}\n説明: ${
             exp.description || ''
           }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
-            exp.start_date?.toLocaleDateString() || ''
-          }\n終了: ${exp.end_date?.toLocaleDateString() || ''}`
+            exp.start_date || ''
+          }\n終了: ${exp.end_date || ''}`
         })
         .join('\n\n')
 
@@ -47,8 +83,8 @@ export const convertProfileJsonToCsv = (
           return `会社: ${exp.company || ''}\n詳細: ${
             exp.description || ''
           }\n役職: ${exp.role || ''}\nCause: ${exp.cause || ''}\n開始: ${
-            exp.start_date?.toLocaleDateString() || ''
-          }\n終了: ${exp.end_date?.toLocaleDateString() || ''}`
+            exp.start_date || ''
+          }\n終了: ${exp.end_date || ''}`
         })
         .join('\n\n')
 
@@ -60,8 +96,8 @@ export const convertProfileJsonToCsv = (
           return `学校: ${edu.school || ''}\n学位: ${
             edu.degree || ''
           }\n専攻: ${edu.field_of_study || ''}\n開始: ${
-            edu.start_date?.toLocaleDateString() || ''
-          }\n終了: ${edu.end_date?.toLocaleDateString() || ''}`
+            edu.start_date || ''
+          }\n終了: ${edu.end_date || ''}`
         })
         .join('\n\n')
       baseInfo.educations = educationsText
@@ -93,7 +129,7 @@ export const convertProfileJsonToCsv = (
     if (profile.projects) {
       const projectsText = profile.projects
         .map((proj) => {
-          return `プロジェクト名: ${proj.name || ''}\n説明: ${proj.description || ''}\nスキル: ${proj.skills || ''}\n開始: ${proj.start_date?.toLocaleDateString() || ''}\n終了: ${proj.end_date?.toLocaleDateString() || ''}`
+          return `プロジェクト名: ${proj.name || ''}\n説明: ${proj.description || ''}\nスキル: ${proj.skills || ''}\n開始: ${proj.start_date || ''}\n終了: ${proj.end_date || ''}`
         })
         .join('\n\n')
       baseInfo.projects = projectsText
@@ -101,21 +137,7 @@ export const convertProfileJsonToCsv = (
 
     return baseInfo
   })
-
-  const csv = Papa.unparse(rows, { newline: '\n' })
-  // ダウンロード
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', outputFilePath)
-  link.style.visibility = 'hidden'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  console.log(`CSV file has been saved to ${outputFilePath}`)
-  return
+  return rows.filter((row) => row !== undefined && row !== null)
 }
 
 // CSVデータを取得して指定したカラムの値を抽出する関数

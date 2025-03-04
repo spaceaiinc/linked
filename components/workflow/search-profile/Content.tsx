@@ -1,17 +1,34 @@
 'use client'
 import { toolConfig } from './toolConfig'
 import AppInfo from '@/components/input/AppInfo'
-import { Button } from '@/components/ui/button'
-import Login from '@/components/input/login'
-import SearchProfileInputCapture from '@/components/input/SearchProfileInput'
+import SearchProfileInputCapture from './Input'
 import { IconPoint } from '@tabler/icons-react'
 import { useAtom } from 'jotai'
-import { providerAtom, userAtom } from '@/lib/atom'
+import { userAtom } from '@/lib/atom'
+import { useEffect, useState } from 'react'
+import { Lead } from '@/lib/types/supabase'
+import { getLeadsByWorkflowId } from '@/lib/db/queries/leadClient'
+import { convertToDisplay } from '@/lib/csv'
+import { LeadTable } from '@/components/dashboard/LeadTable'
 
-export default function Page() {
+export default function SearchProfileContent({
+  workflowId,
+}: {
+  workflowId: string
+}) {
+  const [leads, setLeads] = useState<Lead[]>([])
   const [user, _] = useAtom(userAtom)
-  const [provider, __] = useAtom(providerAtom)
-
+  useEffect(() => {
+    const f = async () => {
+      const fetchedLeads = await getLeadsByWorkflowId({ workflowId })
+      if (fetchedLeads && fetchedLeads.length) {
+        const convertedRow = convertToDisplay(fetchedLeads)
+        if (convertedRow && convertedRow.length)
+          setLeads(convertedRow as Lead[] | [])
+      }
+    }
+    f()
+  }, [])
   const InfoCard = (
     <AppInfo title="概要" background="bg-accent/10">
       <ul className="mt-4 ml-4 text-sm space-y-2 flex flex-col mb-4 relative xs:leading-7">
@@ -77,54 +94,17 @@ export default function Page() {
     </AppInfo>
   )
 
-  const handleConnect = async () => {
-    try {
-      // Try to get LinkedIn cookies
-      const response = await fetch('/api/provider/auth', {
-        method: 'POST',
-      })
-      // push to url
-      if (response.ok) {
-        const { url } = await response.json()
-        if (url) window.open(url, '_blank')
-      }
-    } catch (error) {
-      console.error('Error checking login status:', error)
-      alert('Error checking login status')
-    }
-  }
-
   // If the tool is not paywalled or the user has a valid purchase, render the page
   return (
-    <div data-theme={toolConfig.company.theme} className="bg-white">
-      {!user?.email ? (
-        <div className="flex flex-col items-center justify-center min-h-[75vh]">
-          <Login />
-        </div>
-      ) : provider ? (
-        <>
-          <SearchProfileInputCapture
-            toolConfig={toolConfig}
-            userEmail={user ? user.email : undefined}
-            credits={toolConfig.paywall ? 10 : undefined}
-            emptyStateComponent={InfoCard}
-          />
-          {/* <LinkedInUsage generations={[]} generationType="linkedin" /> */}
-        </>
-      ) : (
-        <div className="flex flex-col items-center justify-center min-h-[75vh]">
-          <h1 className="text-2xl font-bold mb-8">
-            Connect Your LinkedIn Account
-          </h1>
-          <Button
-            onClick={() => handleConnect()}
-            disabled={provider ? true : false}
-            className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white"
-          >
-            {'Connect'}
-          </Button>
-        </div>
-      )}
-    </div>
+    <>
+      <SearchProfileInputCapture
+        workflowId={workflowId}
+        toolConfig={toolConfig}
+        userEmail={user ? user.email : undefined}
+        credits={toolConfig.paywall ? 10 : undefined}
+        emptyStateComponent={InfoCard}
+      />
+      <LeadTable leads={leads} />
+    </>
   )
 }

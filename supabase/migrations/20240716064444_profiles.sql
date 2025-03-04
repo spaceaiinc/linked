@@ -36,11 +36,9 @@ returns trigger as $$
 declare
   new_company_id UUID;
 begin
-  -- 新しいcompany_idを生成
-  new_company_id := 'b2f62c00-a76c-4dd3-bc44-b1ce238cb512'::uuid;
-  -- new_company_id := extensions.UUID_generate_v4();
-  -- insert into public.companies (id, name)
-  -- values (new_company_id, new.raw_user_meta_data->>'full_name');
+  new_company_id := extensions.UUID_generate_v4();
+  insert into public.companies (id, name)
+  values (new_company_id, new.raw_user_meta_data->>'full_name');
   insert into public.profiles (id, company_id, full_name, avatar_url, username, email)
   values (new.id, new_company_id, new.raw_user_meta_data->>'full_name', new.raw_user_meta_data->>'avatar_url', extensions.UUID_generate_v4(), new.email);
   return new;

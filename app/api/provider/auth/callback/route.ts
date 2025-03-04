@@ -6,7 +6,7 @@ import { Database } from '@/lib/types/supabase'
 // {
 //   "status":"CREATION_SUCCESS", // or "RECONNECTED" for reconnect type
 //   "account_id":"e54m8LR22bA7G5qsAc8w",
-//   "name":"myuser1234"
+//   "name":"{user_id: "test", company_id: "b2f62c00-a76c-4dd3-bc44-b1ce238cb512"}"
 // }
 
 export async function POST(req: Request) {
@@ -15,6 +15,15 @@ export async function POST(req: Request) {
     console.log('status:', status)
     console.log('account_id:', account_id)
     console.log('name:', name)
+    const { user_id, company_id } = JSON.parse(name)
+    console.log('user_id:', user_id)
+    console.log('company_id:', company_id)
+    if (!status || !account_id || !name) {
+      return NextResponse.json(
+        { error: 'params are required' },
+        { status: 400 }
+      )
+    }
 
     if (!status || !account_id || !name) {
       return NextResponse.json(
@@ -68,7 +77,7 @@ export async function POST(req: Request) {
       console.log('dataOfGetOwnProfile:', dataOfGetOwnProfile)
 
       const account: Database['public']['Tables']['providers']['Insert'] = {
-        user_id: name,
+        user_id: user_id,
         type: 0,
         status: status_code,
         account_id,
@@ -77,7 +86,7 @@ export async function POST(req: Request) {
         first_name: dataOfGetOwnProfile.first_name,
         last_name: dataOfGetOwnProfile.last_name,
         email: dataOfGetOwnProfile.email,
-        company_id: 'b2f62c00-a76c-4dd3-bc44-b1ce238cb512',
+        company_id: company_id,
         like_target_private_identifiers: [],
         like_target_hours: [],
         check_reaction_hours: [],

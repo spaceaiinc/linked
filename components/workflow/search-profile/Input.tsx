@@ -12,12 +12,14 @@ import { motion } from 'framer-motion'
 import { FileIcon, UploadCloudIcon, LinkIcon, TextIcon } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useDropzone } from 'react-dropzone'
-import { Input } from '../ui/input'
+import { Input } from '@/components/ui/input'
 import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
 import { providerAtom, userAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractColumnData } from '@/lib/csv'
-import CheckboxGroup from '../ui/checkbox-group'
+import CheckboxGroup from '@/components/ui/checkbox-group'
+import { createClient } from '@/lib/utils/supabase/client'
+import { Workflow } from '@/lib/types/supabase'
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -49,6 +51,7 @@ function GridPattern() {
 }
 
 interface SearchProfileInputCaptureProps {
+  workflowId: string
   emptyStateComponent: ReactElement
   toolConfig: ToolConfig
   userEmail?: string
@@ -56,6 +59,7 @@ interface SearchProfileInputCaptureProps {
 }
 
 export default function SearchProfileInputCapture({
+  workflowId,
   toolConfig,
   emptyStateComponent,
   userEmail,
@@ -67,8 +71,54 @@ export default function SearchProfileInputCapture({
     toolConfig.fields!
   )
 
+  useEffect(() => {
+    // fetch workflow data
+    const f = async () => {
+      const supabase = createClient()
+      const { data: workflowData, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('id', workflowId)
+        .single()
+      if (error) {
+        console.error('Error fetching workflow:', error)
+      }
+      if (workflowData) {
+        const workflow: Workflow = workflowData
+        customHandleChange(workflowId, 'workflow_id')
+        customHandleChange(workflow.name, 'name')
+        customHandleChange(workflow.search_url, 'search_url')
+        customHandleChange(workflow.keywords, 'keywords')
+        // customHandleChange(workflow.company_urls, 'company_urls')
+        customHandleChange(workflow.network_distance.join(','), 'network_distance')
+        customHandleChange(
+          workflow.target_public_identifiers.join(','),
+          'target_public_identifiers'
+        )
+        // customHandleChange(workflow.target_workflow_id, 'target_workflow_id')
+        customHandleChange(workflow.limit_count.toString(), 'limit_count')
+        customHandleChange(workflow.invitation_message, 'invitation_message')
+        customHandleChange(
+          workflow.scheduled_hours.join(','),
+          'scheduled_hours'
+        )
+        customHandleChange(workflow.scheduled_days.join(','), 'scheduled_days')
+        customHandleChange(
+          workflow.scheduled_months.join(','),
+          'scheduled_months'
+        )
+        customHandleChange(
+          workflow.scheduled_weekdays.join(','),
+          'scheduled_weekdays'
+        )
+      }
+    }
+    f()
+  }, [workflowId])
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    formData['workflow_id'] = workflowId
     const formType = formData['type']
     if (formType.includes('0') && formType.includes('1')) {
       formData['type'] = '2'
@@ -193,7 +243,7 @@ export default function SearchProfileInputCapture({
                                 <div className="flex items-center gap-2">
                                   <IconFile className="h-4 w-4" />
                                   <span className="font-medium">
-                                    マイリスト
+                                    リード
                                   </span>
                                 </div>
                               </TabsTrigger>
@@ -324,7 +374,7 @@ export default function SearchProfileInputCapture({
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      マイリスト
+                                      リード
                                     </label>
                                     <div className="relative mt-1">
                                       Coming Soon...
@@ -393,7 +443,7 @@ export default function SearchProfileInputCapture({
                                 <div className="flex flex-col items-center justify-center">
                                   <input
                                     {...getInputProps()}
-                                    required={activeTab === '4'}
+                                    // required={activeTab === '4'}
                                   />
 
                                   <p className="relative z-20 font-sans font-bold text-neutral-700 dark:text-neutral-300 text-base">

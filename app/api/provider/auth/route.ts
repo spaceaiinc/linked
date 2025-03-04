@@ -1,4 +1,5 @@
 import { env } from '@/lib/env'
+import { Profile } from '@/lib/types/supabase'
 import { unipileClient } from '@/lib/unipile'
 import { createClient } from '@/lib/utils/supabase/server'
 import { NextResponse } from 'next/server'
@@ -17,7 +18,23 @@ export async function POST(req: Request) {
       )
     }
 
+    const { data: profileData, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+
+    if (error) {
+      console.error('Profile not found:', error)
+      return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    }
+    const profile = profileData as Profile
+
     // TODO: add check reconect or create
+    const nameJson = JSON.stringify({
+      user_id: user.id,
+      company_id: profile.company_id,
+    })
 
     const res = await unipileClient.account.createHostedAuthLink({
       // or reconnect
@@ -28,8 +45,11 @@ export async function POST(req: Request) {
       providers: ['LINKEDIN'],
       success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
       failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
-      name: user.id,
-      notify_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`,
+      name: nameJson,
+      notify_url:
+        env.NEXT_PUBLIC_APP_ENV === 'production'
+          ? `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`
+          : `https://bf55d429bb5a.ngrok.app/api/provider/auth/callback`,
     })
 
     res.url = res.url.replace('account.unipile.com', 'provider.spaceai.jp')
