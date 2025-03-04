@@ -104,7 +104,7 @@ export async function POST(req: Request) {
         second_message_days: 0,
         third_message_days: 0,
         scheduled_months: [],
-        target_public_identifiers: []
+        target_public_identifiers: [],
       }
       const searchProfileRequest = new Request('/api/workflow/search-profile', {
         method: 'POST',

@@ -32,9 +32,6 @@ export const convertToDisplay = (
     return []
   }
   const rows = inputData.map((profile: Lead | LeadInsert) => {
-    if (!profile || profile === undefined) {
-      return
-    }
     const baseInfo: LeadForDisplay = {
       public_profile_url: `https://www.linkedin.com/in/${profile?.public_identifier}`,
       ...profile,
@@ -137,7 +134,8 @@ export const convertToDisplay = (
 
     return baseInfo
   })
-  return rows.filter((row) => row !== undefined && row !== null)
+  const rowAfterFilter = rows.filter((row) => row !== undefined && row !== null)
+  return rowAfterFilter
 }
 
 // CSVデータを取得して指定したカラムの値を抽出する関数
