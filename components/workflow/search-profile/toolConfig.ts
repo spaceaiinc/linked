@@ -1,6 +1,5 @@
 // Please read the @/lib/types/toolconfig file for more details on each field.
 import { ToolConfig } from '@/lib/types/toolconfig'
-import * as yup from 'yup'
 
 export const toolConfig: ToolConfig = {
   ////// Base config
@@ -46,18 +45,26 @@ export const toolConfig: ToolConfig = {
       placeholder: '',
       required: true,
       custom: true,
-      // validation: yup.string().required('アカウントIDは必須です'),
+      // validation: yup.string().required('Account ID is required'),
+    },
+    {
+      label: 'ワークフロー名',
+      name: 'name',
+      type: 'input',
+      placeholder: '',
+      required: true,
+      // validation: yup.string().required('ワークフロー名は必須です'),
     },
     {
       label: '処理',
       name: 'type',
       type: 'checkbox',
       options: [
-        { label: 'つながり申請', value: '0' },
-        { label: 'CSVエクスポート', value: '1' },
+        { label: '検索', value: '0' },
+        { label: 'つながり申請', value: '1' },
       ],
       required: true,
-      initialValue: '1',
+      initialValue: '0',
       multiple: true,
     },
     {
@@ -93,8 +100,8 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: 'mylist id',
-      name: 'mylist_id',
+      label: 'lead_list id',
+      name: 'target_workflow_id',
       type: 'input',
       placeholder: '',
       required: false,
@@ -143,7 +150,7 @@ export const toolConfig: ToolConfig = {
     },
     {
       label: '申請時メッセージ',
-      name: 'message',
+      name: 'invitation_message',
       type: 'textarea',
       placeholder: '',
       required: false,

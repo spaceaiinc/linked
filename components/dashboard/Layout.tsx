@@ -84,9 +84,9 @@ async function MainContent({
       {showGreeting && (
         <>
           {/* <span className="text-4xl">👋🏼</span> */}
-          <Heading className="font-black mb-10">
+          {/* <Heading className="font-black mb-10">
             {toolConfig.company?.name}
-          </Heading>
+          </Heading> */}
           {/* <Paragraph className="max-w-xl mt-4">
             {toolConfig.company?.description}
           </Paragraph> */}

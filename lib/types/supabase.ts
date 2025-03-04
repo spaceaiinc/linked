@@ -1,4 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js'
+import { LeadStatus } from './master'
 
 export type Json =
   | string
@@ -17,18 +18,36 @@ export type Database = {
           name: string
           domain: string
           plan: number
+          timezone: string
+          country: string
+          city: string
+          address: string
+          postal_code: number
+          additional_invoice_information: string
         }
         Insert: {
           id?: string
           name: string
-          domain: string
-          plan: number
+          domain?: string
+          plan?: number
+          timezone?: string
+          country?: string
+          city?: string
+          address?: string
+          postal_code?: number
+          additional_invoice_information?: string
         }
         Update: {
           id: string
-          name: string
-          domain: string
-          plan: number
+          name?: string
+          domain?: string
+          plan?: number
+          timezone?: string
+          country?: string
+          city?: string
+          address?: string
+          postal_code?: number
+          additional_invoice_information?: string
         }
         Relationships: []
       }
@@ -401,19 +420,42 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string
-          closed_at: string
           provider_id: string
           type: number
+          name: string
+          status: number
           scheduled_hours: number[]
           scheduled_days: number[]
+          scheduled_months: number[]
           scheduled_weekdays: number[]
           search_url: string
-          target_public_identifiers: string[]
+          target_workflow_id: string
           keywords: string
           company_private_identifiers: string[]
           network_distance: number[]
-          message: string
+          invitation_message: string
+          invitation_sent_at: string
+          first_message: string
+          first_message_days: number
+          first_message_sent_at: string
+          second_message: string
+          second_message_days: number
+          second_message_sent_at: string
+          third_message: string
+          third_message_days: number
+          third_message_sent_at: string
           limit_count: number
+          max_execution_minutes: number
+          max_number_of_launches: number
+          email_notify_manual_launch_error: boolean
+          email_notify_auto_launch_error: boolean
+          email_notify_manual_error: boolean
+          email_notify_auto_error: boolean
+          email_notify_manual_time_limit: boolean
+          email_notify_auto_time_limit: boolean
+          email_notify_manual_success: boolean
+          email_notify_auto_success: boolean
+          slack_webhook_url: string
         }
         Insert: {
           id?: string
@@ -421,19 +463,42 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string
-          closed_at?: string
           provider_id: string
           type: number
-          scheduled_hours: number[]
-          scheduled_days: number[]
-          scheduled_weekdays: number[]
-          search_url: string
-          target_public_identifiers: string[]
-          keywords: string
-          company_private_identifiers: string[]
-          network_distance: number[]
-          message: string
+          name: string
+          status?: number
+          scheduled_hours?: number[]
+          scheduled_days?: number[]
+          scheduled_months?: number[]
+          scheduled_weekdays?: number[]
+          search_url?: string
+          keywords?: string
+          company_private_identifiers?: string[]
+          target_workflow_id?: string
+          network_distance?: number[]
+          invitation_message?: string
+          invitation_sent_at?: string
+          first_message?: string
+          first_message_days?: number
+          first_message_sent_at?: string
+          second_message?: string
+          second_message_days?: number
+          second_message_sent_at?: string
+          third_message?: string
+          third_message_days?: number
+          third_message_sent_at?: string
           limit_count: number
+          max_execution_minutes?: number
+          max_number_of_launches?: number
+          email_notify_manual_launch_error?: boolean
+          email_notify_auto_launch_error?: boolean
+          email_notify_manual_error?: boolean
+          email_notify_auto_error?: boolean
+          email_notify_manual_time_limit?: boolean
+          email_notify_auto_time_limit?: boolean
+          email_notify_manual_success?: boolean
+          email_notify_auto_success?: boolean
+          slack_webhook_url?: string
         }
         Update: {
           id: string
@@ -441,19 +506,43 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string
-          closed_at?: string
           provider_id: string
-          type: number
-          scheduled_hours?: number[]
-          scheduled_days?: number[]
-          scheduled_weekdays?: number[]
+          type?: number
+          name: string
+          // TODO:
+          status?: number
+          scheduled_hours: number[]
+          scheduled_days: number[]
+          scheduled_months: number[]
+          scheduled_weekdays: number[]
           search_url?: string
-          target_public_identifiers?: string[]
           keywords?: string
           company_private_identifiers?: string[]
+          target_workflow_id?: string
           network_distance?: number[]
-          message?: string
+          invitation_message?: string
+          invitation_sent_at?: string
+          first_message?: string
+          first_message_days?: number
+          first_message_sent_at?: string
+          second_message?: string
+          second_message_days?: number
+          second_message_sent_at?: string
+          third_message?: string
+          third_message_days?: number
+          third_message_sent_at?: string
           limit_count: number
+          max_execution_minutes?: number
+          max_number_of_launches?: number
+          email_notify_manual_launch_error?: boolean
+          email_notify_auto_launch_error?: boolean
+          email_notify_manual_error?: boolean
+          email_notify_auto_error?: boolean
+          email_notify_manual_time_limit?: boolean
+          email_notify_auto_time_limit?: boolean
+          email_notify_manual_success?: boolean
+          email_notify_auto_success?: boolean
+          slack_webhook_url?: string
         }
         Relationships: [
           {
@@ -481,8 +570,8 @@ export type Database = {
           deleted_at: string
           workflow_id: string
           status: number
-          target_private_identifiers: string[]
           cursor: string
+          error_message: string
         }
         Insert: {
           id?: string
@@ -492,8 +581,8 @@ export type Database = {
           deleted_at?: string
           workflow_id: string
           status: number
-          target_private_identifiers?: string[]
-          cursor: string
+          cursor?: string
+          error_message?: string
         }
         Update: {
           id: string
@@ -503,8 +592,8 @@ export type Database = {
           deleted_at?: string
           workflow_id: string
           status: number
-          target_private_identifiers?: string[]
-          cursor: string
+          cursor?: string
+          error_message?: string
         }
         Relationships: [
           {
@@ -530,7 +619,7 @@ export type Database = {
           created_at: string
           updated_at: string
           deleted_at: string
-          workflow_id: string
+          provider_id: string
           private_identifier: string
           public_identifier?: string
           profile_picture_url: string
@@ -559,6 +648,7 @@ export type Database = {
           follower_count: number
           shared_connections_count: number
           keywords: string
+          thread: string
           invitation_message: string
           generated_invitation_message: string
           invitation_sent_at: string
@@ -566,9 +656,18 @@ export type Database = {
           first_message: string
           generated_first_message: string
           first_message_sent_at: string
+          first_message_read_at: string
           first_message_replied_at: string
-          thread: string
-          last_imported_at: string
+          second_message: string
+          generated_second_message: string
+          second_message_sent_at: string
+          second_message_read_at: string
+          second_message_replied_at: string
+          third_message: string
+          generated_third_message: string
+          third_message_sent_at: string
+          third_message_read_at: string
+          third_message_replied_at: string
         }
         Insert: {
           id?: string
@@ -576,53 +675,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
           deleted_at?: string
-          workflow_id: string
-          private_identifier: string
-          public_identifier: string
-          profile_picture_url?: string
-          full_name: string
-          first_name: string
-          last_name: string
-          headline: string
-          summary?: string
-          emails?: string[]
-          phones?: string[]
-          addresses?: string[]
-          socials?: string[]
-          birth_month?: string
-          birth_day?: string
-          primary_locale_country?: string
-          primary_locale_language?: string
-          location: string
-          websites?: string[]
-          can_send_inmail?: boolean
-          is_influencer?: boolean
-          is_creator?: boolean
-          is_hiring?: boolean
-          is_open_to_work?: boolean
-          network_distance: number
-          connections_count?: number
-          follower_count?: number
-          shared_connections_count?: number
-          keywords?: string
-          invitation_message?: string
-          generated_invitation_message?: string
-          invitation_sent_at?: string
-          invitation_replied_at?: string
-          first_message?: string
-          generated_first_message?: string
-          first_message_sent_at?: string
-          first_message_replied_at?: string
-          thread?: string
-          last_imported_at?: string
-        }
-        Update: {
-          id?: string
-          company_id?: string
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string
-          workflow_id?: string
+          provider_id: string
           private_identifier?: string
           public_identifier?: string
           profile_picture_url?: string
@@ -646,11 +699,12 @@ export type Database = {
           is_creator?: boolean
           is_hiring?: boolean
           is_open_to_work?: boolean
-          network_distance?: number
+          network_distance: number
           connections_count?: number
           follower_count?: number
           shared_connections_count?: number
           keywords?: string
+          thread?: string
           invitation_message?: string
           generated_invitation_message?: string
           invitation_sent_at?: string
@@ -658,9 +712,74 @@ export type Database = {
           first_message?: string
           generated_first_message?: string
           first_message_sent_at?: string
+          first_message_read_at?: string
           first_message_replied_at?: string
+          second_message?: string
+          generated_second_message?: string
+          second_message_sent_at?: string
+          second_message_read_at?: string
+          second_message_replied_at?: string
+          third_message?: string
+          generated_third_message?: string
+          third_message_sent_at?: string
+          third_message_read_at?: string
+          third_message_replied_at?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          provider_id: string
+          private_identifier?: string
+          public_identifier?: string
+          profile_picture_url?: string
+          full_name?: string
+          first_name?: string
+          last_name?: string
+          headline?: string
+          summary?: string
+          emails?: string[]
+          phones?: string[]
+          addresses?: string[]
+          socials?: string[]
+          birth_month?: string
+          birth_day?: string
+          primary_locale_country?: string
+          primary_locale_language?: string
+          location?: string
+          websites?: string[]
+          can_send_inmail?: boolean
+          is_influencer?: boolean
+          is_creator?: boolean
+          is_hiring?: boolean
+          is_open_to_work?: boolean
+          network_distance: number
+          connections_count?: number
+          follower_count?: number
+          shared_connections_count?: number
+          keywords?: string
           thread?: string
-          last_imported_at?: string
+          invitation_message?: string
+          generated_invitation_message?: string
+          invitation_sent_at?: string
+          invitation_replied_at?: string
+          first_message?: string
+          generated_first_message?: string
+          first_message_sent_at?: string
+          first_message_read_at?: string
+          first_message_replied_at?: string
+          second_message?: string
+          generated_second_message?: string
+          second_message_sent_at?: string
+          second_message_read_at?: string
+          second_message_replied_at?: string
+          third_message?: string
+          generated_third_message?: string
+          third_message_sent_at?: string
+          third_message_read_at?: string
+          third_message_replied_at?: string
         }
         Relationships: [
           {
@@ -679,7 +798,58 @@ export type Database = {
           },
         ]
       }
-
+      lead_workflows: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          workflow_id: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          workflow_id: string
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_workflows_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_workflows_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_workflows_workflow_id_fkey'
+            columns: ['workflow_id']
+            isOneToOne: false
+            referencedRelation: 'workflows'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       lead_statuses: {
         Row: {
           id: string
@@ -1130,6 +1300,103 @@ export type Database = {
           },
         ]
       }
+      lead_lists: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          provider_id: string
+          name: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          provider_id: string
+          name: string
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          provider_id: string
+          name: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_lists_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_lists_provider_id_fkey'
+            columns: ['provider_id']
+            isOneToOne: false
+            referencedRelation: 'providers'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      lead_list_leads: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          target_workflow_id: string
+          lead_id: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          target_workflow_id: string
+          lead_id: string
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          target_workflow_id: string
+          lead_id: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_list_leads_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_list_leads_target_workflow_id_fkey'
+            columns: ['target_workflow_id']
+            isOneToOne: false
+            referencedRelation: 'lead_lists'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_list_leads_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1300,6 +1567,7 @@ export type Workflow = PublicSchemaTables['workflows']['Row'] & {
 export type WorkflowHistory = PublicSchemaTables['workflow_histories']['Row']
 
 export type LeadInsert = PublicSchemaTables['leads']['Insert'] & {
+  workflows?: PublicSchemaTables['lead_workflows']['Insert'][] | undefined
   statuses?: PublicSchemaTables['lead_statuses']['Insert'][] | undefined
   work_experiences?:
     | PublicSchemaTables['lead_work_experiences']['Insert'][]
@@ -1317,32 +1585,19 @@ export type LeadInsert = PublicSchemaTables['leads']['Insert'] & {
 }
 
 export type Lead = PublicSchemaTables['leads']['Row'] & {
-  statuses: LeadStatuses[]
-  work_experiences: LeadWorkExperience[]
-  volunteering_experiences: LeadVolunteeringExperience[]
-  educations: LeadEducation[]
-  skills: LeadSkill[]
-  languages: LeadLanguage[]
-  certifications: LeadCertification[]
-  projects: LeadProject[]
+  workflows: PublicSchemaTables['workflows']['Row'][]
+  statuses: PublicSchemaTables['lead_statuses']['Row'][]
+  work_experiences: PublicSchemaTables['lead_work_experiences']['Row'][]
+  volunteering_experiences: PublicSchemaTables['lead_volunteering_experiences']['Row'][]
+  educations: PublicSchemaTables['lead_educations']['Row'][]
+  skills: PublicSchemaTables['lead_skills']['Row'][]
+  languages: PublicSchemaTables['lead_languages']['Row'][]
+  certifications: PublicSchemaTables['lead_certifications']['Row'][]
+  projects: PublicSchemaTables['lead_projects']['Row'][]
+
+  status?: number
+  workflow_id?: string
 }
-
-export type LeadStatuses = PublicSchemaTables['lead_statuses']['Row']
-export type LeadWorkExperience =
-  PublicSchemaTables['lead_work_experiences']['Row']
-
-export type LeadVolunteeringExperience =
-  PublicSchemaTables['lead_volunteering_experiences']['Row']
-
-export type LeadEducation = PublicSchemaTables['lead_educations']['Row']
-
-export type LeadSkill = PublicSchemaTables['lead_skills']['Row']
-
-export type LeadLanguage = PublicSchemaTables['lead_languages']['Row']
-
-export type LeadCertification = PublicSchemaTables['lead_certifications']['Row']
-
-export type LeadProject = PublicSchemaTables['lead_projects']['Row']
 
 export type Tables<
   PublicTableNameOrOptions extends

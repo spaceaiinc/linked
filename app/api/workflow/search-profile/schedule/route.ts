@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/utils/supabase/server'
 import { NextResponse } from 'next/server'
-import { POST as searchProfileHandler } from '@/app/api/provider/search/profile/route' // 呼び出したいAPIのハンドラーをインポート
+import { POST as searchProfileHandler } from '@/app/api/workflow/search-profile/route' // 呼び出したいAPIのハンドラーをインポート
 import { Provider, Workflow } from '@/lib/types/supabase'
 import { SearchProfileParam } from '@/lib/validation'
 
 // request param
 export type ProviderSearchProfilePostScheduleParam = {
-  batch_id?: string
+  schedule_id?: string
 }
 
 export async function POST(req: Request) {
@@ -14,18 +14,18 @@ export async function POST(req: Request) {
     // param
     const rawParam = await req.json()
     const param: ProviderSearchProfilePostScheduleParam = {
-      batch_id: rawParam.batch_id,
+      schedule_id: rawParam.schedule_id,
     } as ProviderSearchProfilePostScheduleParam
-    if (!param.batch_id) {
+    if (!param.schedule_id) {
       return NextResponse.json(
-        { error: 'batch_id is required' },
+        { error: 'schedule_id is required' },
         { status: 400 }
       )
     }
     console.log('ProviderSearchProfilePostScheduleParam', param)
-    if (param.batch_id !== '09chdwbiowrivdjwksncdkqod89cy0hqdco') {
+    if (param.schedule_id !== '09chdwbiowrivdjwksncdkqod89cy0hqdco') {
       return NextResponse.json(
-        { error: 'batch_id is invalid' },
+        { error: 'schedule_id is invalid' },
         { status: 400 }
       )
     }
@@ -76,36 +76,42 @@ export async function POST(req: Request) {
         activeTab = 1
         // } else if (workflow.lead_id) {
         //   activeTab = 2
-      } else if (workflow.target_public_identifiers.length > 0) {
-        activeTab = 3
+      } else if (workflow.target_workflow_id) {
+        activeTab = 2
       }
       const provider = providerRaw as Provider
       // 新しいRequestオブジェクトを作成して直接ハンドラーを呼び出す
-      const param: SearchProfileParam = {
+      const searchProfileParam: SearchProfileParam = {
         workflow_id: workflow.id,
+        schedule_id: param.schedule_id,
         type: workflow.type,
         account_id: provider.account_id,
         scheduled_days: workflow.scheduled_days,
         scheduled_hours: workflow.scheduled_hours,
         scheduled_weekdays: workflow.scheduled_weekdays,
         search_url: workflow.search_url,
-        target_public_identifiers: workflow.target_public_identifiers,
-        // mylist_id: workflow.mylist_id,
+        target_workflow_id: workflow.target_workflow_id,
         keywords: workflow.keywords,
         company_private_identifiers: workflow.company_private_identifiers,
         network_distance: workflow.network_distance,
 
         limit_count: workflow.limit_count,
-        message: workflow.message,
+        invitation_message: workflow.invitation_message,
         active_tab: activeTab,
         company_urls: [],
+        name: workflow.name,
+        first_message_days: 0,
+        second_message_days: 0,
+        third_message_days: 0,
+        scheduled_months: [],
+        target_public_identifiers: []
       }
-      const searchProfileRequest = new Request('/api/provider/search/profile', {
+      const searchProfileRequest = new Request('/api/workflow/search-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(param),
+        body: JSON.stringify(searchProfileParam),
       })
 
       try {

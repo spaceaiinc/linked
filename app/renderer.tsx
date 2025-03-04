@@ -1,5 +1,12 @@
 'use client'
-import { providerAtom, userAtom, providersAtom, profileAtom } from '@/lib/atom'
+import LoadingPage from '@/components/Loading'
+import {
+  providerAtom,
+  userAtom,
+  providersAtom,
+  profileAtom,
+  workflowsAtom,
+} from '@/lib/atom'
 import { Provider } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
 import { useAtom } from 'jotai'
@@ -14,6 +21,7 @@ export default function Renderer({ children }: Props) {
   const [__, setProfile] = useAtom(profileAtom)
   const [___, setProvider] = useAtom(providerAtom)
   const [____, setProviders] = useAtom(providersAtom)
+  const [_____, setWorkflows] = useAtom(workflowsAtom)
   useEffect(() => {
     const f = async () => {
       // authenticate
@@ -25,7 +33,7 @@ export default function Renderer({ children }: Props) {
 
       if (!user) {
         // return router.push('/auth')
-        return <>{children}</>
+        return <LoadingPage />
       }
 
       const { data: profile } = await supabase
@@ -39,17 +47,31 @@ export default function Renderer({ children }: Props) {
       const { data: providers } = await supabase
         .from('providers')
         .select('*')
-        .eq('user_id', user?.id)
+        // .eq('user_id', user?.id)
         .eq('company_id', profile?.company_id)
         .order('updated_at', { ascending: false })
 
       if (!providers) {
         // return router.push('/auth')
-        return <>{children}</>
+        return <LoadingPage />
       }
 
       setProvider(providers[0] as Provider)
       setProviders(providers as Provider[])
+
+      const { data: workflows } = await supabase
+        .from('workflows')
+        .select('*')
+        // .eq('user_id', user?.id)
+        .eq('company_id', profile?.company_id)
+        .order('updated_at', { ascending: false })
+
+      if (!workflows) {
+        // return router.push('/auth')
+        return <LoadingPage />
+      }
+
+      setWorkflows(workflows)
     }
     f()
   }, [])

@@ -1,0 +1,572 @@
+'use client'
+
+import * as React from 'react'
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  getPaginationRowModel,
+  SortingState,
+  getSortedRowModel,
+} from '@tanstack/react-table'
+import { ArrowUpDown, Calendar } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { useDebounce } from '@/lib/hooks/useDebounce'
+import { format } from 'date-fns'
+import { Lead } from '@/lib/types/supabase'
+import { Badge } from '../ui/badge'
+import Papa from 'papaparse'
+
+interface LeadTableProps {
+  leads: Lead[]
+}
+
+export function LeadTable({ leads }: LeadTableProps) {
+  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [filterValue, setFilterValue] = React.useState('')
+  const debouncedFilterValue = useDebounce(filterValue, 300)
+
+  const columns: ColumnDef<Lead>[] = React.useMemo(
+    () => [
+      {
+        accessorKey: 'latest_status',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Status
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+        cell: ({ row }) => (
+          <div className="flex items-center whitespace-nowrap">
+            <Badge className="bg-black text-white hover:bg-black/80 text-xs">
+              {row.getValue('latest_status') || '-'}
+            </Badge>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'full_name',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Full Name
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+        cell: ({ row }) => (
+          <div className="font-medium">{row.getValue('full_name') || '-'}</div>
+        ),
+      },
+      {
+        accessorKey: 'first_name',
+        header: 'First Name',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('first_name') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'last_name',
+        header: 'Last Name',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('last_name') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'headline',
+        header: 'Headline          ',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('headline') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'location',
+        header: 'Location',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('location') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'emails',
+        header: 'Email',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('emails') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'phones',
+        header: 'Phone',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('phones') || '-'}
+          </div>
+        ),
+      },
+      // {
+      //   accessorKey: 'websites',
+      //   header: 'Websites',
+      //   cell: ({ row }) => {
+      //     const websites = row.getValue('websites')
+      //     return (
+      //                 <div className="text-sm text-muted-foreground max-w-md truncate">
+      //         {websites && Array.isArray(websites) && websites.length > 0
+      //           ? websites.join(', ')
+      //           : '-'}
+      //       </div>
+      //     )
+      //   },
+      // },
+      // {
+      //   accessorKey: 'socials',
+      //   header: 'Social Profiles',
+      //   cell: ({ row }) => {
+      //     const socials = row.getValue('socials')
+      //     return (
+      //                 <div className="text-sm text-muted-foreground max-w-md truncate">
+      //         {socials && Array.isArray(socials) && socials.length > 0
+      //           ? socials.join(', ')
+      //           : '-'}
+      //       </div>
+      //     )
+      //   },
+      // },
+      {
+        accessorKey: 'network_distance',
+        header: 'Network Distance',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('network_distance') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'connections_count',
+        header: 'Connections',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('connections_count') || '0'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'follower_count',
+        header: 'Followers',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('follower_count') || '0'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'is_open_to_work',
+        header: 'Open to Work',
+        cell: ({ row }) => (
+          <div className="text-sm">
+            {row.getValue('is_open_to_work') ? 'True' : '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'invitation_sent_at',
+        header: 'Invitation Sent',
+        cell: ({ row }) => {
+          const date = row.getValue('invitation_sent_at') as string
+          return (
+            <div className="text-sm text-muted-foreground max-w-md truncate">
+              {date && date !== '-infinity'
+                ? new Date(date).toLocaleDateString()
+                : '-'}
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: 'invitation_replied_at',
+        header: 'Invitation Replied',
+        cell: ({ row }) => {
+          const date = row.getValue('invitation_replied_at') as string
+          return (
+            <div className="text-sm text-muted-foreground max-w-md truncate">
+              {date && date !== '-infinity'
+                ? new Date(date).toLocaleDateString()
+                : '-'}
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: 'first_message_sent_at',
+        header: 'First Message Sent',
+        cell: ({ row }) => {
+          const date = row.getValue('first_message_sent_at') as string
+          return (
+            <div className="text-sm text-muted-foreground max-w-md truncate">
+              {date && date !== '-infinity'
+                ? new Date(date).toLocaleDateString()
+                : '-'}
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: 'first_message_replied_at',
+        header: 'First Message Replied',
+        cell: ({ row }) => {
+          const date = row.getValue('first_message_replied_at') as string
+          return (
+            <div className="text-sm text-muted-foreground max-w-md truncate">
+              {date && date !== '-infinity'
+                ? new Date(date).toLocaleDateString()
+                : '-'}
+            </div>
+          )
+        },
+      },
+      {
+        accessorKey: 'is_influencer',
+        header: 'Influencer',
+        cell: ({ row }) => (
+          <div className="text-sm">
+            {row.getValue('is_influencer') ? 'True' : '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'is_creator',
+        header: 'Creator',
+        cell: ({ row }) => (
+          <div className="text-sm">
+            {row.getValue('is_creator') ? 'True' : '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'is_hiring',
+        header: 'Hiring',
+        cell: ({ row }) => (
+          <div className="text-sm">
+            {row.getValue('is_hiring') ? 'True' : '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'summary',
+        header: 'Summary',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('summary') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'work_experiences',
+        header: 'Work Experience',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('work_experiences') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'volunteering_experiences',
+        header: 'Volunteering Experience',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('volunteering_experiences') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'educations',
+        header: 'Education',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('educations') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'skills',
+        header: 'Skills',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('skills') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'languages',
+        header: 'Languages',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('languages') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'certifications',
+        header: 'Certifications',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('certifications') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'projects',
+        header: 'Projects',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('projects') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'created_at',
+        header: 'Created At',
+        cell: ({ row }) => (
+          <div className="flex items-center">
+            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">
+              {format(new Date(row.getValue('created_at')), 'dd/MM/yyyy')}
+            </span>
+          </div>
+        ),
+      },
+    ],
+    []
+  )
+
+  const filteredLeads = React.useMemo(() => {
+    return leads.filter(
+      (gen) =>
+        gen.full_name
+          ?.toLowerCase()
+          .includes(debouncedFilterValue.toLowerCase()) ||
+        gen.first_name
+          ?.toLowerCase()
+          .includes(debouncedFilterValue.toLowerCase()) ||
+        gen.last_name.toLowerCase().includes(debouncedFilterValue.toLowerCase())
+    )
+  }, [leads, debouncedFilterValue])
+
+  const table = useReactTable({
+    data: filteredLeads,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    state: {
+      sorting,
+    },
+  })
+
+  const { rows } = table.getRowModel()
+  const [visibleRange, setVisibleRange] = React.useState({ start: 0, end: 20 })
+
+  const observerRef = React.useRef<IntersectionObserver | null>(null)
+  const lastRowRef = React.useRef<HTMLTableRowElement | null>(null)
+
+  React.useEffect(() => {
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleRange((prev) => ({
+            start: prev.start,
+            end: Math.min(prev.end + 20, rows.length),
+          }))
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    return () => observerRef.current?.disconnect()
+  }, [rows.length])
+
+  React.useEffect(() => {
+    if (lastRowRef.current && observerRef.current) {
+      observerRef.current.observe(lastRowRef.current)
+    }
+    return () => {
+      if (lastRowRef.current && observerRef.current) {
+        observerRef.current.unobserve(lastRowRef.current)
+      }
+    }
+  }, [visibleRange])
+
+  React.useEffect(() => {
+    setVisibleRange({ start: 0, end: 20 }) // Reset visible range when filter changes
+  }, [debouncedFilterValue])
+
+  const handleFilterChange = React.useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setFilterValue(event.target.value)
+    },
+    []
+  )
+
+  const handleExport = React.useCallback(() => {
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+    const outputFilePath = `linkedin_profile_${year}${month}${day}${hours}${minutes}.csv`
+    const processedLeads = leads.map((lead) => {
+      const {
+        id,
+        company_id,
+        created_at,
+        updated_at,
+        deleted_at,
+        provider_id,
+        ...rest
+      } = lead
+      return rest
+    })
+    const csv = Papa.unparse(processedLeads, { newline: '\n' })
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', outputFilePath)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    console.log(`CSV file has been saved to ${outputFilePath}`)
+  }, [filteredLeads])
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-3xl font-bold">Leads</h2>
+      <div className="flex items-center py-4 space-x-4">
+        <Input
+          placeholder="Search"
+          value={filterValue}
+          onChange={handleFilterChange}
+          className="max-w-sm"
+        />
+        <Button
+          // disabled={loading}
+          onClick={() => handleExport()}
+          className="bg-accent hover:bg-accent/80 text-white"
+        >
+          Export
+        </Button>
+      </div>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  // 長さに関係なく一行に 文字量に合わせて
+                  <TableHead key={header.id} className="whitespace-nowrap">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {rows.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  No results found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              rows
+                .slice(visibleRange.start, visibleRange.end)
+                .map((row, index) => (
+                  <TableRow
+                    key={row.id}
+                    ref={
+                      index === visibleRange.end - visibleRange.start - 1
+                        ? lastRowRef
+                        : null
+                    }
+                    data-state={row.getIsSelected() && 'selected'}
+                    className="cursor-pointer hover:bg-muted/50"
+                    // onClick={() =>
+                    //   router.push(`/apps/${generationType}/${row.original.id}`)
+                    // }
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  )
+}
