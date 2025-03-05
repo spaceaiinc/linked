@@ -33,6 +33,7 @@ export const searchProfileResponse = (toolConfig: ToolConfig) => {
       const responseData = await response.json()
       if (responseData.workflow) {
         setWorkflows([...workflows, responseData.workflow as Workflow])
+        window.location.reload()
       }
     } catch (error) {
       console.error('Failed to responses:', error)

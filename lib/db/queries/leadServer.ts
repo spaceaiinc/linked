@@ -38,7 +38,7 @@ export async function upsertLead({
   scheduled_weekdays: number[]
 }): Promise<LeadInsert | null> {
   const supabase = createClient()
-  lead.id = leadId
+  if (leadId) lead.id = leadId
   const { data: responseOfInsertLead, error: errorOfInsertLead } =
     await supabase
       .from('leads')
@@ -70,21 +70,21 @@ export async function upsertLead({
   }
 
   // update lead status
-  const { data: responseOfFindLeadStatus, error: errorOfFindLeadStatus } =
+  const { data: responseOfFindLeadStatuses, error: errorOfFindLeadStatus } =
     await supabase
       .from('lead_statuses')
       .select('*')
       .eq('lead_id', responseOfInsertLead.id)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
   if (errorOfFindLeadStatus) {
     console.error('Error in find lead status:', errorOfFindLeadStatus)
     return lead
   }
   if (
-    responseOfFindLeadStatus.status < leadStatus &&
-    responseOfFindLeadStatus.status == LeadStatus.IN_QUEUE
+    !responseOfFindLeadStatuses.length ||
+    (responseOfFindLeadStatuses[0].status < leadStatus &&
+      responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE)
   ) {
     lead.statuses = [
       {
@@ -406,7 +406,6 @@ export async function upsertLeadByUnipileProfileDetail({
     unipileProfile.provider_id
   ) {
     const lead: LeadInsert = {
-      id: leadId,
       company_id: companyId,
       provider_id: providerId,
       private_identifier: unipileProfile.provider_id,
@@ -421,6 +420,7 @@ export async function upsertLeadByUnipileProfileDetail({
         ? NetworkDistance[unipileProfile.network_distance]
         : NetworkDistance.OUT_OF_NETWORK,
     }
+    if (leadId) lead.id = leadId
 
     if ('profile_picture_url' in unipileProfile)
       lead.profile_picture_url = unipileProfile.profile_picture_url
@@ -469,21 +469,21 @@ export async function upsertLeadByUnipileProfileDetail({
       return lead
     }
 
-    const { data: responseOfFindLeadStatus, error: errorOfFindLeadStatus } =
+    const { data: responseOfFindLeadStatuses, error: errorOfFindLeadStatus } =
       await supabase
         .from('lead_statuses')
         .select('*')
         .eq('lead_id', responseOfInsertLead.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
     if (errorOfFindLeadStatus) {
       console.error('Error in find lead status:', errorOfFindLeadStatus)
       return lead
     }
     if (
-      responseOfFindLeadStatus.status < leadStatus &&
-      responseOfFindLeadStatus.status == LeadStatus.IN_QUEUE
+      !responseOfFindLeadStatuses.length ||
+      (responseOfFindLeadStatuses[0].status < leadStatus &&
+        responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE)
     ) {
       lead.statuses = [
         {
@@ -1040,21 +1040,21 @@ export async function upsertLeadByUnipileProfile({
   }
 
   // update lead status
-  const { data: responseOfFindLeadStatus, error: errorOfFindLeadStatus } =
+  const { data: responseOfFindLeadStatuses, error: errorOfFindLeadStatus } =
     await supabase
       .from('lead_statuses')
       .select('*')
       .eq('lead_id', responseOfInsertLead.id)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single()
   if (errorOfFindLeadStatus) {
     console.error('Error in find lead status:', errorOfFindLeadStatus)
     return lead
   }
   if (
-    responseOfFindLeadStatus.status < leadStatus &&
-    responseOfFindLeadStatus.status == LeadStatus.IN_QUEUE
+    !responseOfFindLeadStatuses.length ||
+    (responseOfFindLeadStatuses[0].status < leadStatus &&
+      responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE)
   ) {
     lead.statuses = [
       {

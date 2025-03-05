@@ -67,6 +67,7 @@ export type Database = {
           role: number | null
           is_superuser: number | null
           credits: number | null
+          selected_provider_id: string | null
         }
         Insert: {
           id?: string
@@ -83,6 +84,7 @@ export type Database = {
           role?: number | null
           is_superuser?: number | null
           credits: number | null
+          selected_provider_id?: string | null
         }
         Update: {
           id: string
@@ -99,6 +101,7 @@ export type Database = {
           role?: number | null
           is_superuser?: number | null
           credits: number | null
+          selected_provider_id?: string
         }
         Relationships: [
           {

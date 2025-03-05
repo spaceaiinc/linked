@@ -36,7 +36,7 @@ export const convertToDisplay = (
       public_profile_url: `https://www.linkedin.com/in/${profile?.public_identifier}`,
       ...profile,
       network_distance: NetworkDistance[profile?.network_distance] || '',
-      latest_status: LeadStatus[LeadStatus.NOT_SENT],
+      latest_status: LeadStatus[LeadStatus.SEARCHED],
       work_experiences: '',
       volunteering_experiences: '',
       educations: '',

@@ -1,12 +1,9 @@
 import { Suspense } from 'react'
 import { Sidebar } from '@/components/dashboard/Sidebar'
-import { ContentFooter } from '@/components/dashboard/Footer'
 import { createClient } from '@/lib/utils/supabase/server'
 import { Container } from '@/components/dashboard/Container'
-import { Heading } from '@/components/dashboard/Heading'
 import LoadingSpinner from '@/components/Loading'
 import { ToolConfig } from '@/lib/types/toolconfig'
-import { Paragraph } from './Paragraph'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
