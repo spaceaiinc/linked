@@ -17,8 +17,9 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
-import { providerAtom, providersAtom } from '@/lib/atom'
+import { loadingAtom, providerAtom, providersAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
+import { createClient } from '@/lib/utils/supabase/client'
 
 type Navlink = {
   href: string
@@ -209,7 +210,24 @@ export const Sidebar = ({ user }: { user: User | null }) => {
   // const [user, _] = useAtom(userAtom)
   const [providers, _] = useAtom(providersAtom)
   const [provider, setProvider] = useAtom(providerAtom)
-
+  const [, setLoading] = useAtom(loadingAtom)
+  const handleSelectProvider = async (value: string) => {
+    setLoading(true)
+    if (value === 'none' || !user) return
+    const findedProvider = providers.find((p) => p.account_id === value)
+    if (findedProvider === undefined || !findedProvider) return
+    setProvider(findedProvider)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('profiles')
+      .update({ selected_provider_id: findedProvider.id })
+      .eq('id', user.id)
+    if (error) {
+      console.error('Error updating profile', error)
+    }
+    window.location.reload()
+    setLoading(false)
+  }
   return (
     <>
       <div
@@ -228,15 +246,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
                 {providers.length ? (
                   <Select
                     value={provider?.account_id}
-                    onValueChange={(value) => {
-                      if (value === 'none') return
-                      const findedProvider = providers.find(
-                        (p) => p.account_id === value
-                      )
-                      if (findedProvider === undefined || !findedProvider)
-                        return
-                      setProvider(findedProvider)
-                    }}
+                    onValueChange={(value) => handleSelectProvider(value)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue className="capitalize">

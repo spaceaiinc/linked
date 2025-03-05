@@ -43,13 +43,13 @@ export async function POST(req: Request) {
       expiresOn: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365).toISOString(),
       api_url: `https://${env.UNIPILE_DNS}`,
       providers: ['LINKEDIN'],
-      success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
-      failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard`,
+      success_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard?wait=true`,
+      failure_redirect_url: `${env.NEXT_PUBLIC_PRODUCTION_URL}/dashboard?wait=true`,
       name: nameJson,
       notify_url:
         env.NEXT_PUBLIC_APP_ENV === 'production'
           ? `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/provider/auth/callback`
-          : `https://bf55d429bb5a.ngrok.app/api/provider/auth/callback`,
+          : `${process.env.NEXT_PUBLIC_NOTIFY_URL}/api/provider/auth/callback`,
     })
 
     res.url = res.url.replace('account.unipile.com', 'provider.spaceai.jp')

@@ -1,9 +1,12 @@
 'use client'
 import { tools } from '@/lib/apps'
-import { providerAtom, workflowsAtom } from '@/lib/atom'
+import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
 import { WorkflowType } from '@/lib/types/master'
 import { useAtom } from 'jotai'
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Button } from '../ui/button'
+import LoadingPage from '../Loading'
+import Login from '../input/login'
 
 export default function Apps() {
   const getGridClass = () => {
@@ -17,8 +20,23 @@ export default function Apps() {
     }
   }
 
-  const [workflows, _] = useAtom(workflowsAtom)
+  const [user, _] = useAtom(userAtom)
   const [provider, __] = useAtom(providerAtom)
+  const [workflows, ___] = useAtom(workflowsAtom)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const checkDataLoaded = () => {
+      if (user && user !== undefined && provider && provider !== undefined) {
+        setIsLoading(false)
+      }
+    }
+    checkDataLoaded()
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false)
+    }, 5000)
+    return () => clearTimeout(timeoutId)
+  }, [user, provider])
 
   const createWorkflow = useCallback(
     async (type: WorkflowType) => {
@@ -49,106 +67,151 @@ export default function Apps() {
     [provider]
   )
 
+  const handleConnect = async () => {
+    try {
+      // Try to get LinkedIn cookies
+      const response = await fetch('/api/provider/auth', {
+        method: 'POST',
+      })
+      // push to url
+      if (response.ok) {
+        const { url } = await response.json()
+        if (url) window.open(url, '_blank')
+      }
+    } catch (error) {
+      console.error('Error checking login status:', error)
+      alert('Error checking login status')
+    }
+  }
+
+  // Show loading spinner while data is being fetched
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[75vh]">
+        <LoadingPage />
+        <p className="mt-4 text-gray-600">データを読み込み中...</p>
+      </div>
+    )
+  }
+
   return (
     <>
-      {workflows.length > 0 && (
-        <section id="workflows">
-          <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
-            <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-              保存されたワークフロー
-            </h2>
-            <div className="py-10 w-full flex justify-center">
-              <div className={getGridClass()}>
-                {workflows.map((workflow, index) => (
-                  <a
-                    key={index}
-                    href={'/workflow/' + workflow.id}
-                    className="w-full flex justify-center"
-                  >
-                    <div
-                      className="
+      {!user?.email ? (
+        <div className="flex flex-col items-center justify-center min-h-[75vh]">
+          <Login />
+        </div>
+      ) : provider ? (
+        <>
+          {workflows.length > 0 && (
+            <section id="workflows">
+              <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
+                <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                  保存されたワークフロー
+                </h2>
+                <div className="py-10 w-full flex justify-center">
+                  <div className={getGridClass()}>
+                    {workflows.map((workflow, index) => (
+                      <a
+                        key={index}
+                        href={'/workflow/' + workflow.id}
+                        className="w-full flex justify-center"
+                      >
+                        <div
+                          className="
                   w-full h-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-col items-center justify-center text-center"
-                    >
-                      <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                        {workflow.name}
-                      </h3>
-                      {/* // TODO: workflow.image */}
-                      <img
-                        src={'/apps/claude.webp'}
-                        alt={workflow.name}
-                        className="w-full h-auto border border-base-200 rounded-md mt-4 mb-4"
-                      />
-                      <div className="mt-4 flex gap-y-1 flex-wrap justify-center space-x-2 overflow-auto scrollbar-hide ">
-                        <span
-                          key={workflow.type}
-                          className={`border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl ${'w-full text-center'}`}
                         >
-                          {WorkflowType[workflow.type]}
-                        </span>
+                          <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
+                            {workflow.name}
+                          </h3>
+                          {/* // TODO: workflow.image */}
+                          <img
+                            src={'/apps/claude.webp'}
+                            alt={workflow.name}
+                            className="w-full h-auto border border-base-200 rounded-md mt-4 mb-4"
+                          />
+                          <div className="mt-4 flex gap-y-1 flex-wrap justify-center space-x-2 overflow-auto scrollbar-hide ">
+                            <span
+                              key={workflow.type}
+                              className={`border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl ${'w-full text-center'}`}
+                            >
+                              {WorkflowType[workflow.type]}
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+          <section id="suggested_workflows">
+            {/* <div className="bg-base-100"> */}
+            <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                おすすめのワークフロー
+              </h2>
+              <div className="py-10 w-full flex justify-center">
+                <div className={getGridClass()}>
+                  {tools.map((workflow, index) => (
+                    <a
+                      key={index}
+                      onClick={() => {
+                        createWorkflow(workflow.type)
+                      }}
+                      className="w-full flex justify-center"
+                    >
+                      <div
+                        className="
+                  w-full h-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-col items-center justify-center text-center"
+                      >
+                        <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
+                          {workflow.title}
+                        </h3>
+                        {workflow.image && (
+                          <img
+                            src={workflow.image}
+                            alt={workflow.title}
+                            className="w-full h-auto border border-base-200 rounded-md mt-4 mb-4"
+                          />
+                        )}
+                        <p className="max-w-lg text-sm text-neutral-400">
+                          {workflow.description}
+                        </p>
+                        <div className="mt-4 flex gap-y-1 flex-wrap justify-center space-x-2 overflow-auto scrollbar-hide ">
+                          {workflow.tags.map((tag, index) => (
+                            <span
+                              key={tag}
+                              className={`border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl ${
+                                workflow.tags.length === 1
+                                  ? 'w-full text-center'
+                                  : ' md:w-auto'
+                              }`}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  </a>
-                ))}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
-            {/* </div> */}
-          </div>
-        </section>
-      )}
-      <section id="suggested_workflows">
-        {/* <div className="bg-base-100"> */}
-        <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
-          <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-            おすすめのワークフロー
-          </h2>
-          <div className="py-10 w-full flex justify-center">
-            <div className={getGridClass()}>
-              {tools.map((workflow, index) => (
-                <a
-                  key={index}
-                  onClick={() => {
-                    createWorkflow(workflow.type)
-                  }}
-                  className="w-full flex justify-center"
-                >
-                  <div
-                    className="
-                  w-full h-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-col items-center justify-center text-center"
-                  >
-                    <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                      {workflow.title}
-                    </h3>
-                    {workflow.image && (
-                      <img
-                        src={workflow.image}
-                        alt={workflow.title}
-                        className="w-full h-auto border border-base-200 rounded-md mt-4 mb-4"
-                      />
-                    )}
-                    <p className="max-w-lg text-sm text-neutral-400">
-                      {workflow.description}
-                    </p>
-                    <div className="mt-4 flex gap-y-1 flex-wrap justify-center space-x-2 overflow-auto scrollbar-hide ">
-                      {workflow.tags.map((tag, index) => (
-                        <span
-                          key={tag}
-                          className={`border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl ${
-                            workflow.tags.length === 1
-                              ? 'w-full text-center'
-                              : ' md:w-auto'
-                          }`}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
+          </section>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center min-h-[75vh]">
+          <h1 className="text-2xl font-bold mb-8">Linkedinアカウントと連携</h1>
+          <Button
+            onClick={() => handleConnect()}
+            disabled={provider ? true : false}
+            className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white"
+          >
+            {'Connect'}
+          </Button>
         </div>
-      </section>
+      )}
     </>
   )
 }

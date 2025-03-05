@@ -10,6 +10,7 @@ import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import LoadingPage from '@/components/Loading'
 import { Workflow } from '@/lib/types/supabase'
+import InviteContent from '@/components/workflow/invite/Content'
 
 export default function Page() {
   const [user, _] = useAtom(userAtom)
@@ -92,7 +93,7 @@ export default function Page() {
             <SearchProfileContent workflowId={workflowId as string} />
           )}
           {workflow?.type == WorkflowType.INVITE && (
-            <SearchProfileContent workflowId={workflowId as string} />
+            <InviteContent workflowId={workflowId as string} />
           )}
         </>
       ) : (

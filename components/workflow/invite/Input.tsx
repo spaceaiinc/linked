@@ -51,7 +51,7 @@ function GridPattern() {
   )
 }
 
-interface SearchProfileInputCaptureProps {
+interface InviteInputCaptureProps {
   workflowId: string
   emptyStateComponent: ReactElement
   toolConfig: ToolConfig
@@ -59,13 +59,13 @@ interface SearchProfileInputCaptureProps {
   credits?: number
 }
 
-export default function SearchProfileInputCapture({
+export default function InviteInputCapture({
   workflowId,
   toolConfig,
   emptyStateComponent,
   userEmail,
   credits: initialCredits,
-}: SearchProfileInputCaptureProps) {
+}: InviteInputCaptureProps) {
   const [generateResponse, loading] = searchProfileResponse(toolConfig)
 
   const [formData, handleChange, customHandleChange] = useFormData(
@@ -96,7 +96,6 @@ export default function SearchProfileInputCapture({
           workflow.company_private_identifiers.length
         ) {
           customHandleChange(workflow.keywords, 'keywords')
-          // TODO: get company urls
           // customHandleChange(workflow.company_urls, 'company_urls')
           customHandleChange(
             workflow.network_distance.join(','),
@@ -130,7 +129,7 @@ export default function SearchProfileInputCapture({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     formData['workflow_id'] = workflowId
-    formData['type'] = WorkflowType.SEARCH.toString()
+    formData['type'] = WorkflowType.INVITE.toString()
     const targetPublicIdentifiers = await extractColumnData(
       fileUrl,
       formData['extract_column'] || 'public_identifier'

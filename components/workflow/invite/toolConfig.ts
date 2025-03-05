@@ -4,7 +4,7 @@ import { ToolConfig } from '@/lib/types/toolconfig'
 export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
-    name: 'プロフィール検索',
+    name: 'つながり申請',
     theme: 'default',
     homeUrl: '/dashboard',
     appUrl: '/dashboard',
@@ -59,10 +59,7 @@ export const toolConfig: ToolConfig = {
       label: '処理',
       name: 'type',
       type: 'checkbox',
-      options: [
-        { label: '検索', value: '0' },
-        { label: 'つながり申請', value: '1' },
-      ],
+      options: [{ label: 'つながり申請', value: '1' }],
       required: true,
       initialValue: '0',
       custom: true,
@@ -144,9 +141,16 @@ export const toolConfig: ToolConfig = {
       placeholder: '10',
       initialValue: '10',
       required: false,
-      max: 200,
+      max: 20,
       min: 1,
       // validation: yup.number().required('検索数は必須です'),
+    },
+    {
+      label: '申請時メッセージ',
+      name: 'invitation_message',
+      type: 'textarea',
+      placeholder: '',
+      required: false,
     },
     {
       label: '時間',

@@ -7,7 +7,12 @@ import {
   upsertLead,
 } from '@/lib/db/queries/leadServer'
 import { LeadStatus, WorkflowStatus, WorkflowType } from '@/lib/types/master'
-import { Database, LeadInsert, Provider } from '@/lib/types/supabase'
+import {
+  Database,
+  LeadInsert,
+  Provider,
+  PublicSchemaTables,
+} from '@/lib/types/supabase'
 import { unipileClient } from '@/lib/unipile'
 import { createClient } from '@/lib/utils/supabase/server'
 import { searchProfileSchema } from '@/lib/validation'
@@ -18,8 +23,10 @@ export async function POST(req: Request) {
    * validate param
    */
   const param = await searchProfileSchema.validate(await req.json(), {
-    abortEarly: false, // すべてのエラーを一度に収集
-    stripUnknown: true, // 未知のフィールドを削除
+    // すべてのエラーを一度に収集
+    abortEarly: false,
+    // 未知のフィールドを削除
+    stripUnknown: true,
   })
   console.log('Validated params:', param)
 
@@ -41,12 +48,13 @@ export async function POST(req: Request) {
    * authenticate
    */
   const supabase = createClient()
-  const { data: providerData } = await supabase
+  const { data: providerData, error: getProviderError } = await supabase
     .from('providers')
     .select('*')
     .eq('account_id', param.account_id)
     .single()
-  if (!providerData || providerData === undefined) {
+  if (!providerData || providerData === undefined || getProviderError) {
+    console.error('Error in get provider:', getProviderError)
     return NextResponse.json(
       { error: 'Invalid LinkedIn Account' },
       { status: 400 }
@@ -64,7 +72,7 @@ export async function POST(req: Request) {
       if (!fromSchedule) {
         const insertLeadPromises = param.target_public_identifiers?.map(
           async (publicIdentifier: string) => {
-            const { data: InsertLeadData, error: errorOfInsertLead } =
+            const { data: InsertLeadData, error: insertLeadError } =
               await supabase
                 .from('leads')
                 .insert({
@@ -73,29 +81,28 @@ export async function POST(req: Request) {
                 })
                 .select('id')
                 .single()
-            if (errorOfInsertLead) {
-              console.error('Error in insert lead:', errorOfInsertLead)
+            if (insertLeadError) {
+              console.error('Error in insert lead:', insertLeadError)
               return NextResponse.json(
                 { error: 'Internal server error' },
                 { status: 500 }
               )
             }
             // update lead workflows
-            const leadWorkflows = [
+            const leadWorkflows: PublicSchemaTables['lead_workflows']['Insert'] =
               {
                 workflow_id: param.workflow_id,
                 lead_id: InsertLeadData.id,
                 company_id: provider.company_id,
-              },
-            ]
+              }
 
-            const { error: errorOfInsertLeadWorkflow } = await supabase
+            const { error: insertLeadWorkflowError } = await supabase
               .from('lead_workflows')
               .upsert(leadWorkflows, { onConflict: 'workflow_id, lead_id' })
-            if (errorOfInsertLeadWorkflow) {
+            if (insertLeadWorkflowError) {
               console.error(
                 'Error in insert lead workflow:',
-                errorOfInsertLeadWorkflow
+                insertLeadWorkflowError
               )
               return NextResponse.json(
                 { error: 'Internal server error' },
@@ -115,19 +122,20 @@ export async function POST(req: Request) {
           scheduled_days: param.scheduled_days || [],
           scheduled_months: param.scheduled_months || [],
           scheduled_weekdays: param.scheduled_weekdays || [],
-          target_workflow_id: param.workflow_id,
+          target_workflow_id: param.target_workflow_id || '',
           limit_count: Number(param.limit_count),
           invitation_message: param.invitation_message || '',
         }
 
-        const { data: workflowData, error } = await supabase
-          .from('workflows')
-          .update(workflow)
-          .eq('id', param.workflow_id)
-          .select('*')
-          .single()
-        if (error) {
-          console.error('Error in inserting workflow:', error)
+        const { data: workflowData, error: updateWorkflowError } =
+          await supabase
+            .from('workflows')
+            .update(workflow)
+            .eq('id', param.workflow_id)
+            .select('*')
+            .single()
+        if (updateWorkflowError) {
+          console.error('Error in inserting workflow:', updateWorkflowError)
           return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
@@ -176,9 +184,10 @@ export async function POST(req: Request) {
                     )
                   } else {
                     console.error('Error in send invitation:', error)
+                    leadStatus = LeadStatus.NOT_SENT
                   }
-                  leadStatus = LeadStatus.NOT_SENT
                 })
+              await new Promise((resolve) => setTimeout(resolve, 5000))
             }
 
             const convertedLead = await upsertLeadByUnipileProfileDetail({
@@ -269,9 +278,10 @@ export async function POST(req: Request) {
                       )
                     } else {
                       console.error('Error in send invitation:', error)
+                      leadStatus = LeadStatus.NOT_SENT
                     }
-                    leadStatus = LeadStatus.NOT_SENT
                   })
+                await new Promise((resolve) => setTimeout(resolve, 5000))
               }
 
               const convertedLead = await upsertLeadByUnipileProfileDetail({
@@ -314,9 +324,10 @@ export async function POST(req: Request) {
                       )
                     } else {
                       console.error('Error in send invitation:', error)
+                      leadStatus = LeadStatus.NOT_SENT
                     }
-                    leadStatus = LeadStatus.NOT_SENT
                   })
+                await new Promise((resolve) => setTimeout(resolve, 5000))
               }
 
               const convertedLead = await upsertLead({
@@ -337,6 +348,8 @@ export async function POST(req: Request) {
             }
           }
         )
+
+        await Promise.all(profilePromises)
       }
       if (!fromSchedule) {
         const workflow: Database['public']['Tables']['workflows']['Update'] = {
@@ -599,9 +612,10 @@ export async function POST(req: Request) {
                       )
                     } else {
                       console.error('Error in send invitation:', error)
+                      leadStatus = LeadStatus.NOT_SENT
                     }
-                    leadStatus = LeadStatus.NOT_SENT
                   })
+                await new Promise((resolve) => setTimeout(resolve, 5000))
               }
 
               const list = await upsertLeadByUnipileProfile({

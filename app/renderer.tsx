@@ -6,6 +6,7 @@ import {
   providersAtom,
   profileAtom,
   workflowsAtom,
+  loadingAtom,
 } from '@/lib/atom'
 import { Provider } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
@@ -17,11 +18,12 @@ interface Props {
 }
 
 export default function Renderer({ children }: Props) {
-  const [_, setUser] = useAtom(userAtom)
-  const [__, setProfile] = useAtom(profileAtom)
-  const [___, setProvider] = useAtom(providerAtom)
-  const [____, setProviders] = useAtom(providersAtom)
-  const [_____, setWorkflows] = useAtom(workflowsAtom)
+  const [user, setUser] = useAtom(userAtom)
+  const [profile, setProfile] = useAtom(profileAtom)
+  const [provider, setProvider] = useAtom(providerAtom)
+  const [, setProviders] = useAtom(providersAtom)
+  const [, setWorkflows] = useAtom(workflowsAtom)
+  const [loading] = useAtom(loadingAtom)
   useEffect(() => {
     const f = async () => {
       // authenticate
@@ -44,10 +46,19 @@ export default function Renderer({ children }: Props) {
 
       setProfile(profile)
 
+      // URLパラメータをチェック
+      const searchParams = new URLSearchParams(window.location.search)
+      const shouldWait = searchParams.get('wait') === 'true'
+      // ?wait=true がある場合はリロード クエリを削除
+      if (shouldWait) {
+        // wait for 1 second
+        console.log('wait for 5 seconds')
+        await new Promise((resolve) => setTimeout(resolve, 5000))
+      }
+
       const { data: providers } = await supabase
         .from('providers')
         .select('*')
-        // .eq('user_id', user?.id)
         .eq('company_id', profile?.company_id)
         .order('updated_at', { ascending: false })
 
@@ -56,25 +67,36 @@ export default function Renderer({ children }: Props) {
         return <LoadingPage />
       }
 
-      setProvider(providers[0] as Provider)
+      // profile.selected_provider_id と一致する provider を選択
+      const selectedProvider = providers.find(
+        (p) => p.id === profile?.selected_provider_id
+      )
+      if (selectedProvider) {
+        setProvider(selectedProvider)
+      } else {
+        setProvider(providers[0] as Provider)
+      }
       setProviders(providers as Provider[])
 
       const { data: workflows } = await supabase
         .from('workflows')
         .select('*')
-        // .eq('user_id', user?.id)
         .eq('company_id', profile?.company_id)
+        .eq('provider_id', profile?.selected_provider_id)
         .order('updated_at', { ascending: false })
 
       if (!workflows) {
-        // return router.push('/auth')
         return <LoadingPage />
       }
 
       setWorkflows(workflows)
     }
     f()
-  }, [])
+  }, [user, profile, provider])
+
+  if (loading) {
+    return <LoadingPage />
+  }
 
   return <>{children}</>
 }

@@ -8,7 +8,7 @@ export const tools = [
     tags: [],
     image: '/apps/claude.webp',
     description:
-      'キーワードまたは、ユーザーIDのCSVからつながり申請・CSVエクスポートを行います。',
+      'キーワードまたは、ユーザーIDのCSVからプロフィール検索を行います。',
   },
   {
     // href: '/invite',
