@@ -92,7 +92,7 @@ export default function Renderer({ children }: Props) {
       setWorkflows(workflows)
     }
     f()
-  }, [user, profile, provider])
+  }, [])
 
   if (loading) {
     return <LoadingPage />

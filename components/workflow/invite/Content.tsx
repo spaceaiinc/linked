@@ -88,7 +88,8 @@ export default function InviteContent({ workflowId }: { workflowId: string }) {
 
   // If the tool is not paywalled or the user has a valid purchase, render the page
   return (
-    <>
+    <div className="space-y-12">
+      <h2 className="text-3xl font-bold">つながり申請</h2>
       <InviteInputCapture
         workflowId={workflowId}
         toolConfig={toolConfig}
@@ -97,6 +98,6 @@ export default function InviteContent({ workflowId }: { workflowId: string }) {
         emptyStateComponent={InfoCard}
       />
       <LeadTable leads={leads} />
-    </>
+    </div>
   )
 }

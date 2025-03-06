@@ -92,7 +92,8 @@ export default function SearchProfileContent({
 
   // If the tool is not paywalled or the user has a valid purchase, render the page
   return (
-    <>
+    <div className="space-y-12">
+      <h2 className="text-3xl font-bold">プロフィール検索</h2>
       <SearchProfileInputCapture
         workflowId={workflowId}
         toolConfig={toolConfig}
@@ -101,6 +102,6 @@ export default function SearchProfileContent({
         emptyStateComponent={InfoCard}
       />
       <LeadTable leads={leads} />
-    </>
+    </div>
   )
 }
