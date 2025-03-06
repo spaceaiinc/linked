@@ -6,7 +6,7 @@ import { useAtom } from 'jotai'
 import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
 import { WorkflowType } from '@/lib/types/master'
 import SearchProfileContent from '@/components/workflow/search-profile/Content'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import LoadingPage from '@/components/Loading'
 import { Workflow } from '@/lib/types/supabase'
@@ -18,6 +18,7 @@ export default function Page() {
   const [workflows, ___] = useAtom(workflowsAtom)
   const [workflow, setWorkflow] = useState<Workflow | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
   const params = useParams()
   const id = params.id as string
@@ -49,6 +50,7 @@ export default function Page() {
     checkDataLoaded()
     const timeoutId = setTimeout(() => {
       setIsLoading(false)
+      if (!workflow) router.push('/dashboard')
     }, 5000)
     return () => clearTimeout(timeoutId)
   }, [user, provider, workflow])

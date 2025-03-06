@@ -72,6 +72,11 @@ export default function SearchProfileInputCapture({
     toolConfig.fields!
   )
 
+  const [activeTab, setActiveTab] = useState<string>('0')
+  const [fileUrl, setFileUrl] = useState<string>('')
+  const [uploading, setUploading] = useState<boolean>(false)
+  const [provider, __] = useAtom(providerAtom)
+
   useEffect(() => {
     // fetch workflow data
     const f = async () => {
@@ -129,6 +134,9 @@ export default function SearchProfileInputCapture({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (!provider?.account_id) return alert('Provider not connected')
+    formData['account_id'] = provider?.account_id
+    formData['active_tab'] = activeTab
     formData['workflow_id'] = workflowId
     formData['type'] = WorkflowType.SEARCH.toString()
     const targetPublicIdentifiers = await extractColumnData(
@@ -143,11 +151,6 @@ export default function SearchProfileInputCapture({
     formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
     await generateResponse(formData, event)
   }
-
-  const [activeTab, setActiveTab] = useState<string>('0')
-  const [fileUrl, setFileUrl] = useState<string>('')
-  const [uploading, setUploading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleFileUpload = async (files: File[]) => {
     setUploading(true)
@@ -166,18 +169,6 @@ export default function SearchProfileInputCapture({
     },
     maxSize: 10 * 1024 * 1024, // 10MB
   })
-
-  const [user, _] = useAtom(userAtom)
-  const [provider, __] = useAtom(providerAtom)
-
-  useEffect(() => {
-    customHandleChange(activeTab, 'active_tab')
-  }, [activeTab])
-
-  useEffect(() => {
-    console.log('user', user, 'provider', provider)
-    if (provider) customHandleChange(provider.account_id, 'account_id')
-  }, [provider])
 
   let searchUrlField: FormFields | undefined
   let keywordsField: FormFields | undefined
@@ -500,16 +491,6 @@ export default function SearchProfileInputCapture({
                             </div>
                           </TabsContent>
                         </Tabs>
-
-                        {error && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg"
-                          >
-                            {error}
-                          </motion.div>
-                        )}
                       </div>
                     </div>
                     <RenderFields

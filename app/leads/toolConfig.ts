@@ -4,7 +4,7 @@ import { ToolConfig } from '@/lib/types/toolconfig'
 export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
-    name: 'プロフィール検索',
+    name: 'Leads',
     theme: 'default',
     homeUrl: '/workflow',
     appUrl: '/workflow',
