@@ -1,7 +1,6 @@
 import { UserProfileApiResponse } from 'unipile-node-sdk/dist/types/users/user-profile.types'
-import { LeadStatus, NetworkDistance, WorkflowType } from '../../types/master'
+import { LeadStatus, NetworkDistance } from '../../types/master'
 import { Lead, LeadInsert, PublicSchemaTables } from '../../types/supabase'
-import { createClient } from '../../utils/supabase/server'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 // 子テーブルのプロパティを除外するヘルパー関数
@@ -23,6 +22,195 @@ function getLeadBaseProps(
 
   return leadBase
 }
+
+/**
+ * DBから取得したデータに対して、最新のステータスが特定の値であるレコードをフィルタリングする関数
+ * @param supabase SupabaseClientのインスタンス
+ * @param workflowId 対象のワークフローID
+ * @param targetStatus 対象のステータス（単一または配列）
+ * @param limitCount 結果の最大数
+ * @returns フィルタリングされたリードデータ
+ */
+export async function fetchLeadsWithLatestStatusAndWorkflow(
+  supabase: SupabaseClient,
+  workflowId: string,
+  targetStatus: LeadStatus | LeadStatus[],
+  limitCount: number
+): Promise<any[]> {
+  try {
+    // まず、指定されたワークフローIDに関連するリードIDを取得
+    const { data: workflowLeadsData, error: workflowError } = await supabase
+      .from('lead_workflows')
+      .select('lead_id')
+      .eq('workflow_id', workflowId)
+
+    if (workflowError) {
+      console.error('ワークフローリードの取得エラー:', workflowError)
+      return []
+    }
+
+    if (!workflowLeadsData || workflowLeadsData.length === 0) {
+      return []
+    }
+
+    // リードIDの配列を作成
+    const leadIds = workflowLeadsData.map((item) => item.lead_id)
+
+    // 取得したリードIDに基づいてリードデータを取得
+    const { data: leadsData, error } = await supabase
+      .from('leads')
+      .select('*, lead_statuses(*), lead_workflows(*)')
+      .in('id', leadIds)
+
+    if (error) {
+      console.error('リードデータの取得エラー:', error)
+      return []
+    }
+
+    if (!leadsData || leadsData.length === 0) {
+      return []
+    }
+
+    // ステータス配列を準備（単一の値が渡された場合は配列に変換）
+    const statusArray = Array.isArray(targetStatus)
+      ? targetStatus
+      : [targetStatus]
+
+    // 各リードに対して最新のステータスを特定し、対象のステータスでフィルタリング
+    const filteredLeads = leadsData
+      .map((lead) => {
+        // lead_statusesがない場合はスキップ
+        if (!lead.lead_statuses) return null
+
+        // ステータス配列を日付で並べ替えて最新のものを取得
+        const statuses = Array.isArray(lead.lead_statuses)
+          ? [...lead.lead_statuses]
+          : [lead.lead_statuses]
+
+        if (statuses.length === 0) return null
+
+        // 作成日時で降順ソート（最新が先頭に）
+        const sortedStatuses = statuses.sort((a, b) => {
+          return (
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          )
+        })
+
+        // 最新のステータスだけを保持
+        const processedLead = {
+          ...lead,
+          lead_statuses: sortedStatuses[0],
+          _isTargetStatus: statusArray.includes(sortedStatuses[0].status),
+        }
+
+        return processedLead
+      })
+      .filter((lead) => lead && lead._isTargetStatus) // nullと対象外のステータスを除外
+      .map((lead) => {
+        // 内部フラグを削除
+        const { _isTargetStatus, ...cleanLead } = lead
+        return cleanLead
+      })
+
+    // limitCountを適用
+    return filteredLeads.slice(0, limitCount)
+  } catch (error) {
+    console.error('処理中にエラーが発生しました:', error)
+    return []
+  }
+}
+
+export async function fetchLeadsWithLatestStatusFilter(
+  supabase: SupabaseClient,
+  providerId: string,
+  publicIdentifiers: string[]
+): Promise<any[]> {
+  const batchSize = 20
+  const allLeadsResults: any[] = []
+
+  // 公開IDをバッチに分割
+  const publicBatches: string[][] = []
+  for (let i = 0; i < publicIdentifiers.length; i += batchSize) {
+    publicBatches.push(publicIdentifiers.slice(i, i + batchSize))
+  }
+
+  // 各バッチを処理
+  for (let i = 0; i < publicBatches.length; i++) {
+    const currentBatch = publicBatches[i]
+
+    try {
+      // リードデータとそれに関連するすべてのステータスを取得
+      const { data: batchLeads, error } = await supabase
+        .from('leads')
+        .select('*, lead_statuses(*)')
+        .eq('provider_id', providerId)
+        .in('public_identifier', currentBatch)
+
+      if (error) {
+        console.error(`バッチ ${i + 1} のエラー:`, error)
+        continue
+      }
+
+      if (batchLeads && batchLeads.length > 0) {
+        // 各リードに対して最新のステータスを判断し、フィルタリング
+        const filteredLeads = batchLeads.map((lead) => {
+          // lead_statusesが配列の場合、タイムスタンプで並べ替えて最新のものを特定
+          if (
+            Array.isArray(lead.lead_statuses) &&
+            lead.lead_statuses.length > 0
+          ) {
+            // created_atやupdated_atなど、タイムスタンプのフィールド名に合わせて調整
+            const sortedStatuses = [...lead.lead_statuses].sort((a, b) => {
+              // 降順（最新が先頭）
+              return (
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+              )
+            })
+
+            // 最新のステータスのみを保持
+            const latestStatus = sortedStatuses[0]
+            return {
+              ...lead,
+              lead_statuses: latestStatus,
+              // _isTargetStatus: [
+              //   LeadStatus.SEARCHED,
+              //   LeadStatus.IN_QUEUE,
+              // ].includes(latestStatus.status),
+            }
+          }
+          // lead_statusesが単一オブジェクトの場合（すでに最新）
+          else if (lead.lead_statuses) {
+            return {
+              ...lead,
+              // _isTargetStatus: [
+              //   LeadStatus.SEARCHED,
+              //   LeadStatus.IN_QUEUE,
+              // ].includes(lead.lead_statuses.status),
+            }
+          }
+          return { ...lead }
+          // return { ...lead, _isTargetStatus: false }
+        })
+        // 最新のステータスがSEARCHEDまたはIN_QUEUEのリードだけをフィルタリング
+        // .filter((lead) => lead._isTargetStatus)
+
+        // 内部フラグを削除
+        const cleanedLeads = filteredLeads.map((lead) => {
+          const { _isTargetStatus, ...cleanLead } = lead
+          return cleanLead
+        })
+
+        allLeadsResults.push(...cleanedLeads)
+      }
+    } catch (error) {
+      console.error(`バッチ ${i + 1} の例外:`, error)
+    }
+  }
+
+  return allLeadsResults
+}
+
 /**
  * Fetches leads in batches to avoid URI too long errors
  * @param publicIdentifiers Array of public identifiers to query
