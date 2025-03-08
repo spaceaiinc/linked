@@ -13,6 +13,14 @@ export type ProviderSearchProfilePostScheduleParam = {
 
 export async function POST(req: Request) {
   try {
+    // Google-Cloud-Schedulerからのリクエストかどうかを確認
+    // const headers = req.headers
+    // if (!headers.has('X-Appengine-Cron')) {
+    //   return NextResponse.json(
+    //     { error: 'Unauthorized request' },
+    //     { status: 401 }
+    //   )
+    // }
     // param
     const rawParam = await req.json()
     const param: ProviderSearchProfilePostScheduleParam = {
