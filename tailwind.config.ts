@@ -123,9 +123,9 @@ const config = {
     themes: [
       {
         default: {
-          primary: '#185a7a',
+          primary: '#004182',
           secondary: '#0f0f0f',
-          accent: '#171717',
+          accent: '#707070',
           neutral: '#707070',
           'base-100': '#f6f6f3',
           'base-200': '#dbdad7',

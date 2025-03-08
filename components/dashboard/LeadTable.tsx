@@ -26,6 +26,7 @@ import { format } from 'date-fns'
 import { Lead } from '@/lib/types/supabase'
 import { Badge } from '../ui/badge'
 import Papa from 'papaparse'
+import { LeadStatus } from '@/lib/types/master'
 
 interface LeadTableProps {
   leads: Lead[]
@@ -44,6 +45,7 @@ export function LeadTable({ leads }: LeadTableProps) {
           return (
             <Button
               variant="ghost"
+              className="hover:bg-muted/50"
               onClick={() =>
                 column.toggleSorting(column.getIsSorted() === 'asc')
               }
@@ -55,37 +57,18 @@ export function LeadTable({ leads }: LeadTableProps) {
         },
         cell: ({ row }) => (
           <div className="flex items-center whitespace-nowrap">
-            <Badge className="bg-black text-white hover:bg-black/80 text-xs">
-              {row.getValue('latest_status') || '-'}
+            <Badge className="bg-primary text-white hover:bg-primary/80 text-xs">
+              {LeadStatus[Number(row.getValue('latest_status'))]}
             </Badge>
           </div>
         ),
       },
       {
         accessorKey: 'full_name',
-        header: ({ column }) => {
-          return (
-            <Button
-              variant="ghost"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === 'asc')
-              }
-            >
-              Full Name
-              <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-          )
-        },
+        header: 'Full Name',
         cell: ({ row }) => (
-          <div className="font-medium">{row.getValue('full_name') || '-'}</div>
-        ),
-      },
-      {
-        accessorKey: 'first_name',
-        header: 'First Name',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('first_name') || '-'}
+          <div className="text-medium text-muted-foreground max-w-md truncate">
+            {row.getValue('full_name') || '-'}
           </div>
         ),
       },
@@ -99,11 +82,36 @@ export function LeadTable({ leads }: LeadTableProps) {
         ),
       },
       {
+        accessorKey: 'first_name',
+        header: 'First Name',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('first_name') || '-'}
+          </div>
+        ),
+      },
+      {
         accessorKey: 'headline',
         header: 'Headline          ',
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground max-w-md truncate">
             {row.getValue('headline') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'public_profile_url',
+        header: 'Profile URL',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            <a
+              href={row.getValue('public_profile_url') || '-'}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              {row.getValue('public_profile_url') || '-'}
+            </a>
           </div>
         ),
       },
@@ -166,8 +174,10 @@ export function LeadTable({ leads }: LeadTableProps) {
         accessorKey: 'network_distance',
         header: 'Network Distance',
         cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('network_distance') || '-'}
+          <div className="flex items-center whitespace-nowrap">
+            <Badge className="bg-primary text-white hover:bg-primary/80 text-xs">
+              {row.getValue('network_distance') || '-'}
+            </Badge>
           </div>
         ),
       },
@@ -181,6 +191,15 @@ export function LeadTable({ leads }: LeadTableProps) {
         ),
       },
       {
+        accessorKey: 'shared_connections_count',
+        header: 'Shared Connections',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('shared_connections_count') || '0'}
+          </div>
+        ),
+      },
+      {
         accessorKey: 'follower_count',
         header: 'Followers',
         cell: ({ row }) => (
@@ -190,11 +209,74 @@ export function LeadTable({ leads }: LeadTableProps) {
         ),
       },
       {
-        accessorKey: 'is_open_to_work',
-        header: 'Open to Work',
+        accessorKey: 'summary',
+        header: 'Summary',
         cell: ({ row }) => (
-          <div className="text-sm">
-            {row.getValue('is_open_to_work') ? 'True' : '-'}
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('summary') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_work_experiences',
+        header: 'Work Experience',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_work_experiences') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_volunteering_experiences',
+        header: 'Volunteering Experience',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_volunteering_experiences') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_educations',
+        header: 'Education',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_educations') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_skills',
+        header: 'Skills',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_skills') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_languages',
+        header: 'Languages',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_languages') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_certifications',
+        header: 'Certifications',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_certifications') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'lead_projects',
+        header: 'Projects',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('lead_projects') || '-'}
           </div>
         ),
       },
@@ -273,6 +355,15 @@ export function LeadTable({ leads }: LeadTableProps) {
         ),
       },
       {
+        accessorKey: 'is_open_to_work',
+        header: 'Open to Work',
+        cell: ({ row }) => (
+          <div className="text-sm">
+            {row.getValue('is_open_to_work') ? 'True' : '-'}
+          </div>
+        ),
+      },
+      {
         accessorKey: 'is_hiring',
         header: 'Hiring',
         cell: ({ row }) => (
@@ -282,74 +373,11 @@ export function LeadTable({ leads }: LeadTableProps) {
         ),
       },
       {
-        accessorKey: 'summary',
-        header: 'Summary',
+        accessorKey: 'private_identifier',
+        header: 'Account ID',
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('summary') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'work_experiences',
-        header: 'Work Experience',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('work_experiences') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'volunteering_experiences',
-        header: 'Volunteering Experience',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('volunteering_experiences') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'educations',
-        header: 'Education',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('educations') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'skills',
-        header: 'Skills',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('skills') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'languages',
-        header: 'Languages',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('languages') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'certifications',
-        header: 'Certifications',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('certifications') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'projects',
-        header: 'Projects',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('projects') || '-'}
+            {row.getValue('private_identifier') || '-'}
           </div>
         ),
       },
@@ -360,7 +388,19 @@ export function LeadTable({ leads }: LeadTableProps) {
           <div className="flex items-center">
             <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
             <span className="text-sm">
-              {format(new Date(row.getValue('created_at')), 'dd/MM/yyyy')}
+              {format(new Date(row.getValue('created_at')), 'yyyy/MM/dd')}
+            </span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'updated_at',
+        header: 'Updated At',
+        cell: ({ row }) => (
+          <div className="flex items-center">
+            <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">
+              {format(new Date(row.getValue('updated_at')), 'yyyy/MM/dd')}
             </span>
           </div>
         ),
@@ -378,7 +418,13 @@ export function LeadTable({ leads }: LeadTableProps) {
         gen.first_name
           ?.toLowerCase()
           .includes(debouncedFilterValue.toLowerCase()) ||
-        gen.last_name.toLowerCase().includes(debouncedFilterValue.toLowerCase())
+        gen.last_name
+          .toLowerCase()
+          .includes(debouncedFilterValue.toLowerCase()) ||
+        gen.headline
+          .toLowerCase()
+          .includes(debouncedFilterValue.toLowerCase()) ||
+        gen.summary.toLowerCase().includes(debouncedFilterValue.toLowerCase())
     )
   }, [leads, debouncedFilterValue])
 
@@ -473,7 +519,7 @@ export function LeadTable({ leads }: LeadTableProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-3xl font-bold">Leads</h2>
+      <h2 className="text-3xl font-bold">リード</h2>
       <div className="flex items-center py-4 space-x-4">
         <Input
           placeholder="Search"
@@ -486,7 +532,7 @@ export function LeadTable({ leads }: LeadTableProps) {
           onClick={() => handleExport()}
           className="bg-accent hover:bg-accent/80 text-white"
         >
-          Export
+          エクスポート
         </Button>
       </div>
       <div className="rounded-md border">
@@ -531,9 +577,6 @@ export function LeadTable({ leads }: LeadTableProps) {
                     }
                     data-state={row.getIsSelected() && 'selected'}
                     className="cursor-pointer hover:bg-muted/50"
-                    // onClick={() =>
-                    //   router.push(`/apps/${generationType}/${row.original.id}`)
-                    // }
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>

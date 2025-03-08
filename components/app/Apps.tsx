@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import LoadingPage from '../Loading'
 import Login from '../input/login'
+import { createClient } from '@/lib/utils/supabase/client'
 
 export default function Apps() {
   // 縦並びのレイアウトを返す関数
@@ -61,6 +62,27 @@ export default function Apps() {
     [provider]
   )
 
+  const deleteWorkflow = useCallback(
+    async (workflowId: string) => {
+      const supabase = createClient()
+      const { error: deleteError } = await supabase
+        .from('workflows')
+        .update([{ deleted_at: new Date().toISOString() }])
+        .eq('company_id', provider?.company_id)
+        .eq('id', workflowId)
+
+      if (deleteError) {
+        alert('削除に失敗しました')
+        console.error('Failed to delete workflow:', deleteError)
+        return
+      }
+
+      // Refresh the page to update the workflow list
+      window.location.reload()
+    },
+    [provider]
+  )
+
   const handleConnect = async () => {
     try {
       // Try to get LinkedIn cookies
@@ -96,55 +118,11 @@ export default function Apps() {
         </div>
       ) : provider ? (
         <>
-          {workflows.length > 0 && (
-            <section id="workflows">
-              <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
-                <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                  保存されたワークフロー
-                </h2>
-                <div className="py-10 w-full flex justify-center">
-                  <div className={getGridClass()}>
-                    {workflows.map((workflow, index) => (
-                      <a
-                        key={index}
-                        href={'/workflow/' + workflow.id}
-                        className="w-full"
-                      >
-                        <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
-                          {/* 左側：画像 */}
-                          <div className="w-1/3 pr-4">
-                            <img
-                              src={'/apps/linkedin-logo.jpg'}
-                              alt={workflow.name}
-                              className="w-full h-auto border border-base-200 rounded-md"
-                            />
-                          </div>
-                          {/* 右側：テキスト情報 */}
-                          <div className="w-2/3 flex flex-col">
-                            <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                              {workflow.name}
-                            </h3>
-                            <div className="mt-4 flex gap-y-1 flex-wrap">
-                              <span
-                                key={workflow.type}
-                                className="border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl"
-                              >
-                                {WorkflowType[workflow.type]}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </section>
-          )}
+          {' '}
           <section id="suggested_workflows">
             <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
               <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                おすすめのワークフロー
+                ワークフローを作成
               </h2>
               <div className="py-10 w-full flex justify-center">
                 <div className={getGridClass()}>
@@ -193,6 +171,74 @@ export default function Apps() {
               </div>
             </div>
           </section>
+          {workflows.length > 0 && (
+            <section id="workflows">
+              <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
+                <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                  マイワークフロー
+                </h2>
+                <div className="py-10 w-full flex justify-center">
+                  <div className={getGridClass()}>
+                    {workflows.map((workflow, index) => {
+                      if (workflow.type === WorkflowType.LEAD_LIST) {
+                        return null
+                      }
+                      return (
+                        <a
+                          key={index}
+                          href={'/workflow/' + workflow.id}
+                          className="w-full"
+                        >
+                          <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
+                            {/* 左側：画像 */}
+                            <div className="w-1/3 pr-4">
+                              <img
+                                src={'/apps/linkedin-logo.jpg'}
+                                alt={workflow.name}
+                                className="w-full h-auto border border-base-200 rounded-md"
+                              />
+                            </div>
+                            {/* 右側：テキスト情報 */}
+                            <div className="w-2/3 flex flex-col">
+                              <div className="flex justify-between items-start">
+                                <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
+                                  {workflow.name}
+                                </h3>
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    if (
+                                      confirm(
+                                        `ワークフロー「${workflow.name}」を削除しますか？`
+                                      )
+                                    ) {
+                                      deleteWorkflow(workflow.id)
+                                    }
+                                  }}
+                                  className="text-red-500 hover:text-red-700 border border-red-500 hover:border-red-700 px-2 py-1 rounded-md font-semibold text-sm"
+                                >
+                                  削除
+                                </button>
+                              </div>
+                              <div className="mt-4 flex gap-y-1 flex-wrap">
+                                <span
+                                  key={workflow.type}
+                                  className="border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl"
+                                >
+                                  {WorkflowType[workflow.type]}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </a>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
         </>
       ) : (
         <div className="flex flex-col items-center justify-center min-h-[75vh]">
@@ -202,7 +248,7 @@ export default function Apps() {
             disabled={provider ? true : false}
             className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white"
           >
-            {'Connect'}
+            {'Connect Linkedin'}
           </Button>
         </div>
       )}

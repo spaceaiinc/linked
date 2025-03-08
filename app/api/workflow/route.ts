@@ -39,7 +39,10 @@ export async function POST(req: Request) {
       provider_id: provider.id,
       type: Number(param.type),
       limit_count: 20,
-      name: WorkflowType[param.type] + ' WORKFLOW',
+      name:
+        WorkflowType[param.type] +
+        ' WORKFLOW ' +
+        new Date().toISOString().slice(0, 10),
     }
 
     const { data: workflowData, error } = await supabase

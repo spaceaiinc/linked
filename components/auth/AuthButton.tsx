@@ -46,7 +46,7 @@ export default async function AuthButton({ classProps }: AuthButtonProps) {
         <button
           className={`py-2 px-4 text-${bgColor}-content rounded-md no-underline bg-${bgColor} hover:bg-${bgColor}/80`}
         >
-          Logout
+          ログアウト
         </button>
       </form>
     </div>
@@ -56,7 +56,7 @@ export default async function AuthButton({ classProps }: AuthButtonProps) {
         href="/auth"
         className={`btn bg-${bgColor} hover:bg-${bgColor}/80 rounded-xl text-${bgColor}-content`}
       >
-        Login
+        ログイン
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

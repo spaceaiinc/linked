@@ -106,7 +106,7 @@ export default function Page() {
             disabled={provider ? true : false}
             className="bg-[#0077b5] hover:bg-[#0077b5]/90 text-white"
           >
-            {'Connect'}
+            {'Connect Linkedin'}
           </Button>
         </div>
       )}

@@ -76,6 +76,8 @@ export default function SearchProfileInputCapture({
   const [fileUrl, setFileUrl] = useState<string>('')
   const [uploading, setUploading] = useState<boolean>(false)
   const [provider, __] = useAtom(providerAtom)
+  const [defaultActiveTab, setDefaultActiveTab] = useState<string>('')
+  const [workflowInDb, setWorkflowInDb] = useState<Workflow | null>(null)
 
   useEffect(() => {
     // fetch workflow data
@@ -85,17 +87,20 @@ export default function SearchProfileInputCapture({
         .from('workflows')
         .select('*')
         .eq('id', workflowId)
+        .eq('deleted_at', '-infinity')
         .single()
       if (error) {
         console.error('Error fetching workflow:', error)
       }
       if (workflowData) {
         const workflow: Workflow = workflowData
+        setWorkflowInDb(workflow)
         customHandleChange(workflowId, 'workflow_id')
         customHandleChange(workflow.name, 'name')
         if (workflow.search_url) {
           customHandleChange(workflow.search_url, 'search_url')
           setActiveTab('0')
+          setDefaultActiveTab('0')
         } else if (
           workflow.keywords ||
           workflow.company_private_identifiers.length
@@ -108,20 +113,21 @@ export default function SearchProfileInputCapture({
             'network_distance'
           )
           setActiveTab('1')
+          setDefaultActiveTab('1')
         } else if (workflow.target_workflow_id) {
           customHandleChange(workflow.target_workflow_id, 'target_workflow_id')
           setActiveTab('2')
+          setDefaultActiveTab('2')
         }
         customHandleChange(workflow.limit_count.toString(), 'limit_count')
-        customHandleChange(workflow.invitation_message, 'invitation_message')
+        // customHandleChange(workflow.scheduled_days.join(','), 'scheduled_days')
+        // customHandleChange(
+        //   workflow.scheduled_months.join(','),
+        //   'scheduled_months'
+        // )
         customHandleChange(
           workflow.scheduled_hours.join(','),
           'scheduled_hours'
-        )
-        customHandleChange(workflow.scheduled_days.join(','), 'scheduled_days')
-        customHandleChange(
-          workflow.scheduled_months.join(','),
-          'scheduled_months'
         )
         customHandleChange(
           workflow.scheduled_weekdays.join(','),
@@ -139,16 +145,17 @@ export default function SearchProfileInputCapture({
     formData['active_tab'] = activeTab
     formData['workflow_id'] = workflowId
     formData['type'] = WorkflowType.SEARCH.toString()
-    const targetPublicIdentifiers = await extractColumnData(
-      fileUrl,
-      formData['extract_column'] || 'public_identifier'
-    )
-    console.log('targetPublicIdentifiers', targetPublicIdentifiers)
-    customHandleChange(
-      targetPublicIdentifiers.join(','),
-      'target_public_identifiers'
-    )
-    formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
+    if (fileUrl) {
+      const targetPublicIdentifiers = await extractColumnData(
+        fileUrl,
+        formData['extract_column'] || 'public_identifier'
+      )
+      customHandleChange(
+        targetPublicIdentifiers.join(','),
+        'target_public_identifiers'
+      )
+      formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
+    }
     await generateResponse(formData, event)
   }
 
@@ -208,55 +215,70 @@ export default function SearchProfileInputCapture({
                         >
                           <div className="flex justify-center">
                             <TabsList className="flex w-[700px] h-12 items-center bg-neutral-100/50 dark:bg-neutral-900/50 backdrop-blur-sm rounded-full p-1">
-                              <TabsTrigger
-                                value="0"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <IconBrandLinkedin className="h-4 w-4" />
-                                  <span className="font-medium">検索URL</span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="1"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <TextIcon className="h-4 w-4" />
-                                  <span className="font-medium">
-                                    キーワード
-                                  </span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="2"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <IconFile className="h-4 w-4" />
-                                  <span className="font-medium">リード</span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="3"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <LinkIcon className="h-4 w-4" />
-                                  <span className="font-medium">CSV URL</span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="4"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <UploadCloudIcon className="h-4 w-4" />
-                                  <span className="font-medium">
-                                    アップロード
-                                  </span>
-                                </div>
-                              </TabsTrigger>
+                              {(defaultActiveTab === '0' ||
+                                !defaultActiveTab) && (
+                                <TabsTrigger
+                                  value="0"
+                                  className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <IconBrandLinkedin className="h-4 w-4" />
+                                    <span className="font-medium">検索URL</span>
+                                  </div>
+                                </TabsTrigger>
+                              )}
+                              {(defaultActiveTab === '1' ||
+                                !defaultActiveTab) && (
+                                <TabsTrigger
+                                  value="1"
+                                  className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <TextIcon className="h-4 w-4" />
+                                    <span className="font-medium">
+                                      キーワード
+                                    </span>
+                                  </div>
+                                </TabsTrigger>
+                              )}
+                              {/* {(defaultActiveTab === '2' ||
+                                !defaultActiveTab) && (
+                                <>
+                                  <TabsTrigger
+                                    value="2"
+                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <IconFile className="h-4 w-4" />
+                                      <span className="font-medium">
+                                        リード
+                                      </span>
+                                    </div>
+                                  </TabsTrigger>
+                                  <TabsTrigger
+                                    value="3"
+                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <LinkIcon className="h-4 w-4" />
+                                      <span className="font-medium">
+                                        CSV URL
+                                      </span>
+                                    </div>
+                                  </TabsTrigger>
+                                  <TabsTrigger
+                                    value="4"
+                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <UploadCloudIcon className="h-4 w-4" />
+                                      <span className="font-medium">
+                                        アップロード
+                                      </span>
+                                    </div>
+                                  </TabsTrigger>
+                                </>
+                              )} */}
                             </TabsList>
                           </div>
                           <TabsContent value="0">
@@ -331,7 +353,16 @@ export default function SearchProfileInputCapture({
                                           )
                                         }
                                         placeholder={
-                                          'https://www.linkedin.com/company/...'
+                                          workflowInDb
+                                            ?.company_private_identifiers.length
+                                            ? `既に設定されています。企業ID:${workflowInDb?.company_private_identifiers}`
+                                            : 'https://www.linkedin.com/company/...'
+                                        }
+                                        disabled={
+                                          workflowInDb
+                                            ?.company_private_identifiers.length
+                                            ? true
+                                            : false
                                         }
                                         id={companyUrlsField?.name!}
                                         name={companyUrlsField?.name!}

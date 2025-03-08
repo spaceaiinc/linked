@@ -59,7 +59,9 @@ CREATE TABLE public.leads (
     generated_third_message TEXT NOT NULL DEFAULT '',
     third_message_sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     third_message_read_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
-    third_message_replied_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity'
+    third_message_replied_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
+    UNIQUE (provider_id, private_identifier),
+    UNIQUE (provider_id, public_identifier)
 );
 --
 -- Name: providers; Type: TABLE; Schema: public; Owner: -
@@ -105,7 +107,8 @@ CREATE TABLE public.lead_work_experiences (
     current BOOLEAN NOT NULL DEFAULT FALSE,
     status TEXT NOT NULL DEFAULT '',
     start_date DATE NOT NULL DEFAULT '-infinity',
-    end_date DATE NOT NULL DEFAULT '-infinity'
+    end_date DATE NOT NULL DEFAULT '-infinity',
+    UNIQUE (lead_id, company, start_date)
 );
 --
 -- Name: lead_volunteering_experiences; Type: TABLE; Schema: public; Owner: -
@@ -123,7 +126,8 @@ CREATE TABLE public.lead_volunteering_experiences (
     role TEXT NOT NULL,
     cause TEXT NOT NULL,
     start_date DATE NOT NULL DEFAULT '-infinity',
-    end_date DATE NOT NULL DEFAULT '-infinity'
+    end_date DATE NOT NULL DEFAULT '-infinity',
+    UNIQUE (lead_id, company, start_date)
 );
 --
 -- Name: lead_educations; Type: TABLE; Schema: public; Owner: -
@@ -140,7 +144,8 @@ CREATE TABLE public.lead_educations (
     school TEXT NOT NULL,
     field_of_study TEXT NOT NULL,
     start_date DATE NOT NULL DEFAULT '-infinity',
-    end_date DATE NOT NULL DEFAULT '-infinity'
+    end_date DATE NOT NULL DEFAULT '-infinity',
+    UNIQUE (lead_id, school, start_date)
 );
 --
 -- Name: lead_skills; Type: TABLE; Schema: public; Owner: -
@@ -157,7 +162,8 @@ CREATE TABLE public.lead_skills (
     endorsement_count INT NOT NULL DEFAULT 0,
     endorsement_id INT NOT NULL DEFAULT 0,
     insights TEXT [] NOT NULL DEFAULT ARRAY []::TEXT [],
-    endorsed BOOLEAN NOT NULL DEFAULT FALSE
+    endorsed BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE (lead_id, name)
 );
 --
 -- Name: lead_languages; Type: TABLE; Schema: public; Owner: -
@@ -171,7 +177,8 @@ CREATE TABLE public.lead_languages (
     deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     lead_id UUID NOT NULL REFERENCES public.leads(id),
     name TEXT NOT NULL,
-    proficiency TEXT NOT NULL
+    proficiency TEXT NOT NULL,
+    UNIQUE (lead_id, name)
 );
 --
 -- Name: lead_certifications; Type: TABLE; Schema: public; Owner: -
@@ -186,7 +193,8 @@ CREATE TABLE public.lead_certifications (
     lead_id UUID NOT NULL REFERENCES public.leads(id),
     name TEXT NOT NULL,
     organization TEXT NOT NULL,
-    url TEXT NOT NULL
+    url TEXT NOT NULL,
+    UNIQUE (lead_id, name)
 );
 --
 -- Name: lead_projects; Type: TABLE; Schema: public; Owner: -
@@ -203,7 +211,8 @@ CREATE TABLE public.lead_projects (
     description TEXT NOT NULL DEFAULT '',
     skills TEXT [] NOT NULL DEFAULT ARRAY []::TEXT [],
     start_date DATE NOT NULL DEFAULT '-infinity',
-    end_date DATE NOT NULL DEFAULT '-infinity'
+    end_date DATE NOT NULL DEFAULT '-infinity',
+    UNIQUE (lead_id, name, start_date)
 );
 --
 -- Name: Force Update updated_at Column

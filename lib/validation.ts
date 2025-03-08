@@ -1,5 +1,6 @@
 import * as yup from 'yup'
 import { FormFields } from './types/toolconfig'
+import { ActiveTab } from './types/master'
 
 // Yupスキーマの動的生成
 const generateValidationSchema = (fields: FormFields[]) => {
@@ -134,7 +135,7 @@ export const searchProfileSchema = yup
       .string()
       .nullable()
       .when('active_tab', {
-        is: 0,
+        is: ActiveTab.SEARCH,
         then: (schema) =>
           schema.required('Search URL is required when active tab is 0'),
         otherwise: (schema) => schema,
@@ -144,13 +145,16 @@ export const searchProfileSchema = yup
       .string()
       .nullable()
       .when('active_tab', {
-        is: 1,
+        is: ActiveTab.KEYWORDS,
         then: (schema) =>
           schema.test({
             name: 'keywords-or-company-urls',
             test: function (value) {
-              const { company_urls } = this.parent
-              return value || (company_urls && company_urls.length > 0)
+              const { company_urls, company_private_identifiers } = this.parent
+              return value ||
+                (company_urls && company_urls.length > 0) ||
+                (company_private_identifiers &&
+                  company_private_identifiers.length > 0)
                 ? true
                 : this.createError({
                     message:
@@ -180,7 +184,7 @@ export const searchProfileSchema = yup
       .string()
       .nullable()
       .when('active_tab', {
-        is: 2,
+        is: ActiveTab.LEAD_LIST,
         then: (schema) =>
           schema.required('Lead List ID is required when active tab is 2'),
         otherwise: (schema) => schema,
@@ -191,7 +195,8 @@ export const searchProfileSchema = yup
       .transform(stringArrayTransformer.transform)
       .default([])
       .when('active_tab', {
-        is: (value: number) => value === 3 || value === 4,
+        is: (value: number) =>
+          value === ActiveTab.FILE_URL || value === ActiveTab.UPLOAD,
         then: (schema) =>
           schema.test({
             name: 'target-public-identifiers-required',
@@ -268,10 +273,11 @@ export const searchProfileSchema = yup
         company_urls,
         target_workflow_id,
         target_public_identifiers,
+        company_private_identifiers,
       } = values
 
       // active_tab が 0 の場合、search_url が必要
-      if (active_tab === 0) {
+      if (active_tab === ActiveTab.SEARCH) {
         if (!search_url) {
           return this.createError({
             path: 'search_url',
@@ -280,8 +286,13 @@ export const searchProfileSchema = yup
         }
       }
       // active_tab が 1 の場合、keywords または company_urls が必要
-      else if (active_tab === 1) {
-        if (!keywords && (!company_urls || company_urls.length === 0)) {
+      else if (active_tab === ActiveTab.KEYWORDS) {
+        if (
+          !keywords &&
+          (!company_urls || company_urls.length === 0) &&
+          (!company_private_identifiers ||
+            company_private_identifiers.length === 0)
+        ) {
           return this.createError({
             path: 'keywords',
             message:
@@ -290,7 +301,7 @@ export const searchProfileSchema = yup
         }
       }
       // active_tab が 2 の場合、target_workflow_id が必要
-      else if (active_tab === 2) {
+      else if (active_tab === ActiveTab.LEAD_LIST) {
         if (!target_workflow_id) {
           return this.createError({
             path: 'target_workflow_id',
@@ -299,7 +310,10 @@ export const searchProfileSchema = yup
         }
       }
       // active_tab が 3 または 4 の場合、target_public_identifiers が必要
-      else if (active_tab === 3 || active_tab === 4) {
+      else if (
+        active_tab === ActiveTab.FILE_URL ||
+        active_tab === ActiveTab.UPLOAD
+      ) {
         if (
           !target_public_identifiers ||
           target_public_identifiers.length === 0

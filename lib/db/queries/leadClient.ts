@@ -11,15 +11,18 @@ export async function getLeadsByWorkflowId({
     .from('lead_workflows')
     .select('lead_id')
     .eq('workflow_id', workflowId)
+    .order('updated_at', { ascending: false })
   if (leadWorkflowsError) {
     console.error('Error fetching lead workflows:', leadWorkflowsError)
   }
   if (!leadWorkflows) {
     return []
   }
-  const { data: leads, error: leadsError } = await supabase
+  const { data: leadsData, error: leadsError } = await supabase
     .from('leads')
-    .select('*')
+    .select(
+      '*, lead_workflows(*), lead_statuses(*), lead_work_experiences(*), lead_volunteering_experiences(*), lead_educations(*), lead_skills(*), lead_languages(*), lead_certifications(*), lead_projects(*)'
+    )
     .in(
       'id',
       leadWorkflows.map((lw: { lead_id: any }) => lw.lead_id)
@@ -29,125 +32,128 @@ export async function getLeadsByWorkflowId({
     return []
   }
 
-  if (!leads || !Array.isArray(leads) || !leads.length) {
+  if (!leadsData || !Array.isArray(leadsData) || !leadsData.length) {
     return []
   }
 
-  const leadsFetchingChildPromises = leads.map(async (lead) => {
-    // find lead statuses
-    const { data: leadStatusData, error: errorOfFindLeadStatus } =
-      await supabase.from('lead_statuses').select('*').eq('lead_id', lead.id)
+  const leads = leadsData as Lead[]
 
-    if (errorOfFindLeadStatus) {
-      console.error('Error in find lead status:', errorOfFindLeadStatus)
-      return lead
-    }
+  // const leadsFetchingChildPromises = leads.map(async (leadData) => {
+  //   const lead = leadData as Lead
+  //   // find lead statuses
+  //   const { data: leadStatusData, error: errorOfFindLeadStatus } =
+  //     await supabase.from('lead_statuses').select('*').eq('lead_id', lead.id)
 
-    lead.statuses = leadStatusData
+  //   if (errorOfFindLeadStatus) {
+  //     console.error('Error in find lead status:', errorOfFindLeadStatus)
+  //     return lead
+  //   }
 
-    // work experiences
-    const { data: workExperienceData, error: errorOfWorkExperience } =
-      await supabase
-        .from('lead_work_experiences')
-        .select('*')
-        .eq('lead_id', lead.id)
+  //   lead.lead_statuses = leadStatusData
 
-    if (errorOfWorkExperience) {
-      console.error('Error in find work experience:', errorOfWorkExperience)
-    }
-    if (workExperienceData) lead.work_experiences = workExperienceData
+  //   // work experiences
+  //   const { data: workExperienceData, error: errorOfWorkExperience } =
+  //     await supabase
+  //       .from('lead_work_experiences')
+  //       .select('*')
+  //       .eq('lead_id', lead.id)
 
-    // volunteering experiences
-    const {
-      data: volunteeringExperienceData,
-      error: errorOfVolunteeringExperience,
-    } = await supabase
-      .from('lead_volunteering_experiences')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   if (errorOfWorkExperience) {
+  //     console.error('Error in find work experience:', errorOfWorkExperience)
+  //   }
+  //   if (workExperienceData) lead.lead_work_experiences = workExperienceData
 
-    if (errorOfVolunteeringExperience) {
-      console.error(
-        'Error in find volunteering experience:',
-        errorOfVolunteeringExperience
-      )
-    }
-    if (volunteeringExperienceData)
-      lead.volunteering_experiences = volunteeringExperienceData
+  //   // volunteering experiences
+  //   const {
+  //     data: volunteeringExperienceData,
+  //     error: errorOfVolunteeringExperience,
+  //   } = await supabase
+  //     .from('lead_volunteering_experiences')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    // educations
-    const { data: educationData, error: errorOfEducation } = await supabase
-      .from('lead_educations')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   if (errorOfVolunteeringExperience) {
+  //     console.error(
+  //       'Error in find volunteering experience:',
+  //       errorOfVolunteeringExperience
+  //     )
+  //   }
+  //   if (volunteeringExperienceData)
+  //     lead.lead_volunteering_experiences = volunteeringExperienceData
 
-    if (errorOfEducation) {
-      console.error('Error in find education:', errorOfEducation)
-    }
-    if (educationData) lead.educations = educationData
+  //   // educations
+  //   const { data: educationData, error: errorOfEducation } = await supabase
+  //     .from('lead_educations')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    // skills
-    const { data: skillData, error: errorOfSkill } = await supabase
-      .from('lead_skills')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   if (errorOfEducation) {
+  //     console.error('Error in find education:', errorOfEducation)
+  //   }
+  //   if (educationData) lead.lead_educations = educationData
 
-    if (errorOfSkill) {
-      console.error('Error in find skill:', errorOfSkill)
-    }
+  //   // skills
+  //   const { data: skillData, error: errorOfSkill } = await supabase
+  //     .from('lead_skills')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (skillData) lead.skills = skillData
+  //   if (errorOfSkill) {
+  //     console.error('Error in find skill:', errorOfSkill)
+  //   }
 
-    // languages
-    const { data: languageData, error: errorOfLanguage } = await supabase
-      .from('lead_languages')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   if (skillData) lead.lead_skills = skillData
 
-    if (errorOfLanguage) {
-      console.error('Error in find language:', errorOfLanguage)
-    }
+  //   // languages
+  //   const { data: languageData, error: errorOfLanguage } = await supabase
+  //     .from('lead_languages')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (languageData) lead.languages = languageData
+  //   if (errorOfLanguage) {
+  //     console.error('Error in find language:', errorOfLanguage)
+  //   }
 
-    // certifications
-    const { data: certificationData, error: errorOfCertification } =
-      await supabase
-        .from('lead_certifications')
-        .select('*')
-        .eq('lead_id', lead.id)
+  //   if (languageData) lead.lead_languages = languageData
 
-    if (errorOfCertification) {
-      console.error('Error in find certification:', errorOfCertification)
-    }
+  //   // certifications
+  //   const { data: certificationData, error: errorOfCertification } =
+  //     await supabase
+  //       .from('lead_certifications')
+  //       .select('*')
+  //       .eq('lead_id', lead.id)
 
-    if (certificationData) lead.certifications = certificationData
+  //   if (errorOfCertification) {
+  //     console.error('Error in find certification:', errorOfCertification)
+  //   }
 
-    // projects
-    const { data: projectData, error: errorOfProject } = await supabase
-      .from('lead_projects')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   if (certificationData) lead.lead_certifications = certificationData
 
-    if (errorOfProject) {
-      console.error('Error in find project:', errorOfProject)
-    }
+  //   // projects
+  //   const { data: projectData, error: errorOfProject } = await supabase
+  //     .from('lead_projects')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (projectData) lead.projects = projectData
-    return lead
-  })
+  //   if (errorOfProject) {
+  //     console.error('Error in find project:', errorOfProject)
+  //   }
 
-  const leadsWithChild = await Promise.all(leadsFetchingChildPromises)
-  leadsWithChild.filter((lead) => lead !== null && lead !== undefined)
-  if (
-    !leadsWithChild ||
-    !Array.isArray(leadsWithChild) ||
-    !leadsWithChild.length
-  ) {
-    return []
-  }
+  //   if (projectData) lead.lead_projects = projectData
+  //   return lead
+  // })
 
-  return leadsWithChild
+  // const leadsWithChild = await Promise.all(leadsFetchingChildPromises)
+  // leadsWithChild.filter((lead) => lead !== null && lead !== undefined)
+  // if (
+  //   !leadsWithChild ||
+  //   !Array.isArray(leadsWithChild) ||
+  //   !leadsWithChild.length
+  // ) {
+  //   return []
+  // }
+
+  return leads
 }
 
 export async function getLeadsByProviderId({
@@ -156,142 +162,143 @@ export async function getLeadsByProviderId({
   providerId: string
 }): Promise<Lead[]> {
   const supabase = createClient()
-  // const { data: leadWorkflows, error: leadWorkflowsError } = await supabase
-  //   .from('lead_workflows')
-  //   .select('lead_id')
-  //   .eq('workflow_id', workflowId)
-  // if (leadWorkflowsError) {
-  //   console.error('Error fetching lead workflows:', leadWorkflowsError)
-  // }
-  // if (!leadWorkflows) {
-  //   return []
-  // }
-  const { data: leads, error: leadsError } = await supabase
+  const { data: leadsData, error: leadsError } = await supabase
     .from('leads')
-    .select('*')
+    .select(
+      '*, lead_workflows(*), lead_statuses(*), lead_work_experiences(*), lead_volunteering_experiences(*), lead_educations(*), lead_skills(*), lead_languages(*), lead_certifications(*), lead_projects(*)'
+    )
     .eq('provider_id', providerId)
+    .order('updated_at', { ascending: false })
   if (leadsError) {
     console.error('Error fetching leads:', leadsError)
     return []
   }
 
+  const leads = leadsData as Lead[]
+
   if (!leads || !Array.isArray(leads) || !leads.length) {
     return []
   }
 
-  const leadsFetchingChildPromises = leads.map(async (lead) => {
-    // find lead statuses
-    const { data: leadStatusData, error: errorOfFindLeadStatus } =
-      await supabase.from('lead_statuses').select('*').eq('lead_id', lead.id)
+  // const leadsFetchingChildPromises = leads.map(async (lead) => {
+  //   // find lead statuses
+  //   const { data: leadStatusData, error: errorOfFindLeadStatus } =
+  //     await supabase.from('lead_statuses').select('*').eq('lead_id', lead.id)
 
-    if (errorOfFindLeadStatus) {
-      console.error('Error in find lead status:', errorOfFindLeadStatus)
-      return lead
-    }
+  //   if (errorOfFindLeadStatus) {
+  //     console.error('Error in find lead status:', errorOfFindLeadStatus)
+  //     return lead
+  //   }
+  //   console.log('Lead status data:', leadStatusData)
 
-    lead.statuses = leadStatusData
+  //   lead.status =
+  //     leadStatusData && leadStatusData.length ? leadStatusData[0] : null
+  //   lead.lead_statuses = leadStatusData
 
-    // work experiences
-    const { data: workExperienceData, error: errorOfWorkExperience } =
-      await supabase
-        .from('lead_work_experiences')
-        .select('*')
-        .eq('lead_id', lead.id)
+  //   // work experiences
+  //   const { data: workExperienceData, error: errorOfWorkExperience } =
+  //     await supabase
+  //       .from('lead_work_experiences')
+  //       .select('*')
+  //       .eq('lead_id', lead.id)
 
-    if (errorOfWorkExperience) {
-      console.error('Error in find work experience:', errorOfWorkExperience)
-    }
-    if (workExperienceData) lead.work_experiences = workExperienceData
+  //   if (errorOfWorkExperience) {
+  //     console.error('Error in find work experience:', errorOfWorkExperience)
+  //   }
+  //   console.log('Work experience data:', workExperienceData)
+  //   if (workExperienceData?.length)
+  //     lead.lead_work_experiences = workExperienceData
 
-    // volunteering experiences
-    const {
-      data: volunteeringExperienceData,
-      error: errorOfVolunteeringExperience,
-    } = await supabase
-      .from('lead_volunteering_experiences')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   // volunteering experiences
+  //   const {
+  //     data: volunteeringExperienceData,
+  //     error: errorOfVolunteeringExperience,
+  //   } = await supabase
+  //     .from('lead_volunteering_experiences')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (errorOfVolunteeringExperience) {
-      console.error(
-        'Error in find volunteering experience:',
-        errorOfVolunteeringExperience
-      )
-    }
-    if (volunteeringExperienceData)
-      lead.volunteering_experiences = volunteeringExperienceData
+  //   if (errorOfVolunteeringExperience) {
+  //     console.error(
+  //       'Error in find volunteering experience:',
+  //       errorOfVolunteeringExperience
+  //     )
+  //   }
+  //   if (volunteeringExperienceData)
+  //     lead.lead_volunteering_experiences = volunteeringExperienceData
 
-    // educations
-    const { data: educationData, error: errorOfEducation } = await supabase
-      .from('lead_educations')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   // educations
+  //   const { data: educationData, error: errorOfEducation } = await supabase
+  //     .from('lead_educations')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (errorOfEducation) {
-      console.error('Error in find education:', errorOfEducation)
-    }
-    if (educationData) lead.educations = educationData
+  //   if (errorOfEducation) {
+  //     console.error('Error in find education:', errorOfEducation)
+  //   }
+  //   if (educationData) lead.lead_educations = educationData
 
-    // skills
-    const { data: skillData, error: errorOfSkill } = await supabase
-      .from('lead_skills')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   // skills
+  //   const { data: skillData, error: errorOfSkill } = await supabase
+  //     .from('lead_skills')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (errorOfSkill) {
-      console.error('Error in find skill:', errorOfSkill)
-    }
+  //   if (errorOfSkill) {
+  //     console.error('Error in find skill:', errorOfSkill)
+  //   }
 
-    if (skillData) lead.skills = skillData
+  //   if (skillData) lead.lead_skills = skillData
 
-    // languages
-    const { data: languageData, error: errorOfLanguage } = await supabase
-      .from('lead_languages')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   // languages
+  //   const { data: languageData, error: errorOfLanguage } = await supabase
+  //     .from('lead_languages')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (errorOfLanguage) {
-      console.error('Error in find language:', errorOfLanguage)
-    }
+  //   if (errorOfLanguage) {
+  //     console.error('Error in find language:', errorOfLanguage)
+  //   }
 
-    if (languageData) lead.languages = languageData
+  //   if (languageData) lead.lead_languages = languageData
 
-    // certifications
-    const { data: certificationData, error: errorOfCertification } =
-      await supabase
-        .from('lead_certifications')
-        .select('*')
-        .eq('lead_id', lead.id)
+  //   // certifications
+  //   const { data: certificationData, error: errorOfCertification } =
+  //     await supabase
+  //       .from('lead_certifications')
+  //       .select('*')
+  //       .eq('lead_id', lead.id)
 
-    if (errorOfCertification) {
-      console.error('Error in find certification:', errorOfCertification)
-    }
+  //   if (errorOfCertification) {
+  //     console.error('Error in find certification:', errorOfCertification)
+  //   }
 
-    if (certificationData) lead.certifications = certificationData
+  //   if (certificationData) lead.lead_certifications = certificationData
 
-    // projects
-    const { data: projectData, error: errorOfProject } = await supabase
-      .from('lead_projects')
-      .select('*')
-      .eq('lead_id', lead.id)
+  //   // projects
+  //   const { data: projectData, error: errorOfProject } = await supabase
+  //     .from('lead_projects')
+  //     .select('*')
+  //     .eq('lead_id', lead.id)
 
-    if (errorOfProject) {
-      console.error('Error in find project:', errorOfProject)
-    }
+  //   if (errorOfProject) {
+  //     console.error('Error in find project:', errorOfProject)
+  //   }
 
-    if (projectData) lead.projects = projectData
-    return lead
-  })
+  //   if (projectData) lead.lead_projects = projectData
+  //   return lead
+  // })
 
-  const leadsWithChild = await Promise.all(leadsFetchingChildPromises)
-  leadsWithChild.filter((lead) => lead !== null && lead !== undefined)
-  if (
-    !leadsWithChild ||
-    !Array.isArray(leadsWithChild) ||
-    !leadsWithChild.length
-  ) {
-    return []
-  }
+  // const leadsWithChild = await Promise.all(leadsFetchingChildPromises)
+  // console.log('Leads with child:', leadsWithChild)
+  // leadsWithChild.filter((lead) => lead !== null && lead !== undefined)
+  // if (
+  //   !leadsWithChild ||
+  //   !Array.isArray(leadsWithChild) ||
+  //   !leadsWithChild.length
+  // ) {
+  //   return []
+  // }
 
-  return leadsWithChild
+  return leads
 }
