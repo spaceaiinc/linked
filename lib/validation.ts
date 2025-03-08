@@ -274,7 +274,18 @@ export const searchProfileSchema = yup
         target_workflow_id,
         target_public_identifiers,
         company_private_identifiers,
+        scheduled_hours,
+        scheduled_weekdays,
       } = values
+
+      if (scheduled_hours || scheduled_weekdays) {
+        if (!scheduled_hours && !scheduled_weekdays) {
+          return this.createError({
+            message:
+              '実行日時を指定する場合は、時間と曜日の両方を指定してください',
+          })
+        }
+      }
 
       // active_tab が 0 の場合、search_url が必要
       if (active_tab === ActiveTab.SEARCH) {

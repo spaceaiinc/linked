@@ -7,6 +7,8 @@ import {
   unipileProfileWithStatus,
   leadWithStatus,
   unipilePeformSearchProfileWithStatus,
+  fetchLeadsWithLatestStatusFilter,
+  fetchLeadsWithLatestStatusAndWorkflow,
 } from '@/lib/db/queries/leadServer'
 import {
   ActiveTab,
@@ -113,27 +115,28 @@ export async function POST(req: Request) {
       console.log('continue with target_public_identifiers')
       // スケジュールではない場合、リードを作成
       if (scheduled) {
-        const { data: leadsDataInDb, error: errorOfLeadInDb } = await supabase
-          .from('leads')
-          .select('*')
-          .eq('provider_id', provider.id)
-          .in('public_identifier', param.target_public_identifiers)
-        if (errorOfLeadInDb) {
-          console.error('Error in get lead:', errorOfLeadInDb)
-          return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-          )
-        }
+        const leadsDataInDb = await fetchLeadsWithLatestStatusFilter(
+          supabase,
+          provider.id,
+          param.target_public_identifiers
+        )
+        console.log('leadsDataInDb', leadsDataInDb)
         const leadsInDb: Lead[] = leadsDataInDb as Lead[]
 
         const insertLeadPromises = param.target_public_identifiers.map(
           async (publicIdentifier: string) => {
             if (!publicIdentifier || publicIdentifier === undefined) return
             let leadDataId = ''
+            let shouldUpdateStatus = false
             leadsInDb.forEach((lead) => {
               if (lead.public_identifier === publicIdentifier) {
                 leadDataId = lead.id as string
+                if (
+                  lead.status === LeadStatus.SEARCHED ||
+                  lead.status === LeadStatus.INVITED_FAILED
+                ) {
+                  shouldUpdateStatus = true
+                }
               }
             })
             if (!leadDataId) {
@@ -172,6 +175,27 @@ export async function POST(req: Request) {
               console.error(
                 'Error in insert lead workflow:',
                 insertLeadWorkflowError
+              )
+              return NextResponse.json(
+                { error: 'Internal server error' },
+                { status: 500 }
+              )
+            }
+
+            if (!shouldUpdateStatus) return
+            // update lead statuses
+            const leadStatus: PublicSchemaTables['lead_statuses']['Insert'] = {
+              status: LeadStatus.IN_QUEUE,
+              lead_id: leadDataId,
+              company_id: provider.company_id,
+            }
+            const { error: errorOfInsertLeadStatus } = await supabase
+              .from('lead_statuses')
+              .insert(leadStatus)
+            if (errorOfInsertLeadStatus) {
+              console.error(
+                'Error in insert lead status:',
+                errorOfInsertLeadStatus
               )
               return NextResponse.json(
                 { error: 'Internal server error' },
@@ -303,26 +327,12 @@ export async function POST(req: Request) {
     } else if (param.target_workflow_id) {
       if (fromSchedule || !scheduled) {
         console.log('continue with target_workflow_id')
-        const { data: targetLeadData, error: errorOfTargetLead } =
-          await supabase
-            .from('leads')
-            .select(
-              '*, lead_statuses!inner(status), lead_workflows!inner(workflow_id)'
-            )
-            .eq('lead_workflows.workflow_id', param.target_workflow_id)
-            .eq('lead_statuses.status', LeadStatus.IN_QUEUE)
-            // 最新のステータスを取得するためにlead_statusesを日付順に並べる
-            .order('lead_statuses.status', { ascending: false })
-            .limit(1, { foreignTable: 'lead_statuses' })
-            .limit(param.limit_count)
-
-        if (errorOfTargetLead) {
-          console.error('Error in get target lead:', errorOfTargetLead)
-          return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-          )
-        }
+        const targetLeadData = await fetchLeadsWithLatestStatusAndWorkflow(
+          supabase,
+          param.target_workflow_id,
+          LeadStatus.IN_QUEUE,
+          param.limit_count
+        )
         console.log('targetLeads', targetLeadData)
         const targetLeads = targetLeadData as Lead[]
         const profilePromises = targetLeads?.map(async (lead: Lead) => {
@@ -365,6 +375,7 @@ export async function POST(req: Request) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
+                    leadStatus = LeadStatus.INVITED_FAILED
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED

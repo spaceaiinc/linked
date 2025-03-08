@@ -40,10 +40,10 @@ export enum WorkflowStatus {
 export enum LeadStatus {
   SEARCHED = 0,
   IN_QUEUE = 10,
-  INVITED = 20,
-  INVITED_FAILED = 21,
+  INVITED_FAILED = 20,
+  INVITED = 21,
   ACCEPTED = 30,
-  FOLLOW_UP_SENT = 40,
-  FOLLOW_UP_SENT_FAILED = 41,
+  FOLLOW_UP_SENT_FAILED = 40,
+  FOLLOW_UP_SENT = 41,
   REPLIED = 50,
 }
