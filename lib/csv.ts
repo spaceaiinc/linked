@@ -1,70 +1,143 @@
 import Papa from 'papaparse'
+import { Lead, LeadInsert, PublicSchemaTables } from './types/supabase'
+import { LeadStatus, NetworkDistance } from './types/master'
 
-export const convertProfileJsonToCsv = (
-  inputData: any[],
-  outputFilePath: string
-): void => {
-  if (!inputData || inputData.length === 0) {
+export type LeadForDisplay = Omit<
+  PublicSchemaTables['leads']['Insert'],
+  | 'id'
+  | 'network_distance'
+  | 'created_at'
+  | 'updated_at'
+  | 'deleted_at'
+  | 'statuses'
+> & {
+  public_profile_url: string
+  network_distance: string
+  latest_status: LeadStatus
+  lead_work_experiences: string
+  lead_volunteering_experiences: string
+  lead_educations: string
+  lead_skills: string
+  lead_languages: string
+  lead_certifications: string
+  lead_projects: string
+  created_at?: string
+}
+
+export const convertToDisplay = (
+  inputData: Lead[] | LeadInsert[]
+): LeadForDisplay[] => {
+  if (!inputData || inputData.length === 0 || !Array.isArray(inputData)) {
     console.log('No data to convert')
-    return
+    return []
   }
-  const rows = inputData.map((profile) => {
-    const baseInfo = {
-      provider: profile.provider || '',
-      provider_id: profile.provider_id || '',
-      public_identifier: profile?.public_identifier || '',
-      first_name: profile.first_name || '',
-      last_name: profile.last_name || '',
-      headline: profile.headline || '',
-      location: profile.location || '',
-      follower_count: profile.follower_count || 0,
-      connections_count: profile.connections_count || 0,
-      work_experience: '',
+  const rows = inputData.map((profile: Lead | LeadInsert) => {
+    console.log('Profile:', profile)
+    const baseInfo: LeadForDisplay = {
+      public_profile_url: profile?.public_identifier
+        ? `https://www.linkedin.com/in/${profile?.public_identifier}`
+        : '',
+      ...profile,
+      network_distance: profile?.network_distance
+        ? NetworkDistance[profile?.network_distance] || ''
+        : '',
+      latest_status: LeadStatus.SEARCHED,
+      lead_work_experiences: '',
+      lead_volunteering_experiences: '',
+      lead_educations: '',
+      lead_skills: '',
+      lead_languages: '',
+      lead_certifications: '',
+      lead_projects: '',
     }
-
-    if (profile.work_experience) {
-      const workExperiencesText = profile.work_experience
-        .map(
-          (exp: {
-            company: any
-            position: any
-            location: any
-            description: any
-            skills: any
-            start: any
-            end: any
-          }) => {
-            return `会社: ${exp.company || ''}\n役職: ${
-              exp.position || ''
-            }\n場所: ${exp.location || ''}\n説明: ${
-              exp.description || ''
-            }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
-              exp.start || ''
-            }\n終了: ${exp.end || ''}`
-          }
+    if (profile.lead_statuses?.length)
+      baseInfo.latest_status = profile.lead_statuses.sort((a, b) => {
+        console.log(a, b)
+        if (!a.created_at || !b.created_at) {
+          return 0
+        }
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         )
+      })[0].status
+
+    if (profile.lead_work_experiences?.length) {
+      const workExperiencesText = profile.lead_work_experiences
+        .map((exp) => {
+          return `会社: ${exp.company || ''}\n役職: ${
+            exp.position || ''
+          }\n場所: ${exp.location || ''}\n説明: ${
+            exp.description || ''
+          }\nスキル: ${(exp.skills || []).join(', ')}\n開始: ${
+            exp.start_date || ''
+          }\n終了: ${exp.end_date || ''}`
+        })
         .join('\n\n')
 
-      baseInfo.work_experience = workExperiencesText
+      baseInfo.lead_work_experiences = workExperiencesText
+    }
+    if (profile.lead_volunteering_experiences?.length) {
+      const volunteerExperiencesText = profile.lead_volunteering_experiences
+        .map((exp) => {
+          return `会社: ${exp.company || ''}\n詳細: ${
+            exp.description || ''
+          }\n役職: ${exp.role || ''}\nCause: ${exp.cause || ''}\n開始: ${
+            exp.start_date || ''
+          }\n終了: ${exp.end_date || ''}`
+        })
+        .join('\n\n')
+
+      baseInfo.lead_volunteering_experiences = volunteerExperiencesText
+    }
+    if (profile.lead_educations?.length) {
+      const educationsText = profile.lead_educations
+        .map((edu) => {
+          return `学校: ${edu.school || ''}\n学位: ${
+            edu.degree || ''
+          }\n専攻: ${edu.field_of_study || ''}\n開始: ${
+            edu.start_date || ''
+          }\n終了: ${edu.end_date || ''}`
+        })
+        .join('\n\n')
+      baseInfo.lead_educations = educationsText
+    }
+    if (profile.lead_skills) {
+      const skillsText = profile.lead_skills
+        .map((skill) => {
+          return `${skill.name || ''}`
+        })
+        .join(', ')
+      baseInfo.lead_skills = skillsText
+    }
+    if (profile.lead_languages) {
+      const languagesText = profile.lead_languages
+        .map((lang) => {
+          return `言語: ${lang.name || ''}\nレベル: ${lang.proficiency || ''}`
+        })
+        .join('\n\n')
+      baseInfo.lead_languages = languagesText
+    }
+    if (profile.lead_certifications) {
+      const certificationsText = profile.lead_certifications
+        .map((cert) => {
+          return `認定: ${cert.name || ''}\n機関: ${cert.organization || ''}\nURL: ${cert.url || ''}`
+        })
+        .join('\n\n')
+      baseInfo.lead_certifications = certificationsText
+    }
+    if (profile.lead_projects) {
+      const projectsText = profile.lead_projects
+        .map((proj) => {
+          return `プロジェクト名: ${proj.name || ''}\n説明: ${proj.description || ''}\nスキル: ${proj.skills || ''}\n開始: ${proj.start_date || ''}\n終了: ${proj.end_date || ''}`
+        })
+        .join('\n\n')
+      baseInfo.lead_projects = projectsText
     }
 
     return baseInfo
   })
-
-  const csv = Papa.unparse(rows, { newline: '\n' })
-  // ダウンロード
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const link = document.createElement('a')
-  const url = URL.createObjectURL(blob)
-  link.setAttribute('href', url)
-  link.setAttribute('download', outputFilePath)
-  link.style.visibility = 'hidden'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  console.log(`CSV file has been saved to ${outputFilePath}`)
-  return
+  const rowAfterFilter = rows.filter((row) => row !== undefined && row !== null)
+  return rowAfterFilter
 }
 
 // CSVデータを取得して指定したカラムの値を抽出する関数
@@ -82,6 +155,11 @@ export async function extractColumnData(
         const extractedData = results.data
           .map((row: any) => {
             let value = row[columnName]
+            if (typeof value === 'string') {
+              value = value.trim()
+            } else {
+              return undefined
+            }
 
             // LinkedInのURL解析が有効な場合
             if (value.includes('linkedin.com')) {
@@ -122,7 +200,7 @@ function extractLinkedInId(url: string) {
     // 最後の部分から余分な文字（クエリパラメータなど）を除去
     return lastPart.split('?')[0].split('#')[0]
   } catch (error) {
-    console.error('LinkedIn ID抽出エラー:', error)
+    console.error('Error while extracting LinkedIn ID:', error)
     return null
   }
 }

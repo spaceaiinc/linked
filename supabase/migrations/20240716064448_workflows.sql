@@ -1,5 +1,5 @@
 --
--- Name: providers; Type: TABLE; Schema: public; Owner: -
+-- Name: workflows; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.workflows (
@@ -10,16 +10,40 @@ CREATE TABLE public.workflows (
     deleted_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     provider_id UUID NOT NULL REFERENCES public.providers(id),
     type SMALLINT NOT NULL,
+    name TEXT NOT NULL,
+    status SMALLINT NOT NULL DEFAULT 1,
     scheduled_hours SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     scheduled_days SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
+    scheduled_months SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     scheduled_weekdays SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     search_url TEXT NOT NULL DEFAULT '',
-    target_public_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
     keywords TEXT NOT NULL DEFAULT '',
+    company_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+    target_workflow_id UUID NULL,
     network_distance SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
-    message TEXT NOT NULL DEFAULT '',
+    invitation_message TEXT NOT NULL DEFAULT '',
+    invitation_sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
+    first_message TEXT NOT NULL DEFAULT '',
+    first_message_days SMALLINT NOT NULL DEFAULT 0,
+    first_message_sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
+    second_message TEXT NOT NULL DEFAULT '',
+    second_message_days SMALLINT NOT NULL DEFAULT 1,
+    second_message_sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
+    third_message TEXT NOT NULL DEFAULT '',
+    third_message_days SMALLINT NOT NULL DEFAULT 2,
+    third_message_sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',
     limit_count SMALLINT NOT NULL DEFAULT 10,
-    closed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity'
+    max_execution_minutes SMALLINT NOT NULL DEFAULT 10 CHECK (max_execution_minutes <= 300),
+    max_number_of_launches SMALLINT NOT NULL DEFAULT 2 CHECK (max_number_of_launches <= 10),
+    email_notify_manual_launch_error BOOLEAN NOT NULL DEFAULT TRUE,
+    email_notify_auto_launch_error BOOLEAN NOT NULL DEFAULT TRUE,
+    email_notify_manual_error BOOLEAN NOT NULL DEFAULT TRUE,
+    email_notify_auto_error BOOLEAN NOT NULL DEFAULT TRUE,
+    email_notify_manual_time_limit BOOLEAN NOT NULL DEFAULT TRUE,
+    email_notify_auto_time_limit BOOLEAN NOT NULL DEFAULT TRUE,
+    email_notify_manual_success BOOLEAN NOT NULL DEFAULT FALSE,
+    email_notify_auto_success BOOLEAN NOT NULL DEFAULT FALSE,
+    slack_webhook_url TEXT NOT NULL DEFAULT ''
 );
 
 
@@ -36,7 +60,7 @@ CREATE TABLE public.workflow_histories (
     workflow_id UUID NOT NULL REFERENCES public.workflows(id),
     status SMALLINT NOT NULL,
     cursor TEXT NOT NULL DEFAULT '',
-    target_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[]
+    error_message TEXT NOT NULL DEFAULT ''
 );
 
 --

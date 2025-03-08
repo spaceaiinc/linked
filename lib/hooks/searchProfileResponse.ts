@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { type ToolConfig } from '@/lib/types/toolconfig'
-import { convertProfileJsonToCsv } from '../csv'
+import { useAtom } from 'jotai'
+import { workflowsAtom } from '../atom'
+import { Workflow } from '../types/supabase'
+import { useToast } from '@/components/ui/use-toast'
 
 export const searchProfileResponse = (toolConfig: ToolConfig) => {
   const [loading, setLoading] = useState(false)
+  const [workflows, setWorkflows] = useAtom(workflowsAtom)
+  const { toast } = useToast()
 
   const generateResponse = async (
     formData: { [key: string]: string },
@@ -13,12 +18,7 @@ export const searchProfileResponse = (toolConfig: ToolConfig) => {
     setLoading(true)
 
     try {
-      // const body: ProviderSearchProfilePostParam = {
-      //   account_id: formData.account_id,
-      //   ...formData,
-      // }
-
-      const response = await fetch(`/api/provider/search/profile`, {
+      const response = await fetch(`/api/workflow/search-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,34 +30,26 @@ export const searchProfileResponse = (toolConfig: ToolConfig) => {
 
       if (!response.ok) {
         alert(await response.text())
-        throw new Error('Network response was not ok')
+        toast({
+          variant: 'destructive',
+          description: '処理に失敗しました',
+          duration: 4000,
+          className: 'bg-white border-red-200 rounded-xl',
+        })
+        return
       }
-
+      toast({
+        description: '処理に成功しました',
+        duration: 4000,
+        className: 'bg-white border-teal-200 rounded-xl',
+      })
       const responseData = await response.json()
-      console.log('responseData', responseData)
-
-      // For navigation, use slug for Grok and id for others
-      // const baseUrl = toolConfig.company.homeUrl.startsWith('/')
-      //   ? toolConfig.company.homeUrl.slice(1)
-      //   : toolConfig.company.homeUrl
-
-      // const navigationPath = `/${baseUrl}/${responseData.slug}`
-      // router.push(navigationPath)
-      if (
-        responseData.profile_list &&
-        (formData.type == '1' || formData.type == '2')
-      ) {
-        const date = new Date()
-        const year = date.getFullYear()
-        const month = date.getMonth() + 1
-        const day = date.getDate()
-        const hours = date.getHours()
-        const minutes = date.getMinutes()
-        const outputFilePath = `linkedin_profile_${year}${month}${day}${hours}${minutes}.csv`
-        convertProfileJsonToCsv(responseData.profile_list, outputFilePath)
+      if (responseData.workflow) {
+        setWorkflows([...workflows, responseData.workflow as Workflow])
+        window.location.reload()
       }
     } catch (error) {
-      console.error('Failed to generate responses:', error)
+      console.error('Failed to responses:', error)
     } finally {
       setLoading(false)
     }

@@ -1,12 +1,9 @@
 import { Suspense } from 'react'
 import { Sidebar } from '@/components/dashboard/Sidebar'
-import { ContentFooter } from '@/components/dashboard/Footer'
 import { createClient } from '@/lib/utils/supabase/server'
 import { Container } from '@/components/dashboard/Container'
-import { Heading } from '@/components/dashboard/Heading'
 import LoadingSpinner from '@/components/Loading'
 import { ToolConfig } from '@/lib/types/toolconfig'
-import { Paragraph } from './Paragraph'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -84,9 +81,9 @@ async function MainContent({
       {showGreeting && (
         <>
           {/* <span className="text-4xl">👋🏼</span> */}
-          <Heading className="font-black mb-10">
+          {/* <Heading className="font-black mb-10">
             {toolConfig.company?.name}
-          </Heading>
+          </Heading> */}
           {/* <Paragraph className="max-w-xl mt-4">
             {toolConfig.company?.description}
           </Paragraph> */}

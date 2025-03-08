@@ -30,7 +30,7 @@ export default function Page() {
           navbarConfig={toolConfig.navbarLanding!}
         />
         <Hero />
-        {/* <Section>
+        <Section>
           <Features />
           <Testimonials />
         </Section>
@@ -40,7 +40,7 @@ export default function Page() {
         <Footer
           companyConfig={toolConfig.company!}
           footerConfig={toolConfig.footerLanding!}
-        /> */}
+        />
       </div>
     </>
   )

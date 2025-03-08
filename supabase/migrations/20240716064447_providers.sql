@@ -12,14 +12,14 @@ CREATE TABLE public.providers (
     user_id UUID NOT NULL REFERENCES public.profiles(id),
     type SMALLINT NOT NULL,
     status SMALLINT NOT NULL,
-    account_id TEXT NOT NULL,
+    account_id TEXT NOT NULL UNIQUE,
     private_identifier TEXT NOT NULL,
     public_identifier TEXT NOT NULL,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT NOT NULL,
     like_target_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
-    like_target_account_hours SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
+    like_target_hours SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     check_reaction_hours SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[]
 );
 
@@ -36,10 +36,10 @@ CREATE INDEX providers_user_id_index ON public.providers (user_id);
 -- Name: providers Users can select their own providers; Type: POLICY; Schema: public; Owner: -
 --
 
--- CREATE POLICY "Users can select providers their company has" ON public.providers FOR SELECT 
--- USING (company_id = (select company_id from public.profiles where id = auth.uid()));
+CREATE POLICY "Users can select providers their company has" ON public.providers FOR SELECT 
+USING (company_id = (select company_id from public.profiles where id = auth.uid()));
 
 -- Name: providers; Type: ROW SECURITY; Schema: public; Owner: -
 --
 
--- ALTER TABLE public.providers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.providers ENABLE ROW LEVEL SECURITY;
