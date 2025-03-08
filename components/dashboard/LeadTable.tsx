@@ -64,6 +64,33 @@ export function LeadTable({ leads }: LeadTableProps) {
         ),
       },
       {
+        accessorKey: 'public_identifier',
+        header: 'Profile URL',
+        cell: ({ row }) => (
+          <>
+            {row.getValue('public_identifier') ? (
+              <div className="text-sm text-muted-foreground max-w-md truncate">
+                <a
+                  href={
+                    'https://www.linkedin.com/in/' +
+                    row.getValue('public_identifier')
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                >
+                  {decodeURIComponent(row.getValue('public_identifier')) || '-'}
+                </a>
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground max-w-md truncate">
+                -
+              </div>
+            )}
+          </>
+        ),
+      },
+      {
         accessorKey: 'full_name',
         header: 'Full Name',
         cell: ({ row }) => (
@@ -96,22 +123,6 @@ export function LeadTable({ leads }: LeadTableProps) {
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground max-w-md truncate">
             {row.getValue('headline') || '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'public_profile_url',
-        header: 'Profile URL',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            <a
-              href={row.getValue('public_profile_url') || '-'}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              {row.getValue('public_profile_url') || '-'}
-            </a>
           </div>
         ),
       },
@@ -174,11 +185,19 @@ export function LeadTable({ leads }: LeadTableProps) {
         accessorKey: 'network_distance',
         header: 'Network Distance',
         cell: ({ row }) => (
-          <div className="flex items-center whitespace-nowrap">
-            <Badge className="bg-primary text-white hover:bg-primary/80 text-xs">
-              {row.getValue('network_distance') || '-'}
-            </Badge>
-          </div>
+          <>
+            {row.getValue('network_distance') ? (
+              <div className="flex items-center whitespace-nowrap">
+                <Badge className="bg-primary text-white hover:bg-primary/80 text-xs">
+                  {row.getValue('network_distance')}
+                </Badge>
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground max-w-md truncate">
+                -
+              </div>
+            )}
+          </>
         ),
       },
       {
@@ -228,7 +247,7 @@ export function LeadTable({ leads }: LeadTableProps) {
       },
       {
         accessorKey: 'lead_volunteering_experiences',
-        header: 'Volunteering Experience',
+        header: 'Volunteering',
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground max-w-lg truncate">
             {row.getValue('lead_volunteering_experiences') || '-'}
@@ -412,6 +431,9 @@ export function LeadTable({ leads }: LeadTableProps) {
   const filteredLeads = React.useMemo(() => {
     return leads.filter(
       (gen) =>
+        gen.public_identifier
+          ?.toLowerCase()
+          .includes(debouncedFilterValue.toLowerCase()) ||
         gen.full_name
           ?.toLowerCase()
           .includes(debouncedFilterValue.toLowerCase()) ||
