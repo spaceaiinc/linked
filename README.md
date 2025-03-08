@@ -107,3 +107,11 @@ Please read the [official documentation to get started.](https://docs.spaceai.jp
 - Like
 - Reaction
 - Stripe
+
+<!-- rename like_target_account_hours -->
+<!-- company_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[], -->
+
+Add Update Func
+Add Time Scheduler
+
+Add Dashboard

@@ -17,8 +17,9 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
-import { providerAtom, providersAtom } from '@/lib/atom'
+import { loadingAtom, providerAtom, providersAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
+import { createClient } from '@/lib/utils/supabase/client'
 
 type Navlink = {
   href: string
@@ -26,41 +27,6 @@ type Navlink = {
   icon?: React.ReactNode | any
   isExternal?: boolean
 }
-
-// 【具体のやりたいこと】
-// 確認済み：
-// つながり申請の自動化
-// 指定ユーザー（キーマン）の投稿のURL収集＆最新投稿へのいいね
-// 自身の投稿へいいねをくれた人へのコメントと投稿へのいいね
-// プロフィール内の職歴（Experience）の一括ダウンロード
-// 指定の検索条件（「人材紹介　CEO」など）に合致するユーザーのリストをCSVでエクスポートする
-// 特定のユーザーがいいね・コメントした対象投稿のリストアップ
-// 自身の投稿関連（自分の投稿へのコメントへのいいね、コメントは除ける）
-// 自分の投稿にいいねをくれたユーザーのリストアップ
-// 求人データのダウンロード（詳細の大きなテキスト含む）
-
-// 確認中：
-// 外からプロフィールURLをCSVでアップロードしてそのユーザーにつながり申請をまとめて送る（＆100通を5日に分けて20通送る）
-// （他ユーザーのプロフィール閲覧自動化）
-
-// 今後やりたいこと
-// 中小以下向けセールスエージェント
-// つながり申請後に承認されたタイミングで通知する機能
-// 申請許可ユーザーのリストアップと営業ターゲットかどうかの判定&適切なタイミングのレコメンド(投稿直後、よく活動する時間など)
-// Googleアラートと連携して登録した関心分野のニュースを自動てレコメンド&投稿の素案をAIが作ってくれる機能(テイストを微調整)
-// LinkedInLiveとの連携機能
-// 潜在顧客のスコアリング機能
-// 自分からつながり申請・相手からつながり申請の可視化
-// 申請承認タイミングの明示
-// 直近投稿・およびいいね・コメント対象ポストから関心分野の特定
-// 直近投稿を分析して生成AIをかませて、「彼は今○○の分野に関心があります」的なポップアップをくれるイメージ。これはできそう
-// いいね・コメント対象投稿のリストが取れるといろいろ分析に使えそう
-// 適切なDMタイミングのレコメンド
-// 求人データのダウンロード
-// 大企業向け別サービス
-// 自社社員アカウントの登録・モニタリング機能
-// 社員のフォロワーリストの作成、マッピング
-// DM内容のモニタリング、コンプラ違反投稿のアラート
 
 const Navigation = React.memo(
   ({
@@ -85,7 +51,7 @@ const Navigation = React.memo(
     }
 
     const otherLinks = [
-      { href: '/', label: 'Landing', icon: IconFileText },
+      { href: '', label: '使い方', icon: IconFileText },
       // user
       //   ? {
       //       onClick: handleSignOut,
@@ -165,7 +131,7 @@ const Navigation = React.memo(
                 isActive('/auth') && 'text-sky-500'
               )}
             />
-            <span>Logout ({user?.email?.split('@')[0]})</span>
+            <span>ログアウト ({user?.email?.split('@')[0]})</span>
           </a>
         ) : (
           <Link
@@ -201,7 +167,7 @@ const SidebarHeader = React.memo(() => (
         className="w-48"
       />
       */}
-      <p className="text-5xl font-bold">Linked</p>
+      <p className="text-3xl font-bold">Linked</p>
     </Link>
   </div>
 ))
@@ -244,7 +210,24 @@ export const Sidebar = ({ user }: { user: User | null }) => {
   // const [user, _] = useAtom(userAtom)
   const [providers, _] = useAtom(providersAtom)
   const [provider, setProvider] = useAtom(providerAtom)
-
+  const [, setLoading] = useAtom(loadingAtom)
+  const handleSelectProvider = async (value: string) => {
+    setLoading(true)
+    if (value === 'none' || !user) return
+    const findedProvider = providers.find((p) => p.account_id === value)
+    if (findedProvider === undefined || !findedProvider) return
+    setProvider(findedProvider)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('profiles')
+      .update({ selected_provider_id: findedProvider.id })
+      .eq('id', user.id)
+    if (error) {
+      console.error('Error updating profile', error)
+    }
+    window.location.reload()
+    setLoading(false)
+  }
   return (
     <>
       <div
@@ -252,7 +235,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
           open ? 'block' : 'hidden'
         } transition-all duration-300 ease-in-out`}
       >
-        <div className="px-6 z-40 py-10 bg-neutral-100 max-w-[14rem] lg:w-fit fixed h-screen left-0 flex flex-col justify-between overflow-y-auto">
+        <div className="px-6 z-40 py-10 bg-neutral-100 max-w-[12rem] lg:w-fit fixed h-screen left-0 flex flex-col justify-between overflow-y-auto">
           <div className="flex-1 overflow-auto no-scrollbar pb-4">
             <SidebarHeader />
             <Navigation setOpen={handleSetOpen} user={user} />
@@ -263,15 +246,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
                 {providers.length ? (
                   <Select
                     value={provider?.account_id}
-                    onValueChange={(value) => {
-                      if (value === 'none') return
-                      const findedProvider = providers.find(
-                        (p) => p.account_id === value
-                      )
-                      if (findedProvider === undefined || !findedProvider)
-                        return
-                      setProvider(findedProvider)
-                    }}
+                    onValueChange={(value) => handleSelectProvider(value)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue className="capitalize">
@@ -283,7 +258,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
                         <SelectItem
                           key={key.account_id}
                           value={key.account_id}
-                          className="capitalize data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
+                          className="data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
                         >
                           {key.public_identifier}
                         </SelectItem>
@@ -308,7 +283,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
             </>
           ) : null}
           <span className="text-xs text-neutral-400 text-center">
-            version@0.1.0
+            version@0.1.1
           </span>
         </div>
       </div>

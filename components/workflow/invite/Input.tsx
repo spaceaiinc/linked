@@ -3,7 +3,7 @@
 import { useState, ReactElement, useEffect } from 'react'
 import { useFormData } from '@/lib/hooks/useFormData'
 import { RenderFields } from '@/components/input/FormFields'
-import { type ToolConfig } from '@/lib/types/toolconfig'
+import { FormFields, type ToolConfig } from '@/lib/types/toolconfig'
 import { LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { searchProfileResponse } from '@/lib/hooks/searchProfileResponse'
@@ -12,12 +12,15 @@ import { motion } from 'framer-motion'
 import { FileIcon, UploadCloudIcon, LinkIcon, TextIcon } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useDropzone } from 'react-dropzone'
-import { Input } from '../ui/input'
+import { Input } from '@/components/ui/input'
 import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
 import { providerAtom, userAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractColumnData } from '@/lib/csv'
-import CheckboxGroup from '../ui/checkbox-group'
+import CheckboxGroup from '@/components/ui/checkbox-group'
+import { createClient } from '@/lib/utils/supabase/client'
+import { Workflow } from '@/lib/types/supabase'
+import { WorkflowType } from '@/lib/types/master'
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -48,52 +51,116 @@ function GridPattern() {
   )
 }
 
-interface SearchProfileInputCaptureProps {
+interface InviteInputCaptureProps {
+  workflowId: string
   emptyStateComponent: ReactElement
   toolConfig: ToolConfig
   userEmail?: string
   credits?: number
 }
 
-export default function SearchProfileInputCapture({
+export default function InviteInputCapture({
+  workflowId,
   toolConfig,
   emptyStateComponent,
   userEmail,
   credits: initialCredits,
-}: SearchProfileInputCaptureProps) {
+}: InviteInputCaptureProps) {
   const [generateResponse, loading] = searchProfileResponse(toolConfig)
 
   const [formData, handleChange, customHandleChange] = useFormData(
     toolConfig.fields!
   )
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const formType = formData['type']
-    if (formType.includes('0') && formType.includes('1')) {
-      formData['type'] = '2'
-    } else if (formType.includes('0')) {
-      formData['type'] = '1'
-    } else if (formType.includes('1')) {
-      formData['type'] = '1'
-    }
-    const targetPublicIdentifiers = await extractColumnData(
-      fileUrl,
-      formData['extract_column'] || 'public_identifier'
-    )
-    console.log('targetPublicIdentifiers', targetPublicIdentifiers)
-    customHandleChange(
-      targetPublicIdentifiers.join(','),
-      'target_public_identifiers'
-    )
-    formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
-    await generateResponse(formData, event)
-  }
-
   const [activeTab, setActiveTab] = useState<string>('0')
   const [fileUrl, setFileUrl] = useState<string>('')
   const [uploading, setUploading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
+  const [provider] = useAtom(providerAtom)
+  const [defaultActiveTab, setDefaultActiveTab] = useState<string>('')
+  const [workflowInDb, setWorkflowInDb] = useState<Workflow | null>(null)
+
+  useEffect(() => {
+    // fetch workflow data
+    const f = async () => {
+      const supabase = createClient()
+      const { data: workflowData, error } = await supabase
+        .from('workflows')
+        .select('*')
+        .eq('id', workflowId)
+        .eq('deleted_at', '-infinity')
+        .single()
+      if (error) {
+        console.error('Error fetching workflow:', error)
+      }
+      if (workflowData) {
+        const workflow: Workflow = workflowData
+        setWorkflowInDb(workflow)
+        customHandleChange(workflowId, 'workflow_id')
+        customHandleChange(workflow.name, 'name')
+        if (workflow.search_url) {
+          customHandleChange(workflow.search_url, 'search_url')
+          setActiveTab('0')
+          setDefaultActiveTab('0')
+        } else if (
+          workflow.keywords ||
+          workflow.company_private_identifiers.length
+        ) {
+          customHandleChange(workflow.keywords, 'keywords')
+          customHandleChange(
+            workflow.company_private_identifiers.join(','),
+            'company_private_identifiers'
+          )
+          customHandleChange(
+            workflow.network_distance.join(','),
+            'network_distance'
+          )
+          setActiveTab('1')
+          setDefaultActiveTab('1')
+        } else if (workflow.target_workflow_id) {
+          customHandleChange(workflow.target_workflow_id, 'target_workflow_id')
+          setActiveTab('2')
+          setDefaultActiveTab('2')
+        }
+        customHandleChange(workflow.limit_count.toString(), 'limit_count')
+        customHandleChange(workflow.invitation_message, 'invitation_message')
+        // customHandleChange(
+        //   workflow.scheduled_months.join(','),
+        //   'scheduled_months'
+        // )
+        customHandleChange(
+          workflow.scheduled_hours.join(','),
+          'scheduled_hours'
+        )
+        customHandleChange(workflow.scheduled_days.join(','), 'scheduled_days')
+        customHandleChange(
+          workflow.scheduled_weekdays.join(','),
+          'scheduled_weekdays'
+        )
+      }
+    }
+    f()
+  }, [workflowId])
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!provider?.account_id) return alert('Provider not connected')
+    formData['active_tab'] = activeTab
+    formData['account_id'] = provider?.account_id
+    formData['workflow_id'] = workflowId
+    formData['type'] = WorkflowType.INVITE.toString()
+    if (fileUrl) {
+      const targetPublicIdentifiers = await extractColumnData(
+        fileUrl,
+        formData['extract_column'] || 'public_identifier'
+      )
+      customHandleChange(
+        targetPublicIdentifiers.join(','),
+        'target_public_identifiers'
+      )
+      formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
+    }
+    await generateResponse(formData, event)
+  }
 
   const handleFileUpload = async (files: File[]) => {
     setUploading(true)
@@ -113,29 +180,21 @@ export default function SearchProfileInputCapture({
     maxSize: 10 * 1024 * 1024, // 10MB
   })
 
-  const [user, _] = useAtom(userAtom)
-  const [provider, __] = useAtom(providerAtom)
-
-  useEffect(() => {
-    if (activeTab == '4') {
-      customHandleChange('3', 'active_tab')
-    } else {
-      customHandleChange(activeTab, 'active_tab')
+  let searchUrlField: FormFields | undefined
+  let keywordsField: FormFields | undefined
+  let companyUrlsField: FormFields | undefined
+  let networkDistanceField: FormFields | undefined
+  toolConfig.fields?.forEach((field) => {
+    if (field.name === 'search_url') {
+      searchUrlField = field
+    } else if (field.name === 'keywords') {
+      keywordsField = field
+    } else if (field.name === 'company_urls') {
+      companyUrlsField = field
+    } else if (field.name === 'network_distance') {
+      networkDistanceField = field
     }
-  }, [activeTab])
-
-  useEffect(() => {
-    console.log('user', user, 'provider', provider)
-    if (provider) customHandleChange(provider.account_id, 'account_id')
-  }, [provider])
-
-  const keywordsField = toolConfig.fields?.find(
-    (field) => field.name === 'keywords'
-  )
-
-  const networkDistanceField = toolConfig.fields?.find(
-    (field) => field.name === 'network_distance'
-  )
+  })
 
   return (
     <section className="pb-20 w-full mx-auto">
@@ -159,57 +218,70 @@ export default function SearchProfileInputCapture({
                         >
                           <div className="flex justify-center">
                             <TabsList className="flex w-[700px] h-12 items-center bg-neutral-100/50 dark:bg-neutral-900/50 backdrop-blur-sm rounded-full p-1">
-                              <TabsTrigger
-                                value="0"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <IconBrandLinkedin className="h-4 w-4" />
-                                  <span className="font-medium">検索URL</span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="1"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <TextIcon className="h-4 w-4" />
-                                  <span className="font-medium">
-                                    キーワード
-                                  </span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="2"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <IconFile className="h-4 w-4" />
-                                  <span className="font-medium">
-                                    マイリスト
-                                  </span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="3"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <LinkIcon className="h-4 w-4" />
-                                  <span className="font-medium">CSV URL</span>
-                                </div>
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="4"
-                                className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <UploadCloudIcon className="h-4 w-4" />
-                                  <span className="font-medium">
-                                    アップロード
-                                  </span>
-                                </div>
-                              </TabsTrigger>
+                              {(defaultActiveTab === '0' ||
+                                !defaultActiveTab) && (
+                                <TabsTrigger
+                                  value="0"
+                                  className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <IconBrandLinkedin className="h-4 w-4" />
+                                    <span className="font-medium">検索URL</span>
+                                  </div>
+                                </TabsTrigger>
+                              )}
+                              {(defaultActiveTab === '1' ||
+                                !defaultActiveTab) && (
+                                <TabsTrigger
+                                  value="1"
+                                  className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <TextIcon className="h-4 w-4" />
+                                    <span className="font-medium">
+                                      キーワード
+                                    </span>
+                                  </div>
+                                </TabsTrigger>
+                              )}
+                              {(defaultActiveTab === '2' ||
+                                !defaultActiveTab) && (
+                                <>
+                                  <TabsTrigger
+                                    value="2"
+                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <IconFile className="h-4 w-4" />
+                                      <span className="font-medium">
+                                        リード
+                                      </span>
+                                    </div>
+                                  </TabsTrigger>
+                                  <TabsTrigger
+                                    value="3"
+                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <LinkIcon className="h-4 w-4" />
+                                      <span className="font-medium">
+                                        CSV URL
+                                      </span>
+                                    </div>
+                                  </TabsTrigger>
+                                  <TabsTrigger
+                                    value="4"
+                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <UploadCloudIcon className="h-4 w-4" />
+                                      <span className="font-medium">
+                                        アップロード
+                                      </span>
+                                    </div>
+                                  </TabsTrigger>
+                                </>
+                              )}
                             </TabsList>
                           </div>
                           <TabsContent value="0">
@@ -223,15 +295,16 @@ export default function SearchProfileInputCapture({
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      検索URL
+                                      {searchUrlField?.label}
                                     </label>
                                     <div className="relative mt-1">
                                       <Input
                                         placeholder="https://www.linkedin.com/search/results/profile/..."
-                                        value={formData['search_url']}
+                                        value={formData[searchUrlField?.name!]}
                                         onChange={(e) =>
                                           handleChange(e, 'search_url')
                                         }
+                                        required={activeTab === '0'}
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -260,10 +333,42 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           handleChange(e, keywordsField?.name!)
                                         }
-                                        required={false}
                                         placeholder={'人材紹介 CEO'}
                                         id={keywordsField?.name!}
                                         name={keywordsField?.name!}
+                                        className="p-2 text-xs w-full"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                                      {companyUrlsField?.label}{' '}
+                                    </label>
+                                    <div className="relative mt-1">
+                                      <Input
+                                        value={
+                                          formData[companyUrlsField?.name!]
+                                        }
+                                        onChange={(e) =>
+                                          handleChange(
+                                            e,
+                                            companyUrlsField?.name!
+                                          )
+                                        }
+                                        placeholder={
+                                          workflowInDb
+                                            ?.company_private_identifiers.length
+                                            ? `既に設定されています。企業ID:${workflowInDb?.company_private_identifiers}`
+                                            : 'https://www.linkedin.com/company/...'
+                                        }
+                                        disabled={
+                                          workflowInDb
+                                            ?.company_private_identifiers.length
+                                            ? true
+                                            : false
+                                        }
+                                        id={companyUrlsField?.name!}
+                                        name={companyUrlsField?.name!}
                                         className="p-2 text-xs w-full"
                                       />
                                     </div>
@@ -293,9 +398,11 @@ export default function SearchProfileInputCapture({
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      マイリスト
+                                      リード
                                     </label>
-                                    <div className="relative mt-1">実装中</div>
+                                    <div className="relative mt-1">
+                                      Coming Soon...
+                                    </div>
                                   </div>
                                 </div>
                               </motion.div>
@@ -321,6 +428,7 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           setFileUrl(e.target.value)
                                         }
+                                        required={activeTab === '3'}
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -337,6 +445,7 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           handleChange(e, 'extract_column')
                                         }
+                                        required={activeTab === '3'}
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                     </div>
@@ -356,7 +465,10 @@ export default function SearchProfileInputCapture({
                                   <GridPattern />
                                 </div>
                                 <div className="flex flex-col items-center justify-center">
-                                  <input {...getInputProps()} />
+                                  <input
+                                    {...getInputProps()}
+                                    // required={activeTab === '4'}
+                                  />
 
                                   <p className="relative z-20 font-sans font-bold text-neutral-700 dark:text-neutral-300 text-base">
                                     ファイルをアップロード
@@ -406,22 +518,13 @@ export default function SearchProfileInputCapture({
                                   onChange={(e) =>
                                     handleChange(e, 'extract_column')
                                   }
+                                  required={activeTab === '4'}
                                   className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                 />
                               </div>
                             </div>
                           </TabsContent>
                         </Tabs>
-
-                        {error && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg"
-                          >
-                            {error}
-                          </motion.div>
-                        )}
                       </div>
                     </div>
                     <RenderFields

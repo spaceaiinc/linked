@@ -6,12 +6,12 @@ export const toolConfig: ToolConfig = {
   company: {
     name: 'プロフィール検索',
     theme: 'default',
-    homeUrl: '/search',
-    appUrl: '/search',
+    homeUrl: '/dashboard',
+    appUrl: '/dashboard',
     description: 'LinkedIn Automation',
     logo: 'https://cdn2.iconfinder.com/data/icons/privacy-policy/512/privacy-data-policy-security-05-512.png',
     navbarLinks: [
-      { label: 'App', href: `/search` },
+      { label: 'App', href: `/dashboard` },
       { label: 'Home', href: '/' },
     ],
   },
@@ -20,7 +20,7 @@ export const toolConfig: ToolConfig = {
     title: 'LinkedIn Automation',
     description: 'LinkedIn Automation',
     og_image: 'https://linked.spaceai.jp/og.png',
-    canonical: 'https://linked.spaceai.jp/search',
+    canonical: 'https://linked.spaceai.jp/dashboard',
   },
 
   ////// Paywall
@@ -28,7 +28,7 @@ export const toolConfig: ToolConfig = {
   credits: 5,
 
   ////// Location
-  toolPath: '/search',
+  toolPath: '/dashboard',
 
   ////// AI config
   aiModel: '',
@@ -45,18 +45,27 @@ export const toolConfig: ToolConfig = {
       placeholder: '',
       required: true,
       custom: true,
+      // validation: yup.string().required('Account ID is required'),
+    },
+    {
+      label: 'ワークフロー名',
+      name: 'name',
+      type: 'input',
+      placeholder: '',
+      required: true,
+      // validation: yup.string().required('ワークフロー名は必須です'),
     },
     {
       label: '処理',
       name: 'type',
       type: 'checkbox',
       options: [
-        { label: 'つながり申請', value: '0' },
-        { label: 'CSVエクスポート', value: '1' },
+        { label: '検索', value: '0' },
+        { label: 'つながり申請', value: '1' },
       ],
       required: true,
-      initialValue: '1',
-      multiple: true,
+      initialValue: '0',
+      custom: true,
     },
     {
       label: 'Active Tab',
@@ -75,7 +84,7 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: 'Search URL',
+      label: 'URL',
       name: 'search_url',
       type: 'input',
       placeholder: '',
@@ -91,8 +100,8 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: 'mylist id',
-      name: 'mylist_id',
+      label: 'lead_list id',
+      name: 'target_workflow_id',
       type: 'input',
       placeholder: '',
       required: false,
@@ -101,6 +110,14 @@ export const toolConfig: ToolConfig = {
     {
       label: 'キーワード',
       name: 'keywords',
+      type: 'input',
+      placeholder: '',
+      required: false,
+      custom: true,
+    },
+    {
+      label: '企業URL',
+      name: 'company_urls',
       type: 'input',
       placeholder: '',
       required: false,
@@ -120,25 +137,19 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: '検索数(1回毎の実行数)',
+      label: '1回毎の対象数',
       name: 'limit_count',
       type: 'input',
       inputType: 'number',
       placeholder: '10',
       initialValue: '10',
       required: false,
-      max: 50,
-      min: 1,
+      max: 200,
+      min: 0,
+      // validation: yup.number().required('検索数は必須です'),
     },
     {
-      label: '申請時メッセージ',
-      name: 'message',
-      type: 'textarea',
-      placeholder: '',
-      required: false,
-    },
-    {
-      label: '時間',
+      label: '時間(JST)',
       name: 'scheduled_hours',
       type: 'checkbox',
       options: [
@@ -170,7 +181,7 @@ export const toolConfig: ToolConfig = {
       required: false,
     },
     // {
-    //   label: '日',
+    //   label: '日(JST)',
     //   name: 'scheduled_days',
     //   type: 'checkbox',
     //   options: [
@@ -209,7 +220,7 @@ export const toolConfig: ToolConfig = {
     //   required: false,
     // },
     {
-      label: '曜日',
+      label: '曜日(JST)',
       name: 'scheduled_weekdays',
       type: 'checkbox',
       options: [
