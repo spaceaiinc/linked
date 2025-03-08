@@ -1,12 +1,22 @@
+export enum ProviderType {
+  LINKEDIN = 0,
+}
+
+export enum ProviderStatus {
+  CREATION_SUCCESS = 0,
+  RECONNECTED = 1,
+}
+
 export enum WorkflowType {
-  SEARCH = 0,
-  INVITE = 1,
+  LEAD_LIST = 0, // lead list表示用
+  SEARCH = 1,
+  INVITE = 2,
 }
 
 export enum ActiveTab {
   SEARCH = 0,
   KEYWORDS = 1,
-  MYLIST = 2,
+  LEAD_LIST = 2,
   FILE_URL = 3,
   UPLOAD = 4,
 }
@@ -18,6 +28,10 @@ export enum NetworkDistance {
   THIRD_DEGREE = 3,
 }
 
+export enum WorkflowRunStatus {
+  OFF = 0,
+  ON = 1,
+}
 export enum WorkflowStatus {
   FAILED = 0,
   SUCCESS = 1,
@@ -25,10 +39,11 @@ export enum WorkflowStatus {
 
 export enum LeadStatus {
   SEARCHED = 0,
-  IN_QUEUE = 1,
-  INVITED = 2,
-  ACCEPTED = 3,
-  FOLLOW_UP_SENT = 4,
-  REPLIED = 5,
-  NOT_SENT = 6,
+  IN_QUEUE = 10,
+  INVITED = 20,
+  INVITED_FAILED = 21,
+  ACCEPTED = 30,
+  FOLLOW_UP_SENT = 40,
+  FOLLOW_UP_SENT_FAILED = 41,
+  REPLIED = 50,
 }

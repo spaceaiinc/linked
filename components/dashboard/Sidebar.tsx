@@ -51,7 +51,7 @@ const Navigation = React.memo(
     }
 
     const otherLinks = [
-      { href: '/', label: 'Landing', icon: IconFileText },
+      { href: '', label: '使い方', icon: IconFileText },
       // user
       //   ? {
       //       onClick: handleSignOut,
@@ -131,7 +131,7 @@ const Navigation = React.memo(
                 isActive('/auth') && 'text-sky-500'
               )}
             />
-            <span>Logout ({user?.email?.split('@')[0]})</span>
+            <span>ログアウト ({user?.email?.split('@')[0]})</span>
           </a>
         ) : (
           <Link
@@ -258,7 +258,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
                         <SelectItem
                           key={key.account_id}
                           value={key.account_id}
-                          className="capitalize data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
+                          className="data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
                         >
                           {key.public_identifier}
                         </SelectItem>
@@ -283,7 +283,7 @@ export const Sidebar = ({ user }: { user: User | null }) => {
             </>
           ) : null}
           <span className="text-xs text-neutral-400 text-center">
-            version@0.1.0
+            version@0.1.1
           </span>
         </div>
       </div>

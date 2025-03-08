@@ -19,6 +19,7 @@ CREATE TABLE public.workflows (
     search_url TEXT NOT NULL DEFAULT '',
     keywords TEXT NOT NULL DEFAULT '',
     company_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
+    target_workflow_id UUID NULL,
     network_distance SMALLINT[] NOT NULL DEFAULT ARRAY[]::SMALLINT[],
     invitation_message TEXT NOT NULL DEFAULT '',
     invitation_sent_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '-infinity',

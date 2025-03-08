@@ -81,7 +81,7 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: '検索URL',
+      label: 'URL',
       name: 'search_url',
       type: 'input',
       placeholder: '',
@@ -134,7 +134,7 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
-      label: '検索数(1回毎の実行数)',
+      label: '1回毎の対象数',
       name: 'limit_count',
       type: 'input',
       inputType: 'number',
@@ -142,7 +142,7 @@ export const toolConfig: ToolConfig = {
       initialValue: '10',
       required: false,
       max: 20,
-      min: 1,
+      min: 0,
       // validation: yup.number().required('検索数は必須です'),
     },
     {
@@ -153,7 +153,7 @@ export const toolConfig: ToolConfig = {
       required: false,
     },
     {
-      label: '時間',
+      label: '時間(JST)',
       name: 'scheduled_hours',
       type: 'checkbox',
       options: [
@@ -185,7 +185,7 @@ export const toolConfig: ToolConfig = {
       required: false,
     },
     // {
-    //   label: '日',
+    //   label: '日(JST)',
     //   name: 'scheduled_days',
     //   type: 'checkbox',
     //   options: [
@@ -224,7 +224,7 @@ export const toolConfig: ToolConfig = {
     //   required: false,
     // },
     {
-      label: '曜日',
+      label: '曜日(JST)',
       name: 'scheduled_weekdays',
       type: 'checkbox',
       options: [

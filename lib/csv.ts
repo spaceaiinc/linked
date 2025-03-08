@@ -13,14 +13,14 @@ export type LeadForDisplay = Omit<
 > & {
   public_profile_url: string
   network_distance: string
-  latest_status: string
-  work_experiences: string
-  volunteering_experiences: string
-  educations: string
-  skills: string
-  languages: string
-  certifications: string
-  projects: string
+  latest_status: LeadStatus
+  lead_work_experiences: string
+  lead_volunteering_experiences: string
+  lead_educations: string
+  lead_skills: string
+  lead_languages: string
+  lead_certifications: string
+  lead_projects: string
   created_at?: string
 }
 
@@ -32,35 +32,37 @@ export const convertToDisplay = (
     return []
   }
   const rows = inputData.map((profile: Lead | LeadInsert) => {
+    console.log('Profile:', profile)
     const baseInfo: LeadForDisplay = {
-      public_profile_url: `https://www.linkedin.com/in/${profile?.public_identifier}`,
+      public_profile_url: profile?.public_identifier
+        ? `https://www.linkedin.com/in/${profile?.public_identifier}`
+        : '',
       ...profile,
-      network_distance: NetworkDistance[profile?.network_distance] || '',
-      latest_status: LeadStatus[LeadStatus.SEARCHED],
-      work_experiences: '',
-      volunteering_experiences: '',
-      educations: '',
-      skills: '',
-      languages: '',
-      certifications: '',
-      projects: '',
+      network_distance: profile?.network_distance
+        ? NetworkDistance[profile?.network_distance] || ''
+        : '',
+      latest_status: LeadStatus.SEARCHED,
+      lead_work_experiences: '',
+      lead_volunteering_experiences: '',
+      lead_educations: '',
+      lead_skills: '',
+      lead_languages: '',
+      lead_certifications: '',
+      lead_projects: '',
     }
-    if (profile.statuses?.length)
-      baseInfo.latest_status =
-        LeadStatus[
-          profile.statuses.sort((a, b) => {
-            if (!a.created_at || !b.created_at) {
-              return 0
-            }
-            return (
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-            )
-          })[0].status
-        ]
+    if (profile.lead_statuses?.length)
+      baseInfo.latest_status = profile.lead_statuses.sort((a, b) => {
+        console.log(a, b)
+        if (!a.created_at || !b.created_at) {
+          return 0
+        }
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
+      })[0].status
 
-    if (profile.work_experiences?.length) {
-      const workExperiencesText = profile.work_experiences
+    if (profile.lead_work_experiences?.length) {
+      const workExperiencesText = profile.lead_work_experiences
         .map((exp) => {
           return `会社: ${exp.company || ''}\n役職: ${
             exp.position || ''
@@ -72,10 +74,10 @@ export const convertToDisplay = (
         })
         .join('\n\n')
 
-      baseInfo.work_experiences = workExperiencesText
+      baseInfo.lead_work_experiences = workExperiencesText
     }
-    if (profile.volunteering_experiences?.length) {
-      const volunteerExperiencesText = profile.volunteering_experiences
+    if (profile.lead_volunteering_experiences?.length) {
+      const volunteerExperiencesText = profile.lead_volunteering_experiences
         .map((exp) => {
           return `会社: ${exp.company || ''}\n詳細: ${
             exp.description || ''
@@ -85,10 +87,10 @@ export const convertToDisplay = (
         })
         .join('\n\n')
 
-      baseInfo.volunteering_experiences = volunteerExperiencesText
+      baseInfo.lead_volunteering_experiences = volunteerExperiencesText
     }
-    if (profile.educations?.length) {
-      const educationsText = profile.educations
+    if (profile.lead_educations?.length) {
+      const educationsText = profile.lead_educations
         .map((edu) => {
           return `学校: ${edu.school || ''}\n学位: ${
             edu.degree || ''
@@ -97,39 +99,39 @@ export const convertToDisplay = (
           }\n終了: ${edu.end_date || ''}`
         })
         .join('\n\n')
-      baseInfo.educations = educationsText
+      baseInfo.lead_educations = educationsText
     }
-    if (profile.skills) {
-      const skillsText = profile.skills
+    if (profile.lead_skills) {
+      const skillsText = profile.lead_skills
         .map((skill) => {
           return `${skill.name || ''}`
         })
         .join(', ')
-      baseInfo.skills = skillsText
+      baseInfo.lead_skills = skillsText
     }
-    if (profile.languages) {
-      const languagesText = profile.languages
+    if (profile.lead_languages) {
+      const languagesText = profile.lead_languages
         .map((lang) => {
           return `言語: ${lang.name || ''}\nレベル: ${lang.proficiency || ''}`
         })
         .join('\n\n')
-      baseInfo.languages = languagesText
+      baseInfo.lead_languages = languagesText
     }
-    if (profile.certifications) {
-      const certificationsText = profile.certifications
+    if (profile.lead_certifications) {
+      const certificationsText = profile.lead_certifications
         .map((cert) => {
           return `認定: ${cert.name || ''}\n機関: ${cert.organization || ''}\nURL: ${cert.url || ''}`
         })
         .join('\n\n')
-      baseInfo.certifications = certificationsText
+      baseInfo.lead_certifications = certificationsText
     }
-    if (profile.projects) {
-      const projectsText = profile.projects
+    if (profile.lead_projects) {
+      const projectsText = profile.lead_projects
         .map((proj) => {
           return `プロジェクト名: ${proj.name || ''}\n説明: ${proj.description || ''}\nスキル: ${proj.skills || ''}\n開始: ${proj.start_date || ''}\n終了: ${proj.end_date || ''}`
         })
         .join('\n\n')
-      baseInfo.projects = projectsText
+      baseInfo.lead_projects = projectsText
     }
 
     return baseInfo
@@ -153,6 +155,11 @@ export async function extractColumnData(
         const extractedData = results.data
           .map((row: any) => {
             let value = row[columnName]
+            if (typeof value === 'string') {
+              value = value.trim()
+            } else {
+              return undefined
+            }
 
             // LinkedInのURL解析が有効な場合
             if (value.includes('linkedin.com')) {
@@ -193,7 +200,7 @@ function extractLinkedInId(url: string) {
     // 最後の部分から余分な文字（クエリパラメータなど）を除去
     return lastPart.split('?')[0].split('#')[0]
   } catch (error) {
-    console.error('LinkedIn ID抽出エラー:', error)
+    console.error('Error while extracting LinkedIn ID:', error)
     return null
   }
 }

@@ -376,9 +376,9 @@ export type Database = {
           first_name: string
           last_name: string
           email: string
-          like_target_private_identifiers: string[]
-          like_target_hours: number[]
-          check_reaction_hours: number[]
+          like_target_private_identifiers?: string[]
+          like_target_hours?: number[]
+          check_reaction_hours?: number[]
         }
         Update: {
           id: string
@@ -702,7 +702,7 @@ export type Database = {
           is_creator?: boolean
           is_hiring?: boolean
           is_open_to_work?: boolean
-          network_distance: number
+          network_distance?: number
           connections_count?: number
           follower_count?: number
           shared_connections_count?: number
@@ -1473,33 +1473,35 @@ export type Workflow = PublicSchemaTables['workflows']['Row'] & {
 export type WorkflowHistory = PublicSchemaTables['workflow_histories']['Row']
 
 export type LeadInsert = PublicSchemaTables['leads']['Insert'] & {
-  workflows?: PublicSchemaTables['lead_workflows']['Insert'][] | undefined
-  statuses?: PublicSchemaTables['lead_statuses']['Insert'][] | undefined
-  work_experiences?:
+  lead_workflows?: PublicSchemaTables['lead_workflows']['Insert'][] | undefined
+  lead_statuses?: PublicSchemaTables['lead_statuses']['Insert'][] | undefined
+  lead_work_experiences?:
     | PublicSchemaTables['lead_work_experiences']['Insert'][]
     | undefined
-  volunteering_experiences?:
+  lead_volunteering_experiences?:
     | PublicSchemaTables['lead_volunteering_experiences']['Insert'][]
     | undefined
-  educations?: PublicSchemaTables['lead_educations']['Insert'][] | undefined
-  skills?: PublicSchemaTables['lead_skills']['Insert'][] | undefined
-  languages?: PublicSchemaTables['lead_languages']['Insert'][] | undefined
-  certifications?:
+  lead_educations?:
+    | PublicSchemaTables['lead_educations']['Insert'][]
+    | undefined
+  lead_skills?: PublicSchemaTables['lead_skills']['Insert'][] | undefined
+  lead_languages?: PublicSchemaTables['lead_languages']['Insert'][] | undefined
+  lead_certifications?:
     | PublicSchemaTables['lead_certifications']['Insert'][]
     | undefined
-  projects?: PublicSchemaTables['lead_projects']['Insert'][] | undefined
+  lead_projects?: PublicSchemaTables['lead_projects']['Insert'][] | undefined
 }
 
 export type Lead = PublicSchemaTables['leads']['Row'] & {
-  workflows: PublicSchemaTables['workflows']['Row'][]
-  statuses: PublicSchemaTables['lead_statuses']['Row'][]
-  work_experiences: PublicSchemaTables['lead_work_experiences']['Row'][]
-  volunteering_experiences: PublicSchemaTables['lead_volunteering_experiences']['Row'][]
-  educations: PublicSchemaTables['lead_educations']['Row'][]
-  skills: PublicSchemaTables['lead_skills']['Row'][]
-  languages: PublicSchemaTables['lead_languages']['Row'][]
-  certifications: PublicSchemaTables['lead_certifications']['Row'][]
-  projects: PublicSchemaTables['lead_projects']['Row'][]
+  lead_workflows: PublicSchemaTables['lead_workflows']['Row'][]
+  lead_statuses: PublicSchemaTables['lead_statuses']['Row'][]
+  lead_work_experiences: PublicSchemaTables['lead_work_experiences']['Row'][]
+  lead_volunteering_experiences: PublicSchemaTables['lead_volunteering_experiences']['Row'][]
+  lead_educations: PublicSchemaTables['lead_educations']['Row'][]
+  lead_skills: PublicSchemaTables['lead_skills']['Row'][]
+  lead_languages: PublicSchemaTables['lead_languages']['Row'][]
+  lead_certifications: PublicSchemaTables['lead_certifications']['Row'][]
+  lead_projects: PublicSchemaTables['lead_projects']['Row'][]
 
   status?: number
   workflow_id?: string

@@ -1,22 +1,31 @@
 import { env } from '@/lib/env'
 import {
   searchProfileBodyType,
-  findSupabaseLeadByProviderIdAndPrivateIdentifier,
-  upsertLeadByUnipileProfileDetail,
-  upsertLeadByUnipileProfile,
+  upsertLeadByUnipileUserProfileApiResponse,
+  upsertLeadByUnipilePerformSearchProfile,
   upsertLead,
+  unipileProfileWithStatus,
+  leadWithStatus,
+  unipilePeformSearchProfileWithStatus,
 } from '@/lib/db/queries/leadServer'
-import { LeadStatus, WorkflowStatus, WorkflowType } from '@/lib/types/master'
+import {
+  ActiveTab,
+  LeadStatus,
+  WorkflowStatus,
+  WorkflowType,
+} from '@/lib/types/master'
 import {
   Database,
-  LeadInsert,
+  Lead,
   Provider,
   PublicSchemaTables,
 } from '@/lib/types/supabase'
 import { unipileClient } from '@/lib/unipile'
-import { createClient } from '@/lib/utils/supabase/server'
+import { createClient as createClientInServer } from '@/lib/utils/supabase/server'
 import { searchProfileSchema } from '@/lib/validation'
 import { NextResponse } from 'next/server'
+import { supabase as serviceSupabase } from '@/lib/utils/supabase/service'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 export async function POST(req: Request) {
   /**
@@ -29,6 +38,31 @@ export async function POST(req: Request) {
     stripUnknown: true,
   })
   console.log('Validated params:', param)
+  if (param.active_tab === ActiveTab.SEARCH) {
+    param.keywords = undefined
+    param.company_urls = []
+    param.network_distance = []
+    param.target_public_identifiers = []
+    param.target_workflow_id = undefined
+  } else if (param.active_tab === ActiveTab.KEYWORDS) {
+    param.search_url = undefined
+    param.target_public_identifiers = []
+    param.target_workflow_id = undefined
+  } else if (param.active_tab === ActiveTab.LEAD_LIST) {
+    param.search_url = undefined
+    param.keywords = undefined
+    param.company_urls = []
+    param.network_distance = []
+    param.target_public_identifiers = []
+  } else if (
+    param.active_tab === ActiveTab.FILE_URL ||
+    param.active_tab === ActiveTab.UPLOAD
+  ) {
+    param.search_url = undefined
+    param.keywords = undefined
+    param.company_urls = []
+    param.network_distance = []
+  }
 
   const scheduled =
     param.scheduled_hours?.length ||
@@ -43,11 +77,20 @@ export async function POST(req: Request) {
   let nextCursor = ''
   let status = WorkflowStatus.FAILED
   let responseOfInsertWorkflow = null
+  let unipileProfilesWithStatus: unipileProfileWithStatus[] = []
+  let leadsWithStatus: leadWithStatus[] = []
+  let unipiePerformSearchProfilesWithStatus: unipilePeformSearchProfileWithStatus[] =
+    []
 
   /**
    * authenticate
    */
-  const supabase = createClient()
+  let supabase: SupabaseClient = createClientInServer()
+  if (fromSchedule) {
+    supabase = serviceSupabase
+  }
+
+  // adminクライアントを作成（RLSをバイパス）
   const { data: providerData, error: getProviderError } = await supabase
     .from('providers')
     .select('*')
@@ -68,31 +111,57 @@ export async function POST(req: Request) {
      */
     if (param.target_public_identifiers.length) {
       console.log('continue with target_public_identifiers')
-      // スケジュールから出ない場合、insert leads
-      if (!fromSchedule) {
-        const insertLeadPromises = param.target_public_identifiers?.map(
+      // スケジュールではない場合、リードを作成
+      if (scheduled) {
+        const { data: leadsDataInDb, error: errorOfLeadInDb } = await supabase
+          .from('leads')
+          .select('*')
+          .eq('provider_id', provider.id)
+          .in('public_identifier', param.target_public_identifiers)
+        if (errorOfLeadInDb) {
+          console.error('Error in get lead:', errorOfLeadInDb)
+          return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+          )
+        }
+        const leadsInDb: Lead[] = leadsDataInDb as Lead[]
+
+        const insertLeadPromises = param.target_public_identifiers.map(
           async (publicIdentifier: string) => {
-            const { data: InsertLeadData, error: insertLeadError } =
-              await supabase
-                .from('leads')
-                .insert({
-                  provider_id: provider.id,
-                  public_identifier: publicIdentifier,
-                })
-                .select('id')
-                .single()
-            if (insertLeadError) {
-              console.error('Error in insert lead:', insertLeadError)
-              return NextResponse.json(
-                { error: 'Internal server error' },
-                { status: 500 }
-              )
+            if (!publicIdentifier || publicIdentifier === undefined) return
+            let leadDataId = ''
+            leadsInDb.forEach((lead) => {
+              if (lead.public_identifier === publicIdentifier) {
+                leadDataId = lead.id as string
+              }
+            })
+            if (!leadDataId) {
+              const { data: InsertLeadData, error: insertLeadError } =
+                await supabase
+                  .from('leads')
+                  .insert({
+                    provider_id: provider.id,
+                    company_id: provider.company_id,
+                    public_identifier: publicIdentifier,
+                  })
+                  .select('id')
+                  .single()
+              if (insertLeadError) {
+                console.error('Error in insert lead:', insertLeadError)
+                return NextResponse.json(
+                  { error: 'Internal server error' },
+                  { status: 500 }
+                )
+              }
+              if (!InsertLeadData || InsertLeadData === undefined) return
+              leadDataId = InsertLeadData.id as string
             }
             // update lead workflows
             const leadWorkflows: PublicSchemaTables['lead_workflows']['Insert'] =
               {
                 workflow_id: param.workflow_id,
-                lead_id: InsertLeadData.id,
+                lead_id: leadDataId,
                 company_id: provider.company_id,
               }
 
@@ -109,67 +178,45 @@ export async function POST(req: Request) {
                 { status: 500 }
               )
             }
+
+            return
           }
         )
         await Promise.all(insertLeadPromises)
-
-        const workflow: Database['public']['Tables']['workflows']['Update'] = {
-          id: param.workflow_id,
-          company_id: provider.company_id,
-          provider_id: provider.id,
-          name: param.name,
-          scheduled_hours: param.scheduled_hours || [],
-          scheduled_days: param.scheduled_days || [],
-          scheduled_months: param.scheduled_months || [],
-          scheduled_weekdays: param.scheduled_weekdays || [],
-          target_workflow_id: param.target_workflow_id || '',
-          limit_count: Number(param.limit_count),
-          invitation_message: param.invitation_message || '',
-        }
-
-        const { data: workflowData, error: updateWorkflowError } =
-          await supabase
-            .from('workflows')
-            .update(workflow)
-            .eq('id', param.workflow_id)
-            .select('*')
-            .single()
-        if (updateWorkflowError) {
-          console.error('Error in inserting workflow:', updateWorkflowError)
-          return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-          )
-        }
-        responseOfInsertWorkflow = workflowData
-        console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
-      }
-
-      // スケジュールされていない場合即実行
-      if (!scheduled) {
+      } else {
         // TODO: public_identifier prefix
         const leadPromises = param.target_public_identifiers?.map(
-          async (publicIdentifier: string) => {
-            const responseOfGetProfile = await unipileClient.users.getProfile({
+          async (publicIdentifier: string, index: number) => {
+            if (!publicIdentifier || publicIdentifier === undefined) return
+            if (index > param.limit_count) {
+              console.log('limit over')
+              return
+            }
+            const getProfileResponse = await unipileClient.users.getProfile({
               account_id: param.account_id,
               identifier: publicIdentifier,
               linkedin_sections: '*',
             })
-            if (!responseOfGetProfile || responseOfGetProfile === undefined)
-              return
+            if (!getProfileResponse || getProfileResponse === undefined) return
             await new Promise((resolve) => setTimeout(resolve, 5000))
 
             let leadStatus = LeadStatus.SEARCHED
             if (
               param.type === WorkflowType.INVITE &&
-              'provider_id' in responseOfGetProfile
+              'provider_id' in getProfileResponse
             ) {
+              const sendInvitationParam: {
+                account_id: string
+                provider_id: string
+                message?: string
+              } = {
+                account_id: param.account_id,
+                provider_id: getProfileResponse.provider_id,
+              }
+              if (param.invitation_message)
+                sendInvitationParam.message = param.invitation_message
               unipileClient.users
-                .sendInvitation({
-                  account_id: param.account_id,
-                  provider_id: responseOfGetProfile.provider_id,
-                  message: param.invitation_message || undefined,
-                })
+                .sendInvitation(sendInvitationParam)
                 .then((responseOfSendInvitation) => {
                   console.log(
                     'responseOfSendInvitation',
@@ -178,36 +225,77 @@ export async function POST(req: Request) {
                   leadStatus = LeadStatus.INVITED
                 })
                 .catch((error) => {
+                  // error type ref: https://developer.unipile.com/reference/userscontroller_adduserbyidentifier
                   if (error?.body?.type === 'errors/already_invited_recently') {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
                   } else {
                     console.error('Error in send invitation:', error)
-                    leadStatus = LeadStatus.NOT_SENT
+                    leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
               await new Promise((resolve) => setTimeout(resolve, 5000))
             }
 
-            const convertedLead = await upsertLeadByUnipileProfileDetail({
+            const unipileProfile: unipileProfileWithStatus = {
               leadId: '',
               leadStatus: leadStatus,
-              unipileProfile: responseOfGetProfile,
-              providerId: provider.id as string,
-              workflowId: param.workflow_id as string,
-              type: param.type,
-              companyId: provider.company_id,
-              scheduled_days: param.scheduled_days,
-              scheduled_hours: param.scheduled_hours,
-              scheduled_months: param.scheduled_months,
-              scheduled_weekdays: param.scheduled_weekdays,
-            })
-            return convertedLead
+              unipileProfile: getProfileResponse,
+            }
+
+            return unipileProfile
           }
         )
-        await Promise.all(leadPromises)
+        const searchedLeadList = await Promise.all(leadPromises)
+        const filteredSearchedLeadList = searchedLeadList.filter(
+          (lead) => lead !== undefined
+        ) as unipileProfileWithStatus[]
+        console.log('filteredSearchedLeadList', filteredSearchedLeadList)
+
+        const upsertedLeadList =
+          await upsertLeadByUnipileUserProfileApiResponse({
+            supabase,
+            unipileProfiles: filteredSearchedLeadList,
+            providerId: provider.id as string,
+            workflowId: param.workflow_id as string,
+            companyId: provider.company_id,
+            scheduled_days: param.scheduled_days,
+            scheduled_hours: param.scheduled_hours,
+            scheduled_months: param.scheduled_months,
+            scheduled_weekdays: param.scheduled_weekdays,
+          })
+        console.log('upsertedLeadList', upsertedLeadList)
       }
+      const workflow: Database['public']['Tables']['workflows']['Update'] = {
+        id: param.workflow_id,
+        company_id: provider.company_id,
+        provider_id: provider.id,
+        name: param.name,
+        scheduled_hours: param.scheduled_hours || [],
+        scheduled_days: param.scheduled_days || [],
+        scheduled_months: param.scheduled_months || [],
+        scheduled_weekdays: param.scheduled_weekdays || [],
+        target_workflow_id: param.workflow_id || '',
+        limit_count: Number(param.limit_count),
+        invitation_message: param.invitation_message || '',
+      }
+
+      const { data: workflowData, error: updateWorkflowError } = await supabase
+        .from('workflows')
+        .update(workflow)
+        .eq('id', param.workflow_id)
+        .select('*')
+        .single()
+      if (updateWorkflowError) {
+        console.error('Error in inserting workflow:', updateWorkflowError)
+        return NextResponse.json(
+          { error: 'Internal server error' },
+          { status: 500 }
+        )
+      }
+      responseOfInsertWorkflow = workflowData
+      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
 
       /**
        * if search_url exists, search profiles
@@ -224,10 +312,8 @@ export async function POST(req: Request) {
             .eq('lead_workflows.workflow_id', param.target_workflow_id)
             .eq('lead_statuses.status', LeadStatus.IN_QUEUE)
             // 最新のステータスを取得するためにlead_statusesを日付順に並べる
-            .order('lead_statuses.created_at', { ascending: false })
-            // 各リードごとに1つのステータスレコードのみを取得
+            .order('lead_statuses.status', { ascending: false })
             .limit(1, { foreignTable: 'lead_statuses' })
-            .order('created_at', { ascending: true })
             .limit(param.limit_count)
 
         if (errorOfTargetLead) {
@@ -238,116 +324,104 @@ export async function POST(req: Request) {
           )
         }
         console.log('targetLeads', targetLeadData)
-        const profilePromises = targetLeadData?.map(
-          async (lead: LeadInsert) => {
-            if (!lead || lead === undefined) return
-            if (!lead.private_identifier) {
-              const responseOfGetProfile = await unipileClient.users.getProfile(
-                {
-                  account_id: param.account_id,
-                  identifier: lead.public_identifier as string,
-                  linkedin_sections: '*',
-                }
-              )
+        const targetLeads = targetLeadData as Lead[]
+        const profilePromises = targetLeads?.map(async (lead: Lead) => {
+          if (!lead || lead === undefined) return
+          if (!lead.private_identifier) {
+            const getProfileResponse = await unipileClient.users.getProfile({
+              account_id: param.account_id,
+              identifier: lead.public_identifier as string,
+              linkedin_sections: '*',
+            })
 
+            await new Promise((resolve) => setTimeout(resolve, 5000))
+            let leadStatus = LeadStatus.SEARCHED
+            if (
+              param.type === WorkflowType.INVITE &&
+              'provider_id' in getProfileResponse
+            ) {
+              const sendInvitationParam: {
+                account_id: string
+                provider_id: string
+                message?: string
+              } = {
+                account_id: param.account_id,
+                provider_id: getProfileResponse.provider_id,
+              }
+              if (param.invitation_message)
+                sendInvitationParam.message = param.invitation_message
+              unipileClient.users
+                .sendInvitation(sendInvitationParam)
+
+                .then((responseOfSendInvitation) => {
+                  console.log(
+                    'responseOfSendInvitation',
+                    responseOfSendInvitation
+                  )
+                  leadStatus = LeadStatus.INVITED
+                })
+                .catch((error) => {
+                  if (error?.body?.type === 'errors/already_invited_recently') {
+                    console.log(
+                      'Skipping lead - invitation was already sent recently'
+                    )
+                  } else {
+                    console.error('Error in send invitation:', error)
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
+                })
               await new Promise((resolve) => setTimeout(resolve, 5000))
-              let leadStatus = LeadStatus.SEARCHED
-              if (
-                param.type === WorkflowType.INVITE &&
-                'provider_id' in responseOfGetProfile
-              ) {
-                unipileClient.users
-                  .sendInvitation({
-                    account_id: param.account_id,
-                    provider_id: responseOfGetProfile.provider_id,
-                    message: param.invitation_message || undefined,
-                  })
-                  .then((responseOfSendInvitation) => {
-                    console.log(
-                      'responseOfSendInvitation',
-                      responseOfSendInvitation
-                    )
-                    leadStatus = LeadStatus.INVITED
-                  })
-                  .catch((error) => {
-                    if (
-                      error?.body?.type === 'errors/already_invited_recently'
-                    ) {
-                      console.log(
-                        'Skipping lead - invitation was already sent recently'
-                      )
-                    } else {
-                      console.error('Error in send invitation:', error)
-                      leadStatus = LeadStatus.NOT_SENT
-                    }
-                  })
-                await new Promise((resolve) => setTimeout(resolve, 5000))
-              }
-
-              const convertedLead = await upsertLeadByUnipileProfileDetail({
-                leadId: '',
-                leadStatus: leadStatus,
-                unipileProfile: responseOfGetProfile,
-                providerId: provider.id as string,
-                workflowId: param.workflow_id as string,
-                type: param.type,
-                companyId: provider.company_id,
-                scheduled_days: param.scheduled_days,
-                scheduled_hours: param.scheduled_hours,
-                scheduled_months: param.scheduled_months,
-                scheduled_weekdays: param.scheduled_weekdays,
-              })
-              console.log('convertedLead', convertedLead)
-              return convertedLead
-            } else {
-              let leadStatus = LeadStatus.SEARCHED
-              if (param.type === WorkflowType.INVITE) {
-                unipileClient.users
-                  .sendInvitation({
-                    account_id: param.account_id,
-                    provider_id: lead.private_identifier,
-                    message: param.invitation_message || undefined,
-                  })
-                  .then((responseOfSendInvitation) => {
-                    console.log(
-                      'responseOfSendInvitation',
-                      responseOfSendInvitation
-                    )
-                    leadStatus = LeadStatus.INVITED
-                  })
-                  .catch((error) => {
-                    if (
-                      error?.body?.type === 'errors/already_invited_recently'
-                    ) {
-                      console.log(
-                        'Skipping lead - invitation was already sent recently'
-                      )
-                    } else {
-                      console.error('Error in send invitation:', error)
-                      leadStatus = LeadStatus.NOT_SENT
-                    }
-                  })
-                await new Promise((resolve) => setTimeout(resolve, 5000))
-              }
-
-              const convertedLead = await upsertLead({
-                leadId: '',
-                leadStatus: leadStatus,
-                lead: lead,
-                providerId: provider.id as string,
-                workflowId: param.workflow_id as string,
-                type: param.type,
-                companyId: provider.company_id,
-                scheduled_days: param.scheduled_days,
-                scheduled_hours: param.scheduled_hours,
-                scheduled_months: param.scheduled_months,
-                scheduled_weekdays: param.scheduled_weekdays,
-              })
-              console.log('convertedLead', convertedLead)
-              return convertedLead
             }
+
+            unipileProfilesWithStatus.push({
+              leadId: lead.id,
+              leadStatus: leadStatus,
+              unipileProfile: getProfileResponse,
+            })
+            return
+          } else {
+            let leadStatus = LeadStatus.SEARCHED
+            if (param.type === WorkflowType.INVITE) {
+              const sendInvitationParam: {
+                account_id: string
+                provider_id: string
+                message?: string
+              } = {
+                account_id: param.account_id,
+                provider_id: lead.private_identifier,
+              }
+              if (param.invitation_message)
+                sendInvitationParam.message = param.invitation_message
+              unipileClient.users
+                .sendInvitation(sendInvitationParam)
+                .then((responseOfSendInvitation) => {
+                  console.log(
+                    'responseOfSendInvitation',
+                    responseOfSendInvitation
+                  )
+                  leadStatus = LeadStatus.INVITED
+                })
+                .catch((error) => {
+                  if (error?.body?.type === 'errors/already_invited_recently') {
+                    console.log(
+                      'Skipping lead - invitation was already sent recently'
+                    )
+                  } else {
+                    console.error('Error in send invitation:', error)
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
+                })
+              await new Promise((resolve) => setTimeout(resolve, 5000))
+            }
+
+            leadsWithStatus.push({
+              lead: lead,
+              leadId: lead.id,
+              leadStatus: leadStatus,
+            })
+            return
           }
-        )
+        })
 
         await Promise.all(profilePromises)
       }
@@ -513,50 +587,60 @@ export async function POST(req: Request) {
           param.type === WorkflowType.SEARCH &&
           dataOfSearchList.length < 51
         ) {
+          const privateIdentifiers = dataOfSearchList.map(
+            (item) => item.private_identifier
+          )
+          const { data: leadsDataInDb, error: errorOfLeadInDb } = await supabase
+            .from('leads')
+            .select('*')
+            .eq('provider_id', provider.id)
+            .in('public_identifier', privateIdentifiers)
+          if (errorOfLeadInDb) {
+            console.error('Error in get lead:', errorOfLeadInDb)
+            return NextResponse.json(
+              { error: 'Internal server error' },
+              { status: 500 }
+            )
+          }
+          const leadsInDb: Lead[] = leadsDataInDb as Lead[]
           const profilePromises = dataOfSearchList.map(async (item) => {
             console.log('item:', item)
-            // get supabase profile
-            const leadInDb =
-              await findSupabaseLeadByProviderIdAndPrivateIdentifier({
-                providerId: provider.id as string,
-                privateIdentifier: item.id,
-              })
-            if (leadInDb && leadInDb !== undefined) {
-              console.log('Skipping lead - already exists in DB')
-              // profileList.push(leadInDb)
+            let matched = false
+            leadsInDb.forEach((leadInDb) => {
+              if (leadInDb.public_identifier === item.public_identifier) {
+                leadsWithStatus.push({
+                  leadId: leadInDb.id,
+                  leadStatus: LeadStatus.SEARCHED,
+                  lead: leadInDb,
+                })
+                matched = true
+                return
+              }
               return
-            }
+            })
+            if (matched) return
             if (
               !item.public_identifier ||
               item.public_identifier === '' ||
               item.public_identifier === 'null' ||
               item.public_identifier === null
             ) {
-              const list = await upsertLeadByUnipileProfileDetail({
+              unipileProfilesWithStatus.push({
                 leadId: '',
                 leadStatus: LeadStatus.SEARCHED,
                 unipileProfile: item,
-                providerId: provider.id as string,
-                workflowId: param.workflow_id as string,
-                type: param.type,
-                companyId: provider.company_id,
-                scheduled_days: param.scheduled_days,
-                scheduled_hours: param.scheduled_hours,
-                scheduled_months: param.scheduled_months,
-                scheduled_weekdays: param.scheduled_weekdays,
               })
-              // if (list) profileList.push(list)
               return
             }
 
-            const responseOfGetProfile = await unipileClient.users.getProfile({
+            const getProfileResponse = await unipileClient.users.getProfile({
               account_id: param.account_id,
               identifier: item.public_identifier,
               linkedin_sections: '*',
             })
             // 2 sec wait for each profile fetch
             await new Promise((resolve) => setTimeout(resolve, 5000))
-            return responseOfGetProfile
+            return getProfileResponse
           })
           const unipileProfileList = await Promise.all(profilePromises)
           // Wait for all profile fetches to complete
@@ -564,20 +648,12 @@ export async function POST(req: Request) {
             .filter((profile) => profile !== undefined && profile !== null)
             .map(async (profile) => {
               if (!profile || profile === undefined) return null
-              const convertedLead = await upsertLeadByUnipileProfileDetail({
-                leadId: '',
-                leadStatus: LeadStatus.SEARCHED,
+              unipileProfilesWithStatus.push({
                 unipileProfile: profile,
-                providerId: provider.id as string,
-                workflowId: param.workflow_id as string,
-                type: param.type,
-                companyId: provider.company_id,
-                scheduled_days: param.scheduled_days,
-                scheduled_hours: param.scheduled_hours,
-                scheduled_months: param.scheduled_months,
-                scheduled_weekdays: param.scheduled_weekdays,
+                leadStatus: LeadStatus.SEARCHED,
+                leadId: '',
               })
-              return convertedLead
+              return
             })
 
           await Promise.all(leadPromises)
@@ -590,12 +666,19 @@ export async function POST(req: Request) {
                 param.type === WorkflowType.INVITE &&
                 'provider_id' in profile
               ) {
+                const sendInvitationParam: {
+                  account_id: string
+                  provider_id: string
+                  message?: string
+                } = {
+                  account_id: param.account_id,
+                  provider_id: profile.private_identifier,
+                }
+                if (param.invitation_message)
+                  sendInvitationParam.message = param.invitation_message
                 unipileClient.users
-                  .sendInvitation({
-                    account_id: param.account_id,
-                    provider_id: profile.private_identifier,
-                    message: param.invitation_message || undefined,
-                  })
+                  .sendInvitation(sendInvitationParam)
+
                   .then((responseOfSendInvitation) => {
                     console.log(
                       'responseOfSendInvitation',
@@ -612,25 +695,18 @@ export async function POST(req: Request) {
                       )
                     } else {
                       console.error('Error in send invitation:', error)
-                      leadStatus = LeadStatus.NOT_SENT
+                      leadStatus = LeadStatus.INVITED_FAILED
                     }
                   })
                 await new Promise((resolve) => setTimeout(resolve, 5000))
               }
 
-              const list = await upsertLeadByUnipileProfile({
+              unipiePerformSearchProfilesWithStatus.push({
                 unipileProfile: profile,
                 leadStatus: leadStatus,
-                providerId: provider.id as string,
-                workflowId: param.workflow_id as string,
-                type: param.type,
-                companyId: provider.company_id,
-                scheduled_days: param.scheduled_days,
-                scheduled_hours: param.scheduled_hours,
-                scheduled_months: param.scheduled_months,
-                scheduled_weekdays: param.scheduled_weekdays,
+                leadId: '',
               })
-              return list
+              return
             }
           )
           await Promise.all(dataOfSearchListPromises)
@@ -673,6 +749,49 @@ export async function POST(req: Request) {
       }
     } else {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    }
+
+    if (unipileProfilesWithStatus.length) {
+      const convertedLead = await upsertLeadByUnipileUserProfileApiResponse({
+        supabase,
+        unipileProfiles: unipileProfilesWithStatus,
+        providerId: provider.id as string,
+        workflowId: param.workflow_id as string,
+        companyId: provider.company_id,
+        scheduled_days: param.scheduled_days,
+        scheduled_hours: param.scheduled_hours,
+        scheduled_months: param.scheduled_months,
+        scheduled_weekdays: param.scheduled_weekdays,
+      })
+      console.log('convertedLead', convertedLead)
+    }
+    if (leadsWithStatus.length) {
+      const convertedLead = await upsertLead({
+        supabase,
+        leads: leadsWithStatus,
+        providerId: provider.id as string,
+        workflowId: param.workflow_id as string,
+        companyId: provider.company_id,
+        scheduled_days: param.scheduled_days,
+        scheduled_hours: param.scheduled_hours,
+        scheduled_months: param.scheduled_months,
+        scheduled_weekdays: param.scheduled_weekdays,
+      })
+      console.log('convertedLead', convertedLead)
+    }
+    if (unipiePerformSearchProfilesWithStatus.length) {
+      const convertedLead = await upsertLeadByUnipilePerformSearchProfile({
+        supabase,
+        unipileProfiles: unipiePerformSearchProfilesWithStatus,
+        providerId: provider.id as string,
+        workflowId: param.workflow_id as string,
+        companyId: provider.company_id,
+        scheduled_days: param.scheduled_days,
+        scheduled_hours: param.scheduled_hours,
+        scheduled_months: param.scheduled_months,
+        scheduled_weekdays: param.scheduled_weekdays,
+      })
+      console.log('convertedLead', convertedLead)
     }
 
     status = WorkflowStatus.SUCCESS

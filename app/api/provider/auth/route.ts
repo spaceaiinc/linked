@@ -4,7 +4,7 @@ import { unipileClient } from '@/lib/unipile'
 import { createClient } from '@/lib/utils/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function POST(req: Request) {
+export async function POST() {
   try {
     const supabase = createClient()
     const {

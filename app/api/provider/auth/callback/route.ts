@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/utils/supabase/server'
 import { env } from '@/lib/env'
 import { Database } from '@/lib/types/supabase'
+import { ProviderStatus, ProviderType } from '@/lib/types/master'
+import { supabase } from '@/lib/utils/supabase/service'
 
 // {
 //   "status":"CREATION_SUCCESS", // or "RECONNECTED" for reconnect type
@@ -12,42 +14,23 @@ import { Database } from '@/lib/types/supabase'
 export async function POST(req: Request) {
   try {
     const { status, account_id, name } = await req.json()
-    console.log('status:', status)
-    console.log('account_id:', account_id)
-    console.log('name:', name)
-    const { user_id, company_id } = JSON.parse(name)
-    console.log('user_id:', user_id)
-    console.log('company_id:', company_id)
+    console.log('status:', status, 'account_id:', account_id, 'name:', name)
     if (!status || !account_id || !name) {
       return NextResponse.json(
         { error: 'params are required' },
         { status: 400 }
       )
     }
-
-    if (!status || !account_id || !name) {
-      return NextResponse.json(
-        { error: 'params are required' },
-        { status: 400 }
-      )
-    }
-    const supabase = createClient()
-    // const {
-    //   data: { profile },
-    //   error,
-    // } = await supabase.from('profiles').select('*').eq('id', name).single()
-    // if (error) {
-    //   console.log('error:', error)
-    //   return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-    // }
-
     if (status !== 'CREATION_SUCCESS' && status !== 'RECONNECTED') {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
-    let status_code = 0
-    if (status === 'RECONNECTED') {
-      status_code = 1
+    const { user_id, company_id } = JSON.parse(name)
+    if (!user_id || !company_id) {
+      return NextResponse.json(
+        { error: 'user_id and company_id are required' },
+        { status: 400 }
+      )
     }
 
     const url = `https://${
@@ -63,46 +46,43 @@ export async function POST(req: Request) {
       },
     }
 
-    try {
-      const responseOfGetOwnProfile = await fetch(url, options)
+    const getOwnProfileResponse = await fetch(url, options)
 
-      if (responseOfGetOwnProfile.status !== 200) {
-        return NextResponse.json(
-          { error: 'An error occurred while searching' },
-          { status: 500 }
-        )
-      }
-
-      const dataOfGetOwnProfile = await responseOfGetOwnProfile.json()
-      console.log('dataOfGetOwnProfile:', dataOfGetOwnProfile)
-
-      const account: Database['public']['Tables']['providers']['Insert'] = {
-        user_id: user_id,
-        type: 0,
-        status: status_code,
-        account_id,
-        private_identifier: dataOfGetOwnProfile.provider_id,
-        public_identifier: dataOfGetOwnProfile.public_identifier,
-        first_name: dataOfGetOwnProfile.first_name,
-        last_name: dataOfGetOwnProfile.last_name,
-        email: dataOfGetOwnProfile.email,
-        company_id: company_id,
-        like_target_private_identifiers: [],
-        like_target_hours: [],
-        check_reaction_hours: [],
-      }
-
-      const responseOfUpsertProviders = await supabase
-        .from('providers')
-        .upsert(account)
-      console.log('responseOfUpsertProviders:', responseOfUpsertProviders)
-
-      return NextResponse.json({ success: true })
-    } catch (error) {
-      console.log(error)
+    if (getOwnProfileResponse.status !== 200) {
+      return NextResponse.json(
+        { error: 'An error occurred while searching' },
+        { status: 500 }
+      )
     }
+
+    const getOwnProfileData = await getOwnProfileResponse.json()
+    console.log('getOwnProfileData:', getOwnProfileData)
+
+    const account: Database['public']['Tables']['providers']['Insert'] = {
+      user_id: user_id,
+      type: ProviderType.LINKEDIN,
+      status: ProviderStatus[status as keyof typeof ProviderStatus],
+      account_id: account_id,
+      private_identifier: getOwnProfileData.provider_id,
+      public_identifier: getOwnProfileData.public_identifier,
+      first_name: getOwnProfileData.first_name,
+      last_name: getOwnProfileData.last_name,
+      email: getOwnProfileData.email,
+      company_id: company_id,
+    }
+
+    const { error: upsertProviderError } = await supabase
+      .from('providers')
+      .upsert(account, { onConflict: 'account_id' })
+    if (upsertProviderError) {
+      return NextResponse.json(
+        { error: 'An error occurred while upserting' },
+        { status: 500 }
+      )
+    }
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('LinkedIn API Error:', error)
+    console.error('Error at /api/provider/auth/callback: ', error)
     return NextResponse.json(
       { error: 'An error occurred while callback' },
       { status: 500 }

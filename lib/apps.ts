@@ -2,19 +2,16 @@ import { WorkflowType } from './types/master'
 
 export const tools = [
   {
-    // href: '/search/profile',
     type: WorkflowType.SEARCH,
-    title: 'プロフィール出力',
-    tags: [],
+    title: 'プロフィール検索',
+    tags: [WorkflowType[WorkflowType.SEARCH]],
     image: '/apps/linkedin-logo.jpg',
-    description:
-      'キーワードまたは、ユーザーIDのCSVからプロフィール検索を行います。',
+    description: 'キーワード、検索URLからプロフィール検索を行います。',
   },
   {
-    // href: '/invite',
     title: 'つながり申請',
     type: WorkflowType.INVITE,
-    tags: [],
+    tags: [WorkflowType[WorkflowType.INVITE]],
     image: '/apps/linkedin-logo.jpg',
     description:
       'キーワードまたは、ユーザーIDのCSVからつながり申請を行います。',
