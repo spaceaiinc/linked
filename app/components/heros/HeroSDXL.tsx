@@ -22,10 +22,7 @@ export default function Hero() {
           <div className="max-w-md flex rounded-lg overflow-hidden">
             <div className="flex-grow flex-shrink flex items-center">
               <div className="flex md:flex-row flex-col items-center space-x-4">
-                <a
-                  className="btn btn-accent hover:bg-white/80 w-64 text-accent-content bg-transparent border border-white text-white"
-                  // href="mailto:info@spaceai.jp"
-                >
+                <a className="btn btn-accent hover:bg-white/80 w-64 text-accent-content bg-transparent border border-white text-white">
                   <MailIcon className="w-6 h-6" />
                   お問い合わせ
                 </a>
