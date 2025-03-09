@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/utils/supabase/server'
-import AuthComponent from '@/components/auth/AuthLayout'
+import AuthComponent from '@/app/components/auth/AuthLayout'
 import { homePage } from '@/config'
 
 export default async function AuthPage() {

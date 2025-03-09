@@ -1,4 +1,4 @@
-import { Toaster } from '@/components/ui/toaster'
+import { Toaster } from '@/app/components/ui/toaster'
 import { PHProvider } from '@/lib/services/posthog/provider'
 
 // This needs to be declared so we can use Pixel tracking in the app

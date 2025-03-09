@@ -32,7 +32,6 @@ export const convertToDisplay = (
     return []
   }
   const rows = inputData.map((profile: Lead | LeadInsert) => {
-    console.log('Profile:', profile)
     const baseInfo: LeadForDisplay = {
       public_profile_url: profile?.public_identifier
         ? `https://www.linkedin.com/in/${profile?.public_identifier}`
@@ -52,7 +51,6 @@ export const convertToDisplay = (
     }
     if (profile.lead_statuses?.length)
       baseInfo.latest_status = profile.lead_statuses.sort((a, b) => {
-        console.log(a, b)
         if (!a.created_at || !b.created_at) {
           return 0
         }
@@ -172,8 +170,6 @@ export async function extractColumnData(
             return value
           })
           .filter((value) => value !== undefined && value !== '')
-
-        console.log(`Extracted data: ${extractedData}`)
 
         resolve(extractedData)
       },
