@@ -2,6 +2,7 @@ import { UserProfileApiResponse } from 'unipile-node-sdk/dist/types/users/user-p
 import { LeadStatus, NetworkDistance } from '../../types/master'
 import { Lead, LeadInsert, PublicSchemaTables } from '../../types/supabase'
 import { SupabaseClient } from '@supabase/supabase-js'
+import { decodeJapaneseOnly } from '@/lib/utils/decode'
 
 // 子テーブルのプロパティを除外するヘルパー関数
 function getLeadBaseProps(
@@ -37,6 +38,9 @@ export async function fetchLeadsWithLatestStatusAndWorkflow(
   targetStatus: LeadStatus | LeadStatus[],
   limitCount: number
 ): Promise<any[]> {
+  if (!limitCount) {
+    return []
+  }
   try {
     // まず、指定されたワークフローIDに関連するリードIDを取得
     const { data: workflowLeadsData, error: workflowError } = await supabase
@@ -96,6 +100,8 @@ export async function fetchLeadsWithLatestStatusAndWorkflow(
           )
         })
 
+        console.log('sortedStatuses:', sortedStatuses)
+
         // 最新のステータスだけを保持
         const processedLead = {
           ...lead,
@@ -112,6 +118,7 @@ export async function fetchLeadsWithLatestStatusAndWorkflow(
         return cleanLead
       })
 
+    console.log('filteredLeads:', filteredLeads, 'limitCount:', limitCount)
     // limitCountを適用
     return filteredLeads.slice(0, limitCount)
   } catch (error) {
@@ -128,10 +135,15 @@ export async function fetchLeadsWithLatestStatusFilter(
   const batchSize = 20
   const allLeadsResults: any[] = []
 
+  // デコードする
+  const decodedPublicIdentifiers = publicIdentifiers.map((publicIdentifier) =>
+    decodeJapaneseOnly(publicIdentifier)
+  )
+
   // 公開IDをバッチに分割
   const publicBatches: string[][] = []
-  for (let i = 0; i < publicIdentifiers.length; i += batchSize) {
-    publicBatches.push(publicIdentifiers.slice(i, i + batchSize))
+  for (let i = 0; i < decodedPublicIdentifiers.length; i += batchSize) {
+    publicBatches.push(decodedPublicIdentifiers.slice(i, i + batchSize))
   }
 
   // 各バッチを処理
@@ -151,58 +163,61 @@ export async function fetchLeadsWithLatestStatusFilter(
         continue
       }
 
-      if (batchLeads && batchLeads.length > 0) {
-        // 各リードに対して最新のステータスを判断し、フィルタリング
-        const filteredLeads = batchLeads.map((lead) => {
-          // lead_statusesが配列の場合、タイムスタンプで並べ替えて最新のものを特定
-          if (
-            Array.isArray(lead.lead_statuses) &&
-            lead.lead_statuses.length > 0
-          ) {
-            // created_atやupdated_atなど、タイムスタンプのフィールド名に合わせて調整
-            const sortedStatuses = [...lead.lead_statuses].sort((a, b) => {
-              // 降順（最新が先頭）
-              return (
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
-              )
-            })
+      allLeadsResults.push(...batchLeads)
 
-            // 最新のステータスのみを保持
-            const latestStatus = sortedStatuses[0]
-            return {
-              ...lead,
-              lead_statuses: latestStatus,
-              // _isTargetStatus: [
-              //   LeadStatus.SEARCHED,
-              //   LeadStatus.IN_QUEUE,
-              // ].includes(latestStatus.status),
-            }
-          }
-          // lead_statusesが単一オブジェクトの場合（すでに最新）
-          else if (lead.lead_statuses) {
-            return {
-              ...lead,
-              // _isTargetStatus: [
-              //   LeadStatus.SEARCHED,
-              //   LeadStatus.IN_QUEUE,
-              // ].includes(lead.lead_statuses.status),
-            }
-          }
-          return { ...lead }
-          // return { ...lead, _isTargetStatus: false }
-        })
-        // 最新のステータスがSEARCHEDまたはIN_QUEUEのリードだけをフィルタリング
-        // .filter((lead) => lead._isTargetStatus)
+      // if (batchLeads && batchLeads.length > 0) {
+      //   // 各リードに対して最新のステータスを判断し、フィルタリング
+      //   const filteredLeads = batchLeads.map((lead) => {
+      //     // lead_statusesが配列の場合、タイムスタンプで並べ替えて最新のものを特定
+      //     if (
+      //       Array.isArray(lead.lead_statuses) &&
+      //       lead.lead_statuses.length > 0
+      //     ) {
+      //       // created_atやupdated_atなど、タイムスタンプのフィールド名に合わせて調整
+      //       const sortedStatuses = [...lead.lead_statuses].sort((a, b) => {
+      //         // 降順（最新が先頭）
+      //         return (
+      //           new Date(b.created_at).getTime() -
+      //           new Date(a.created_at).getTime()
+      //         )
+      //       })
 
-        // 内部フラグを削除
-        const cleanedLeads = filteredLeads.map((lead) => {
-          const { _isTargetStatus, ...cleanLead } = lead
-          return cleanLead
-        })
+      //       // 最新のステータスのみを保持
+      //       console.log('sortedStatuses:', sortedStatuses)
+      //       const latestStatus = sortedStatuses[0]
+      //       return {
+      //         ...lead,
+      //         lead_statuses: latestStatus,
+      //         // _isTargetStatus: [
+      //         //   LeadStatus.SEARCHED,
+      //         //   LeadStatus.IN_QUEUE,
+      //         // ].includes(latestStatus.status),
+      //       }
+      //     }
+      //     // lead_statusesが単一オブジェクトの場合（すでに最新）
+      //     else if (lead.lead_statuses) {
+      //       return {
+      //         ...lead,
+      //         // _isTargetStatus: [
+      //         //   LeadStatus.SEARCHED,
+      //         //   LeadStatus.IN_QUEUE,
+      //         // ].includes(lead.lead_statuses.status),
+      //       }
+      //     }
+      //     return { ...lead }
+      //     // return { ...lead, _isTargetStatus: false }
+      //   })
+      //   // 最新のステータスがSEARCHEDまたはIN_QUEUEのリードだけをフィルタリング
+      //   // .filter((lead) => lead._isTargetStatus)
 
-        allLeadsResults.push(...cleanedLeads)
-      }
+      //   // 内部フラグを削除
+      //   const cleanedLeads = filteredLeads.map((lead) => {
+      //     const { _isTargetStatus, ...cleanLead } = lead
+      //     return cleanLead
+      //   })
+
+      //   allLeadsResults.push(...cleanedLeads)
+      // }
     } catch (error) {
       console.error(`バッチ ${i + 1} の例外:`, error)
     }
@@ -234,8 +249,12 @@ async function fetchLeadsInBatches(
   const publicBatches: string[][] = []
   const privateBatches: string[][] = []
 
-  for (let i = 0; i < publicIdentifiers.length; i += batchSize) {
-    publicBatches.push(publicIdentifiers.slice(i, i + batchSize))
+  // デコードする
+  const decodedPublicIdentifiers = publicIdentifiers.map((publicIdentifier) =>
+    decodeJapaneseOnly(publicIdentifier)
+  )
+  for (let i = 0; i < decodedPublicIdentifiers.length; i += batchSize) {
+    publicBatches.push(decodedPublicIdentifiers.slice(i, i + batchSize))
   }
 
   for (let i = 0; i < privateIdentifiers.length; i += batchSize) {
@@ -333,9 +352,10 @@ export async function upsertLead({
 
   // private or public が一致するleadが存在するか確認するために、public_identifierとprivate_identifierを取得する
   // 一致する場合は、leadIdを更新して、insertではなくupdateする
-  leads.map((leadWithStatus) => {
+  leads.forEach((leadWithStatus) => {
     const { lead } = leadWithStatus
     if (lead.public_identifier) {
+      lead.public_identifier = decodeJapaneseOnly(lead.public_identifier)
       leadPublicIdentifiers.push(lead.public_identifier)
     }
     if (lead.private_identifier) {
@@ -369,6 +389,8 @@ export async function upsertLead({
     const leadInsert: PublicSchemaTables['leads']['Insert'] =
       getLeadBaseProps(lead)
     if (leadId) leadInsert.id = leadId
+    if (lead.public_identifier)
+      leadInsert.public_identifier = lead.public_identifier
     const { data: upsertLeadData, error: errorOfInsertLead } = await supabase
       .from('leads')
       .upsert(leadInsert, { onConflict: 'id' })
@@ -408,7 +430,7 @@ export async function upsertLead({
         .from('lead_statuses')
         .select('*')
         .eq('lead_id', upsertLead.id)
-        .order('status', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1)
     if (errorOfFindLeadStatus) {
       console.error('Error in find lead status:', errorOfFindLeadStatus)
@@ -420,6 +442,7 @@ export async function upsertLead({
       !responseOfFindLeadStatuses.length ||
       (responseOfFindLeadStatuses[0].status < leadStatus &&
         (responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE ||
+          responseOfFindLeadStatuses[0].status == LeadStatus.INVITED_FAILED ||
           responseOfFindLeadStatuses[0].status == LeadStatus.SEARCHED))
     ) {
       lead.lead_statuses = [
@@ -748,13 +771,16 @@ export async function upsertLeadByUnipileUserProfileApiResponse({
 
   // private or public が一致するleadが存在するか確認するために、public_identifierとprivate_identifierを取得する
   // 一致する場合は、leadIdを更新して、insertではなくupdateする
-  unipileProfiles.map((unipileProfileWithStatus) => {
+  unipileProfiles.forEach((unipileProfileWithStatus) => {
     const { unipileProfile } = unipileProfileWithStatus
     if (unipileProfile && typeof unipileProfile === 'object') {
       if (
         'public_identifier' in unipileProfile &&
         unipileProfile.public_identifier
       ) {
+        unipileProfile.public_identifier = decodeJapaneseOnly(
+          unipileProfile.public_identifier
+        )
         leadPublicIdentifiers.push(unipileProfile.public_identifier)
       }
       if ('provider_id' in unipileProfile && unipileProfile.provider_id) {
@@ -815,7 +841,9 @@ export async function upsertLeadByUnipileUserProfileApiResponse({
       }
       if (leadId) lead.id = leadId
       if ('public_identifier' in unipileProfile)
-        lead.public_identifier = unipileProfile.public_identifier || ''
+        lead.public_identifier = unipileProfile.public_identifier
+          ? decodeJapaneseOnly(unipileProfile.public_identifier)
+          : ''
       if ('first_name' in unipileProfile)
         lead.first_name = unipileProfile.first_name || ''
       if ('last_name' in unipileProfile)
@@ -884,7 +912,7 @@ export async function upsertLeadByUnipileUserProfileApiResponse({
           .from('lead_statuses')
           .select('*')
           .eq('lead_id', upsertLeadData.id)
-          .order('status', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(1)
       if (errorOfFindLeadStatus) {
         console.error('Error in find lead status:', errorOfFindLeadStatus)
@@ -894,6 +922,7 @@ export async function upsertLeadByUnipileUserProfileApiResponse({
         !responseOfFindLeadStatuses.length ||
         (responseOfFindLeadStatuses[0].status < leadStatus &&
           (responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE ||
+            responseOfFindLeadStatuses[0].status == LeadStatus.INVITED_FAILED ||
             responseOfFindLeadStatuses[0].status == LeadStatus.SEARCHED))
       ) {
         lead.lead_statuses = [
@@ -1470,9 +1499,12 @@ export async function upsertLeadByUnipilePerformSearchProfile({
 
   // private or public が一致するleadが存在するか確認するために、public_identifierとprivate_identifierを取得する
   // 一致する場合は、leadIdを更新して、insertではなくupdateする
-  unipileProfiles.map((unipileProfilesWithStatus) => {
+  unipileProfiles.forEach((unipileProfilesWithStatus) => {
     const { unipileProfile } = unipileProfilesWithStatus
     if (unipileProfile.public_identifier) {
+      unipileProfile.public_identifier = decodeJapaneseOnly(
+        unipileProfile.public_identifier
+      )
       leadPublicIdentifiers.push(unipileProfile.public_identifier)
     }
     if (unipileProfile.id) {
@@ -1507,7 +1539,9 @@ export async function upsertLeadByUnipilePerformSearchProfile({
       company_id: companyId,
       provider_id: providerId,
       private_identifier: unipileProfile.id,
-      public_identifier: unipileProfile.public_identifier || '',
+      public_identifier: unipileProfile.public_identifier
+        ? decodeJapaneseOnly(unipileProfile.public_identifier)
+        : '',
       profile_picture_url: unipileProfile.profile_picture_url || '',
       full_name: unipileProfile.name || '',
       headline: unipileProfile.headline || '',
@@ -1554,7 +1588,7 @@ export async function upsertLeadByUnipilePerformSearchProfile({
         .from('lead_statuses')
         .select('*')
         .eq('lead_id', upsertLead.id)
-        .order('status', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1)
     if (errorOfFindLeadStatus) {
       console.error('Error in find lead status:', errorOfFindLeadStatus)
@@ -1564,6 +1598,7 @@ export async function upsertLeadByUnipilePerformSearchProfile({
       !responseOfFindLeadStatuses.length ||
       (responseOfFindLeadStatuses[0].status < leadStatus &&
         (responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE ||
+          responseOfFindLeadStatuses[0].status == LeadStatus.INVITED_FAILED ||
           responseOfFindLeadStatuses[0].status == LeadStatus.SEARCHED))
     ) {
       lead.lead_statuses = [

@@ -79,7 +79,7 @@ export function LeadTable({ leads }: LeadTableProps) {
                   rel="noreferrer"
                   className="underline"
                 >
-                  {decodeURIComponent(row.getValue('public_identifier')) || '-'}
+                  {row.getValue('public_identifier') || '-'}
                 </a>
               </div>
             ) : (

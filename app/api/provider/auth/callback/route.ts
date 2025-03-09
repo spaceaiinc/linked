@@ -4,6 +4,7 @@ import { env } from '@/lib/env'
 import { Database } from '@/lib/types/supabase'
 import { ProviderStatus, ProviderType } from '@/lib/types/master'
 import { supabase } from '@/lib/utils/supabase/service'
+import { decodeJapaneseOnly } from '@/lib/utils/decode'
 
 // {
 //   "status":"CREATION_SUCCESS", // or "RECONNECTED" for reconnect type
@@ -64,7 +65,9 @@ export async function POST(req: Request) {
       status: ProviderStatus[status as keyof typeof ProviderStatus],
       account_id: account_id,
       private_identifier: getOwnProfileData.provider_id,
-      public_identifier: getOwnProfileData.public_identifier,
+      public_identifier: decodeJapaneseOnly(
+        getOwnProfileData.public_identifier
+      ),
       first_name: getOwnProfileData.first_name,
       last_name: getOwnProfileData.last_name,
       email: getOwnProfileData.email,
