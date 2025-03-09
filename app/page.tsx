@@ -1,14 +1,15 @@
-import Section from '@/components/Section'
-import Navbar from '@/components/navbars/Navbar-1'
-import Hero from '@/components/heros/HeroSDXL'
-import Features from '@/components/features/Features-1'
-import Pricing from '@/components/pricing/Pricing-1'
-import CTA from '@/components/ctas/CTA-1'
-import FAQ from '@/components/faqs/FAQ-1'
-import Footer from '@/components/footers/Footer-1'
-import Testimonials from '@/components/testimonials/Testimonials-1'
+import Section from '@/app/components/Section'
+import Navbar from '@/app/components/navbars/Navbar-1'
+import Hero from '@/app/components/heros/HeroWhisper'
+import Features from '@/app/components/features/Features-1'
+import Pricing from '@/app/components/pricing/Pricing-1'
+import CTA from '@/app/components/ctas/CTA-1'
+import FAQ from '@/app/components/faqs/FAQ-1'
+import Footer from '@/app/components/footers/Footer-1'
+import Testimonials from '@/app/components/testimonials/Testimonials-1'
 
 import { toolConfig } from './toolConfig'
+import LinkedinMarketingTool from '@/app/components/heros/LinkedinMarketingTool'
 
 export const metadata = {
   title: toolConfig.metadata.title,
@@ -24,7 +25,8 @@ export const metadata = {
 export default function Page() {
   return (
     <>
-      <div data-theme={toolConfig.company.theme}>
+      <LinkedinMarketingTool />
+      {/* <div data-theme={toolConfig.company.theme}>
         <Navbar
           companyConfig={toolConfig.company!}
           navbarConfig={toolConfig.navbarLanding!}
@@ -41,7 +43,7 @@ export default function Page() {
           companyConfig={toolConfig.company!}
           footerConfig={toolConfig.footerLanding!}
         />
-      </div>
+      </div> */}
     </>
   )
 }

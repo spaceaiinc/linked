@@ -1,4 +1,4 @@
-import { Dock, DockIcon } from '@/components/magicui/dock'
+import { Dock, DockIcon } from '@/app/components/magicui/dock'
 import { HomeIcon } from 'lucide-react'
 
 export default function NotFoundPage() {

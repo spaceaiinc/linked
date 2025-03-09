@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers'
-import { Chat } from '@/components/chat/chat'
+import { Chat } from '@/app/components/chat/chat'
 import { generateUUID } from '@/lib/ai/chat'
 import { availableModels } from '@/lib/ai/models'
 import { getSession } from '@/lib/db/cached-queries'

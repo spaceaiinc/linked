@@ -1,16 +1,16 @@
 'use client'
 import { toolConfig } from './toolConfig'
-import { Button } from '@/components/ui/button'
-import Login from '@/components/input/login'
+import { Button } from '@/app/components/ui/button'
+import Login from '@/app/components/input/login'
 import { useAtom } from 'jotai'
 import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
 import { WorkflowType } from '@/lib/types/master'
-import SearchProfileContent from '@/components/workflow/search-profile/Content'
+import SearchProfileContent from '@/app/components/workflow/search-profile/Content'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import LoadingPage from '@/components/Loading'
+import LoadingPage from '@/app/components/Loading'
 import { Workflow } from '@/lib/types/supabase'
-import InviteContent from '@/components/workflow/invite/Content'
+import InviteContent from '@/app/components/workflow/invite/Content'
 
 export default function Page() {
   const [user, _] = useAtom(userAtom)

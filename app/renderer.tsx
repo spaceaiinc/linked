@@ -1,5 +1,5 @@
 'use client'
-import LoadingPage from '@/components/Loading'
+import LoadingPage from '@/app/components/Loading'
 import {
   providerAtom,
   userAtom,

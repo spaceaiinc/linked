@@ -2,10 +2,10 @@ import { companyConfig } from '@/config'
 import { createClient } from '@/lib/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { loops } from '@/lib/loops'
-import HeroDemos from '@/components/heros/HeroDemos'
-import Navbar from '@/components/navbars/Navbar-1'
-import Footer from '@/components/footers/Footer-1'
-import Apps from '@/components/app/Apps'
+import HeroDemos from '@/app/components/heros/HeroDemos'
+import Navbar from '@/app/components/navbars/Navbar-1'
+import Footer from '@/app/components/footers/Footer-1'
+import Apps from '@/app/components/app/Apps'
 
 export default async function Page() {
   const supabase = createClient()
