@@ -3,7 +3,7 @@ import { type ToolConfig } from '@/lib/types/toolconfig'
 import { useAtom } from 'jotai'
 import { workflowsAtom } from '../atom'
 import { Workflow } from '../types/supabase'
-import { useToast } from '@/components/ui/use-toast'
+import { useToast } from '@/app/components/ui/use-toast'
 
 export const searchProfileResponse = (toolConfig: ToolConfig) => {
   const [loading, setLoading] = useState(false)
