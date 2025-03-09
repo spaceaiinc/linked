@@ -27,36 +27,106 @@ const LinkedinMarketingTool = () => {
 }
 
 // ヘッダーコンポーネント
+import { useState } from 'react'
+import { Menu } from 'lucide-react'
+import { useAtom } from 'jotai'
+import { profileAtom } from '@/lib/atom'
+
 const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const [profile] = useAtom(profileAtom)
+
   return (
-    <header className="fixed top-0 w-full bg-white z-50 shadow-sm h-20 flex items-center justify-between px-[5%] md:flex-row flex-col md:h-20 h-auto md:py-0 py-4">
-      <div className="logo text-3xl font-bold text-[#0a66c2]">
+    <header className="fixed top-0 w-full bg-white z-50 shadow-sm h-16 flex items-center justify-between px-4 sm:px-[5%]">
+      <div className="logo text-2xl font-bold text-[#0a66c2]">
         Linked<span className="text-gray-800">.</span>
       </div>
-      <nav className="header-nav md:mt-0 mt-4">
-        <ul className="flex md:gap-8 gap-4">
-          <li className="font-bold">
+
+      {/* Hamburger menu button for mobile */}
+      <button
+        className="block md:hidden text-gray-700"
+        onClick={toggleMenu}
+        aria-label="メニュー"
+      >
+        <Menu size={24} />
+      </button>
+
+      {/* Desktop navigation */}
+      <nav className="hidden md:block">
+        <ul className="flex items-center gap-6">
+          <li className="text-sm font-bold">
             <a href="#features">機能</a>
           </li>
-          <li className="font-bold">
+          <li className="text-sm font-bold">
             <a href="#how-to">使い方</a>
           </li>
-          <li className="font-bold">
+          <li className="text-sm font-bold">
             <a href="#pricing">料金プラン</a>
           </li>
-          <li className="font-bold">
+          <li className="text-sm font-bold">
             <a href="#contact">お問い合わせ</a>
           </li>
           <li>
-            <a
-              href="/auth"
-              className="bg-[#0a66c2] text-white px-6 py-3 rounded-full font-bold transition-colors hover:bg-[#004182]"
-            >
-              7日間無料トライアル
-            </a>
+            {profile ? (
+              <a
+                href="/dashboard"
+                className="bg-[#0a66c2] text-white px-4 py-2 text-sm rounded-full font-bold transition-colors hover:bg-[#004182]"
+              >
+                ダッシュボード
+              </a>
+            ) : (
+              <a
+                href="/auth"
+                className="bg-[#0a66c2] text-white px-4 py-2 text-sm rounded-full font-bold transition-colors hover:bg-[#004182]"
+              >
+                7日間無料トライアル
+              </a>
+            )}
           </li>
         </ul>
       </nav>
+
+      {/* Mobile navigation dropdown */}
+      {isMenuOpen && (
+        <div className="absolute top-16 left-0 right-0 bg-white shadow-md md:hidden">
+          <ul className="flex flex-col py-2">
+            <li className="py-2 px-4 text-sm font-bold">
+              <a href="#features" onClick={toggleMenu}>
+                機能
+              </a>
+            </li>
+            <li className="py-2 px-4 text-sm font-bold">
+              <a href="#how-to" onClick={toggleMenu}>
+                使い方
+              </a>
+            </li>
+            <li className="py-2 px-4 text-sm font-bold">
+              <a href="#pricing" onClick={toggleMenu}>
+                料金プラン
+              </a>
+            </li>
+            <li className="py-2 px-4 text-sm font-bold">
+              <a href="#contact" onClick={toggleMenu}>
+                お問い合わせ
+              </a>
+            </li>
+            <li className="py-2 px-4">
+              <a
+                href="/auth"
+                className="bg-[#0a66c2] text-white px-4 py-2 text-sm rounded-full font-bold transition-colors hover:bg-[#004182] inline-block"
+                onClick={toggleMenu}
+              >
+                7日間無料トライアル
+              </a>
+            </li>
+          </ul>
+        </div>
+      )}
     </header>
   )
 }
@@ -98,7 +168,7 @@ const FeaturesSection = () => {
   const features = [
     {
       // icon: '📊',
-      title: 'リード検索・エクスポート',
+      title: 'リード作成',
       description:
         'キーワード、企業ページなど検索条件に合致するユーザーを検索。プロフィール情報、メールアドレス、職歴、学歴までエクスポートできます。',
     },
@@ -444,13 +514,13 @@ const ContactSection = () => {
                     、及びお問い合わせにおける個人情報の取扱いについて
                   </p>
                 </div>
-                <div className="bg-white white flex justify-center mb-8">
+                <div className="flex justify-center mb-8">
                   <label
-                    className={`bg-white white flex items-center ${errors.privacy ? 'text-red-500' : ''}`}
+                    className={`flex items-center ${errors.privacy ? 'text-red-500' : ''}`}
                   >
                     <input
                       type="checkbox"
-                      className={`white bg-white mr-2 h-5 w-5 ${errors.privacy ? 'border-red-500' : ''}`}
+                      className={`appearance-none bg-white border border-gray-300 checked:bg-white checked:border-gray-500 mr-2 h-5 w-5 ${errors.privacy ? 'border-red-500' : ''}`}
                       {...register('privacy')}
                     />
                     <span>同意する(必須)</span>
@@ -484,8 +554,8 @@ const Footer = () => {
     {
       title: 'サービス',
       links: [
-        { name: '機能一覧', url: '#features' },
-        { name: '使い方ガイド', url: '#how-to' },
+        { name: '機能', url: '#features' },
+        { name: '使い方', url: '#how-to' },
         { name: '料金プラン', url: '#pricing' },
       ],
     },
@@ -516,7 +586,7 @@ const Footer = () => {
         <div>
           <div className="text-3xl font-bold mb-5">Linked.</div>
           <p className="mb-5">
-            Linked(リンクト)は、LinkedInのリード獲得支援サービスです。
+            Linked(リンクト)は、LinkedInのリード獲得業務をサポートするオールインワンツールです。
           </p>
         </div>
 

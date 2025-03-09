@@ -8,7 +8,7 @@ export const toolConfig: ToolConfig = {
     theme: 'default',
     homeUrl: '/workflow',
     appUrl: '/workflow',
-    description: 'LinkedIn Automation',
+    description: 'Linked',
     logo: 'https://cdn2.iconfinder.com/data/icons/privacy-policy/512/privacy-data-policy-security-05-512.png',
     navbarLinks: [
       { label: 'App', href: `/workflow` },
@@ -17,8 +17,8 @@ export const toolConfig: ToolConfig = {
   },
   ////// SEO stuff
   metadata: {
-    title: 'LinkedIn Automation',
-    description: 'LinkedIn Automation',
+    title: 'Linked',
+    description: 'Linked',
     og_image: 'https://linked.spaceai.jp/og.png',
     canonical: 'https://linked.spaceai.jp/workflow',
   },
