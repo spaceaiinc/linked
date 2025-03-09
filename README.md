@@ -17,7 +17,7 @@ In order to use build tools, you will need to download and install Node.js. If N
 1. Clone
 
 ```bash
-git clone https://github.com/spaceaiinc/corporate.git
+git clone https://github.com/spaceaiinc/linked.git
 ```
 
 2. Get env.local file from Admin
@@ -101,17 +101,7 @@ Please read the [official documentation to get started.](https://docs.spaceai.jp
 
 ## TODO
 
-- Tab Switch Form
-- Connect Func Confirm in Prod
-- Batch
+- Batch / Time Scheduler
 - Like
 - Reaction
 - Stripe
-
-<!-- rename like_target_account_hours -->
-<!-- company_private_identifiers TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[], -->
-
-Add Update Func
-Add Time Scheduler
-
-Add Dashboard
