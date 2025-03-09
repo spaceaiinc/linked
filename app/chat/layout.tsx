@@ -1,7 +1,7 @@
-import { Sidebar } from '@/components/dashboard/Sidebar'
+import { Sidebar } from '@/app/components/dashboard/Sidebar'
 import { toolConfig } from './toolConfig'
 // import { UnifiedSidebar } from "@/components/dashboard/UnifiedSidebar";
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { SidebarInset, SidebarProvider } from '@/app/components/ui/sidebar'
 import { getSession } from '@/lib/db/cached-queries'
 
 export const metadata = {
