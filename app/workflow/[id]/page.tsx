@@ -27,7 +27,6 @@ export default function Page() {
   useEffect(() => {
     if (id) {
       setWorkflowId(id)
-      console.log('workflowId', id)
       workflows.map((workflow) => {
         if (workflow.id === id) setWorkflow(workflow)
       })

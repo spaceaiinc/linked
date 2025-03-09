@@ -343,7 +343,7 @@ const PricingSection = () => {
               ))}
             </ul>
             <a
-              href="#"
+              href="#contact"
               className="bg-[#0a66c2] text-white px-6 py-3 rounded-full font-bold inline-block transition-colors hover:bg-[#004182]"
             >
               {plan.ctaText}
