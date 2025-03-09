@@ -94,10 +94,7 @@ export default async function Navbar({
       <div className="navbar-end">
         <div className="flex md:flex-row flex-col items-center space-x-4">
           <li className="sm:mr-10 ml-auto inline-flex items-center">
-            <a
-              className="btn btn-accent hover:bg-white/10 w-40 text-accent-content bg-transparent border border-white text-white"
-              // href="mailto:info@spaceai.jp"
-            >
+            <a className="btn btn-accent hover:bg-white/10 w-40 text-accent-content bg-transparent border border-white text-white">
               <MailIcon className="w-6 h-6" />
               お問い合わせ
             </a>
