@@ -28,6 +28,8 @@ import { searchProfileSchema } from '@/lib/validation'
 import { NextResponse } from 'next/server'
 import { supabase as serviceSupabase } from '@/lib/utils/supabase/service'
 import { SupabaseClient } from '@supabase/supabase-js'
+import { decode } from 'punycode'
+import { decodeJapaneseOnly } from '@/lib/utils/decode'
 
 export async function POST(req: Request) {
   /**
@@ -129,13 +131,27 @@ export async function POST(req: Request) {
             let leadDataId = ''
             let shouldUpdateStatus = false
             leadsInDb.forEach((lead) => {
-              if (lead.public_identifier === publicIdentifier) {
+              if (
+                lead.public_identifier === decodeJapaneseOnly(publicIdentifier)
+              ) {
                 leadDataId = lead.id as string
-                if (
-                  lead.status === LeadStatus.SEARCHED ||
-                  lead.status === LeadStatus.INVITED_FAILED
-                ) {
+                if (lead.lead_statuses.length === 0) {
                   shouldUpdateStatus = true
+                } else {
+                  // sort by created_at desc
+                  lead.lead_statuses.sort((a, b) => {
+                    return (
+                      new Date(b.created_at).getTime() -
+                      new Date(a.created_at).getTime()
+                    )
+                  })
+                  console.log('lead.lead_statuses[0]', lead.lead_statuses[0])
+                  if (
+                    lead.lead_statuses[0]?.status === LeadStatus.SEARCHED ||
+                    lead.lead_statuses[0]?.status === LeadStatus.INVITED_FAILED
+                  ) {
+                    shouldUpdateStatus = true
+                  }
                 }
               }
             })
@@ -254,6 +270,7 @@ export async function POST(req: Request) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
+                    leadStatus = LeadStatus.ALREADY_INVITED
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED
@@ -375,7 +392,7 @@ export async function POST(req: Request) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
-                    leadStatus = LeadStatus.INVITED_FAILED
+                    leadStatus = LeadStatus.ALREADY_INVITED
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED
@@ -417,6 +434,7 @@ export async function POST(req: Request) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
+                    leadStatus = LeadStatus.ALREADY_INVITED
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED
@@ -618,7 +636,10 @@ export async function POST(req: Request) {
             console.log('item:', item)
             let matched = false
             leadsInDb.forEach((leadInDb) => {
-              if (leadInDb.public_identifier === item.public_identifier) {
+              if (
+                leadInDb.public_identifier ===
+                decodeJapaneseOnly(item.public_identifier)
+              ) {
                 leadsWithStatus.push({
                   leadId: leadInDb.id,
                   leadStatus: LeadStatus.SEARCHED,
@@ -673,17 +694,14 @@ export async function POST(req: Request) {
             async (profile) => {
               if (!profile || profile === undefined) return null
               let leadStatus = LeadStatus.SEARCHED
-              if (
-                param.type === WorkflowType.INVITE &&
-                'provider_id' in profile
-              ) {
+              if (param.type === WorkflowType.INVITE && 'id' in profile) {
                 const sendInvitationParam: {
                   account_id: string
                   provider_id: string
                   message?: string
                 } = {
                   account_id: param.account_id,
-                  provider_id: profile.private_identifier,
+                  provider_id: profile.id,
                 }
                 if (param.invitation_message)
                   sendInvitationParam.message = param.invitation_message
@@ -704,6 +722,7 @@ export async function POST(req: Request) {
                       console.log(
                         'Skipping lead - invitation was already sent recently'
                       )
+                      leadStatus = LeadStatus.ALREADY_INVITED
                     } else {
                       console.error('Error in send invitation:', error)
                       leadStatus = LeadStatus.INVITED_FAILED
