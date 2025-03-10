@@ -224,7 +224,6 @@ export async function POST(req: Request) {
         )
         await Promise.all(insertLeadPromises)
       } else {
-        // TODO: public_identifier prefix
         const leadPromises = param.target_public_identifiers?.map(
           async (publicIdentifier: string, index: number) => {
             if (!publicIdentifier || publicIdentifier === undefined) return
