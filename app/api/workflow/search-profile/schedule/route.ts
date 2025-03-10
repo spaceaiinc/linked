@@ -13,6 +13,15 @@ export type ProviderSearchProfilePostScheduleParam = {
 
 export async function POST(req: Request) {
   try {
+    // if (env.NEXT_PUBLIC_APP_ENV === 'production') {
+    //   // Google-Cloud-Schedulerからのリクエストかどうかを確認
+    //   const headers = req.headers
+    //   if (!headers.has('X-Appengine-Cron')) {
+    //   return NextResponse.json(
+    //     { error: 'Unauthorized request' },
+    //     { status: 401 }
+    //   )
+    // }
     // Google-Cloud-Schedulerからのリクエストかどうかを確認
     // const headers = req.headers
     // if (!headers.has('X-Appengine-Cron')) {
@@ -104,6 +113,7 @@ export async function POST(req: Request) {
 
       // 新しいRequestオブジェクトを作成して直接ハンドラーを呼び出す
       const searchProfileParam: SearchProfileParam = {
+        name: workflow.name,
         workflow_id: workflow.id,
         schedule_id: param.schedule_id,
         type: workflow.type,
@@ -121,7 +131,6 @@ export async function POST(req: Request) {
         invitation_message: workflow.invitation_message,
         active_tab: activeTab,
         company_urls: [],
-        name: workflow.name,
         first_message_days: 0,
         second_message_days: 0,
         third_message_days: 0,
