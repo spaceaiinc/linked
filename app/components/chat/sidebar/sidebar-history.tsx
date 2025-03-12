@@ -58,7 +58,7 @@ export function SidebarHistory({
   showAllHistory,
   setShowAllHistory,
 }: SidebarHistoryProps) {
-  const { setOpenMobile } = useSidebar()
+  // const { setOpenMobile } = useSidebar()
   const { id } = useParams()
   const { data: history, isLoading } = useSWR<Chat[]>(
     user ? ['chats', user.id] : null,
@@ -94,7 +94,7 @@ export function SidebarHistory({
   if (!user) {
     return (
       <div className="text-xs text-neutral-500 italic">
-        Login to view chat history
+        ログインしてチャットを閲覧する
       </div>
     )
   }
@@ -104,7 +104,7 @@ export function SidebarHistory({
       <GroupedChatList
         chats={history || []}
         currentChatId={id as string}
-        setOpenMobile={setOpenMobile}
+        setOpenMobile={() => {}}
         limit={limit}
         showAllHistory={showAllHistory}
         setShowAllHistory={setShowAllHistory}

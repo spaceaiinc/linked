@@ -1,8 +1,7 @@
-import { Sidebar } from '@/app/components/dashboard/Sidebar'
 import { toolConfig } from './toolConfig'
-// import { UnifiedSidebar } from "@/components/dashboard/UnifiedSidebar";
 import { SidebarInset, SidebarProvider } from '@/app/components/ui/sidebar'
 import { getSession } from '@/lib/db/cached-queries'
+import { UnifiedSidebar } from '../components/dashboard/UnifiedSidebar'
 
 export const metadata = {
   title: toolConfig.metadata.title,
@@ -24,9 +23,8 @@ export default async function Layout({
 
   return (
     <SidebarProvider>
-      {/* <UnifiedSidebar user={user} showChatHistory={true} /> */}
-      <Sidebar user={user} />
-      <div className="lg:pl-2 lg:pt-2 bg-white flex-1 overflow-y-auto">
+      <UnifiedSidebar user={user} showChatHistory={true} />
+      <div className="lg:pl-2 lg:pt-2 bg-gray-100 flex-1 overflow-y-auto">
         <SidebarInset
           data-theme="anotherwrapper"
           className="flex-1 bg-white lg:rounded-tl-xl border border-transparent lg:border-neutral-200 overflow-y-auto"

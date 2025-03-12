@@ -12,10 +12,20 @@ import {
 } from '@tabler/icons-react'
 import { isMobile } from '@/lib/utils'
 import { SidebarHistory } from '@/app/components/chat/sidebar/sidebar-history'
-import { Badge } from '@/app/components/dashboard/Badge'
 import { Heading } from './Heading'
 import { IconLogout, IconLogin } from '@tabler/icons-react'
 import { navlinks, otherLinks } from './links'
+import { providersAtom, providerAtom, loadingAtom } from '@/lib/atom'
+import { useAtom } from 'jotai'
+import { createClient } from '@/lib/utils/supabase/client'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select'
+import { Button } from '../ui/button'
 
 // Import navlinks from config
 
@@ -37,16 +47,19 @@ const UpdatedBadge = () => (
 )
 
 const SidebarHeader = React.memo(() => (
-  <Link className="px-2 mb-4" href="/">
-    <Image
+  <div className="flex space-x-2 pt-8">
+    <Link className="px-2 mb-4" href="/">
+      {/* <Image
       src="/logo-text.png"
       alt="Logo"
       width={400}
       height={100}
       quality={100}
       className="w-full"
-    />
-  </Link>
+      /> */}
+      <p className="text-3xl font-bold">Linked</p>
+    </Link>
+  </div>
 ))
 
 SidebarHeader.displayName = 'SidebarHeader'
@@ -63,8 +76,7 @@ export function UnifiedSidebar({
   const isActive = useCallback((href: string) => pathname === href, [pathname])
 
   // Separate chat link from other navlinks
-  const chatLink = navlinks.find((link) => link.label === 'Chat')
-  const otherNavlinks = navlinks.filter((link) => link.label !== 'Chat')
+  const chatLink = navlinks.find((link) => link.label === 'チャット')
 
   const renderLinks = useCallback(
     (links: any[], heading: string, defaultExternal: boolean = false) => {
@@ -76,10 +88,10 @@ export function UnifiedSidebar({
               user
                 ? {
                     href: '/api/auth/signout',
-                    label: 'Logout',
+                    label: `ログアウト(${user.email?.split('@')[0]})`,
                     icon: IconLogout,
                   }
-                : { href: '/auth', label: 'Login', icon: IconLogin },
+                : { href: '/auth', label: 'ログイン', icon: IconLogin },
             ]
           : links
 
@@ -92,8 +104,47 @@ export function UnifiedSidebar({
             {heading}
           </Heading>
 
+          {/* Render other links */}
+          {linksToRender.map((link) => {
+            if (heading === 'Apps' && link.label === 'チャット') return null
+            const isExternal = link.isExternal ?? defaultExternal
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                prefetch={!isExternal}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noopener noreferrer' : undefined}
+                onClick={(e) => {
+                  if (link.label === 'Logout') {
+                    e.preventDefault()
+                    fetch(link.href, { method: 'POST' }).then(() => {
+                      window.location.href = '/auth'
+                    })
+                  } else if (isMobile()) {
+                    setOpen(false)
+                  }
+                }}
+                className={twMerge(
+                  'text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm',
+                  isActive(link.href) && 'bg-white shadow-lg text-primary'
+                )}
+              >
+                <link.icon
+                  className={twMerge(
+                    'h-4 w-4 flex-shrink-0',
+                    isActive(link.href) && 'text-sky-500'
+                  )}
+                />
+                <span>{link.label}</span>
+                {link.isNew && <NewBadge />}
+                {link.isUpdated && <UpdatedBadge />}
+              </Link>
+            )
+          })}
           {/* Always render Chat AI first in Demo Apps section */}
-          {heading === 'Demo Apps' && chatLink && (
+          {heading === 'Apps' && chatLink && (
             <>
               {showChatHistory ? (
                 <div className="mb-1">
@@ -157,46 +208,6 @@ export function UnifiedSidebar({
               )}
             </>
           )}
-
-          {/* Render other links */}
-          {linksToRender.map((link) => {
-            if (heading === 'Demo Apps' && link.label === 'Chat AI') return null
-            const isExternal = link.isExternal ?? defaultExternal
-
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                prefetch={!isExternal}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noopener noreferrer' : undefined}
-                onClick={(e) => {
-                  if (link.label === 'Logout') {
-                    e.preventDefault()
-                    fetch(link.href, { method: 'POST' }).then(() => {
-                      window.location.href = '/auth'
-                    })
-                  } else if (isMobile()) {
-                    setOpen(false)
-                  }
-                }}
-                className={twMerge(
-                  'text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm',
-                  isActive(link.href) && 'bg-white shadow-lg text-primary'
-                )}
-              >
-                <link.icon
-                  className={twMerge(
-                    'h-4 w-4 flex-shrink-0',
-                    isActive(link.href) && 'text-sky-500'
-                  )}
-                />
-                <span>{link.label}</span>
-                {link.isNew && <NewBadge />}
-                {link.isUpdated && <UpdatedBadge />}
-              </Link>
-            )
-          })}
         </>
       )
     },
@@ -211,17 +222,54 @@ export function UnifiedSidebar({
     ]
   )
 
-  const handleBadgeClick = () => {
-    if (isMobile()) setOpen(false)
+  const handleConnect = async () => {
+    try {
+      // Try to get LinkedIn cookies
+      const response = await fetch('/api/provider/auth', {
+        method: 'POST',
+      })
+      // const res: {
+      //   object: 'HostedAuthUrl'
+      //   url: string
+      // }
+      // push to url
+      if (response.ok) {
+        const { url } = await response.json()
+        if (url) window.open(url, '_blank')
+      }
+    } catch (error) {
+      console.error('Error checking login status:', error)
+    }
+  }
+
+  // const [user, _] = useAtom(userAtom)
+  const [providers, _] = useAtom(providersAtom)
+  const [provider, setProvider] = useAtom(providerAtom)
+  const [, setLoading] = useAtom(loadingAtom)
+  const handleSelectProvider = async (value: string) => {
+    setLoading(true)
+    if (value === 'none' || !user) return
+    const findedProvider = providers.find((p) => p.account_id === value)
+    if (findedProvider === undefined || !findedProvider) return
+    setProvider(findedProvider)
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('profiles')
+      .update({ selected_provider_id: findedProvider.id })
+      .eq('id', user.id)
+    if (error) {
+      console.error('Error updating profile', error)
+    }
+    window.location.reload()
+    setLoading(false)
   }
 
   return (
     <>
-      <div className={`lg:block ${open ? 'block' : 'hidden'}`}>
-        <div className="px-3 z-40 pb-4 bg-neutral-100 w-[220px] fixed lg:relative h-screen left-0 flex flex-col justify-between">
-          <div className="flex-1 overflow-auto no-scrollbar">
-            <SidebarHeader />
-
+      <div className={`lg:block ${open ? 'block' : 'hidden'} h-screen`}>
+        <div className="px-3 z-40 bg-neutral-100 w-[220px] h-full overflow-hidden flex flex-col">
+          <SidebarHeader />
+          <div className="flex-1 overflow-y-auto no-scrollbar">
             <div className="flex flex-col space-y-1 relative z-40">
               <div className="flex flex-col">
                 {/* {renderLinks(overviewLinks, "Overview")} */}
@@ -232,26 +280,59 @@ export function UnifiedSidebar({
               </div>
             </div>
           </div>
-
-          <div className="pb-4">
-            <div onClick={handleBadgeClick}>
-              <Badge
-                href="https://anotherwrapper.lemonsqueezy.com/buy/c1a15bd7-58b0-4174-8d1a-9bca6d8cb511"
-                text="Build your startup"
-                icon={IconChevronRight}
-                className="w-full"
-              />
-            </div>
-          </div>
+          {user ? (
+            <>
+              <div className="flex justify-center mb-4">
+                {providers.length ? (
+                  <Select
+                    value={provider?.account_id}
+                    onValueChange={(value) => handleSelectProvider(value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue className="capitalize">
+                        {provider?.public_identifier || 'Select Provider'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {providers.map((key) => (
+                        <SelectItem
+                          key={key.account_id}
+                          value={key.account_id}
+                          className="data-[state=checked]:bg-accent data-[state=checked]:text-accent-foreground"
+                        >
+                          {key.public_identifier}
+                        </SelectItem>
+                      ))}
+                      <Button
+                        onClick={() => handleConnect()}
+                        className="bg-white hover:bg-white/10 text-black w-full"
+                      >
+                        {'LinkedInアカウント追加'}
+                      </Button>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Button
+                    onClick={() => handleConnect()}
+                    className="bg-white hover:bg-white/10 text-black w-full"
+                  >
+                    {'LinkedInアカウント追加'}
+                  </Button>
+                )}
+              </div>
+            </>
+          ) : null}
+          <span className="text-xs text-neutral-400 text-center">
+            version@0.1.3
+          </span>
+          <button
+            className="fixed lg:hidden bottom-4 right-4 h-8 w-8 border border-neutral-200 rounded-full backdrop-blur-sm flex items-center justify-center z-40"
+            onClick={() => setOpen(!open)}
+          >
+            <IconLayoutSidebarRightCollapse className="h-4 w-4 text-primary" />
+          </button>
         </div>
       </div>
-
-      <button
-        className="fixed lg:hidden bottom-4 right-4 h-8 w-8 border border-neutral-200 rounded-full backdrop-blur-sm flex items-center justify-center z-40"
-        onClick={() => setOpen(!open)}
-      >
-        <IconLayoutSidebarRightCollapse className="h-4 w-4 text-primary" />
-      </button>
     </>
   )
 }
