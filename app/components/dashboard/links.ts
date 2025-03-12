@@ -1,14 +1,7 @@
 import {
-  IconMicrophone,
   IconFileText,
-  IconMessage,
-  IconPhoto,
-  IconEye,
-  IconBolt,
-  IconMessage2,
   IconRobot,
   IconCurrencyDollar,
-  IconPencil,
   IconHome,
   IconLayoutDashboard,
 } from '@tabler/icons-react'
