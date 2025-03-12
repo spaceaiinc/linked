@@ -23,7 +23,7 @@ import {
   AIModelDisplayInfo,
 } from '@/lib/ai/models'
 import { getCookie, setCookie } from '@/lib/utils/cookies'
-import { ImageIcon } from 'lucide-react'
+import { BrainCircuitIcon, SearchIcon } from 'lucide-react'
 import { PreviewAttachment } from './preview-attachment'
 import { Button } from '../ui/button'
 import { ArrowUpIcon, StopIcon } from './icons'
@@ -32,17 +32,16 @@ import { cn } from '@/lib/utils'
 
 const suggestedActions = [
   {
-    title: 'Build a Youtube Script Generator',
-    label: 'How can I build a Youtube Script Generator with AnotherWrapper?',
-    action:
-      'I want to build a Youtube Script Generator. Which demo app can I use? It should generate text scripts, the audio for each scene + thumbnails for the video.',
-    icon: '📹',
+    icon: <BrainCircuitIcon className="w-4 h-4" />,
+    title: 'パーソナライズDM生成',
+    action: 'パーソナライズされたDMを生成します',
+    label: 'パーソナライズされたDMを生成します',
   },
   {
-    title: 'Write an essay',
-    label: 'Write an essay about Tupac Shakur',
-    action: 'I want to write an essay about the life of Tupac Shakur.',
-    icon: '✨',
+    icon: <SearchIcon className="w-4 h-4" />,
+    title: '候補者検索',
+    action: '候補者のSNSアカウントを検索します',
+    label: '候補者のSNSアカウントを検索します',
   },
 ]
 
@@ -131,7 +130,7 @@ export function MultimodalInput({
   const [previewAttachments, setPreviewAttachments] = useState<Attachment[]>([])
 
   const submitForm = useCallback(() => {
-    window.history.replaceState({}, '', `/apps/chat/${chatId}`)
+    window.history.replaceState({}, '', `/chat/${chatId}`)
 
     handleSubmit(undefined, {
       experimental_attachments: attachments,
@@ -192,89 +191,89 @@ export function MultimodalInput({
     adjustHeight()
   }
 
-  const uploadFile = async (file: File, chatId: string) => {
-    setIsUploading(true)
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('chatId', chatId)
+  // const uploadFile = async (file: File, chatId: string) => {
+  //   setIsUploading(true)
+  //   const formData = new FormData()
+  //   formData.append('file', file)
+  //   formData.append('chatId', chatId)
 
-    try {
-      const response = await fetch(`/api/files/upload`, {
-        method: 'POST',
-        body: formData,
-      })
+  //   try {
+  //     const response = await fetch(`/api/files/upload`, {
+  //       method: 'POST',
+  //       body: formData,
+  //     })
 
-      if (response.ok) {
-        const data = await response.json()
-        return {
-          url: data.url,
-          name: data.path,
-          contentType: file.type,
-        }
-      } else {
-        const { error, details } = await response.json()
-        console.error('Upload error:', { error, details })
-        toast({
-          title: 'Upload error',
-          description: error,
-        })
-      }
-    } catch (error) {
-      console.error('Upload failed:', error)
-      toast({
-        title: 'Upload failed',
-        description: 'Failed to upload file, please try again!',
-      })
-    } finally {
-      setIsUploading(false)
-    }
-  }
+  //     if (response.ok) {
+  //       const data = await response.json()
+  //       return {
+  //         url: data.url,
+  //         name: data.path,
+  //         contentType: file.type,
+  //       }
+  //     } else {
+  //       const { error, details } = await response.json()
+  //       console.error('Upload error:', { error, details })
+  //       toast({
+  //         title: 'Upload error',
+  //         description: error,
+  //       })
+  //     }
+  //   } catch (error) {
+  //     console.error('Upload failed:', error)
+  //     toast({
+  //       title: 'Upload failed',
+  //       description: 'Failed to upload file, please try again!',
+  //     })
+  //   } finally {
+  //     setIsUploading(false)
+  //   }
+  // }
 
-  const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(event.target.files || [])
-      if (files.length === 0) return
+  // const handleFileChange = useCallback(
+  //   async (event: ChangeEvent<HTMLInputElement>) => {
+  //     const files = Array.from(event.target.files || [])
+  //     if (files.length === 0) return
 
-      // Process each file one by one
-      for (const file of files) {
-        // Check file size
-        if (file.size > MAX_FILE_SIZE) {
-          toast({
-            title: `${file.name} exceeds 5MB limit`,
-          })
-          continue
-        }
+  //     // Process each file one by one
+  //     for (const file of files) {
+  //       // Check file size
+  //       if (file.size > MAX_FILE_SIZE) {
+  //         toast({
+  //           title: `${file.name} exceeds 5MB limit`,
+  //         })
+  //         continue
+  //       }
 
-        // Add single file to upload queue
-        const queueItem = {
-          id: crypto.randomUUID(),
-          name: file.name,
-          file,
-        }
-        setUploadQueue((prev) => [...prev, queueItem])
-        setIsUploading(true)
+  //       // Add single file to upload queue
+  //       const queueItem = {
+  //         id: crypto.randomUUID(),
+  //         name: file.name,
+  //         file,
+  //       }
+  //       setUploadQueue((prev) => [...prev, queueItem])
+  //       setIsUploading(true)
 
-        try {
-          const uploadedAttachment = await uploadFile(file, chatId)
-          if (uploadedAttachment) {
-            setAttachments((current) => [...current, uploadedAttachment])
-          }
-        } catch (error) {
-          console.error('Error uploading file:', error)
-          toast({
-            title: `Failed to upload ${file.name}`,
-          })
-        } finally {
-          // Remove this file from the queue
-          setUploadQueue((prev) =>
-            prev.filter((item) => item.id !== queueItem.id)
-          )
-        }
-      }
-      setIsUploading(false)
-    },
-    [setAttachments, chatId]
-  )
+  //       try {
+  //         const uploadedAttachment = await uploadFile(file, chatId)
+  //         if (uploadedAttachment) {
+  //           setAttachments((current) => [...current, uploadedAttachment])
+  //         }
+  //       } catch (error) {
+  //         console.error('Error uploading file:', error)
+  //         toast({
+  //           title: `Failed to upload ${file.name}`,
+  //         })
+  //       } finally {
+  //         // Remove this file from the queue
+  //         setUploadQueue((prev) =>
+  //           prev.filter((item) => item.id !== queueItem.id)
+  //         )
+  //       }
+  //     }
+  //     setIsUploading(false)
+  //   },
+  //   [setAttachments, chatId]
+  // )
 
   useEffect(() => {
     // Load both cookies on mount
@@ -324,7 +323,7 @@ export function MultimodalInput({
     return (
       <div className="w-full" onClick={handleUnauthenticatedInteraction}>
         <div className="cursor-pointer p-4 text-center border border-dashed rounded-lg">
-          Sign in to send messages
+          チャットを開始するにはログインしてください
         </div>
       </div>
     )
@@ -338,7 +337,7 @@ export function MultimodalInput({
         messages.length === 0 && (
           <div className="w-full px-1">
             <div className="text-sm text-muted-foreground/60 mb-4 font-medium">
-              Get started with
+              おすすめのワークフロー
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {suggestedActions.map((suggestedAction, index) => (
@@ -548,7 +547,7 @@ export function MultimodalInput({
             </ul>
           )}
         </div>
-
+        {/* 
         {AI_MODEL_DISPLAY[selectedModel.id].vision && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
             <ImageIcon className="h-4 w-4 mr-1" />
@@ -561,7 +560,7 @@ export function MultimodalInput({
               onChange={(e) => handleFileChange(e)}
             />
           </label>
-        )}
+        )} */}
       </div>
     </div>
   )

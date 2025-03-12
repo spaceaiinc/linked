@@ -6,13 +6,13 @@ export const toolConfig: ToolConfig = {
   company: {
     name: 'Advanced AI Assistant',
     theme: 'anotherwrapper',
-    homeUrl: '/apps/chat',
-    appUrl: '/apps/chat',
+    homeUrl: '/chat',
+    appUrl: '/chat',
     description:
       'Advanced AI Assistant with multiple models, multimodal capabilities, web search, and document generation features.',
     logo: 'https://cdn3.iconfinder.com/data/icons/aami-web-internet/64/aami4-68-512.png',
     navbarLinks: [
-      { label: 'App', href: `/apps/chat` },
+      { label: 'App', href: `/chat` },
       { label: 'Home', href: '/' },
       { label: 'Other apps', href: '/apps' },
       { label: 'Blog', href: '/blog' },
@@ -25,7 +25,7 @@ export const toolConfig: ToolConfig = {
     description:
       'AI Assistant powered by OpenAI, Anthropic and Groq, featuring multimodal capabilities, web search via Serper API and Jina AI, and document generation with Canvas.',
     og_image: 'https://anotherwrapper.com/og.png',
-    canonical: 'https://anotherwrapper.com/apps/chat',
+    canonical: 'https://anotherwrapper.com/chat',
   },
 
   ////// Payments

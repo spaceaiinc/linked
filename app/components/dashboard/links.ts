@@ -46,13 +46,11 @@ export const overviewLinks: NavLink[] = [
 ]
 
 export const navlinks: NavLink[] = [
+  // { href: '/chat', label: 'チャット', icon: IconMessage },
   { href: '/dashboard', label: 'ダッシュボード', icon: IconHome },
   { href: '/leads', label: 'リード', icon: IconFileText },
-  // { href: '/search/profile', label: 'プロフィール検索', icon: IconMessage },
-  // { href: '/search/job', label: '求人検索', icon: IconMessage },
-  // { href: '/target', label: 'キーマン投稿', icon: IconMessage },
-  // { href: '/reaction', label: 'コメント反応', icon: IconMessage },
-  // { href: '/chat', label: 'Chat', icon: IconMessage },
 ]
 
-export const otherLinks = [{ href: '/', label: 'Landing', icon: IconFileText }]
+export const otherLinks = [
+  { href: '/', label: '使い方ガイド', icon: IconFileText },
+]

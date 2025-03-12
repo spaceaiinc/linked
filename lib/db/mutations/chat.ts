@@ -25,10 +25,12 @@ async function mutateQuery<T extends any[]>(
 
 export async function saveChat({
   id,
+  companyId,
   userId,
   title,
 }: {
   id: string
+  companyId: string
   userId: string
   title: string
 }) {
@@ -38,7 +40,7 @@ export async function saveChat({
       // TODO:
       const { error } = await client.from('chats').insert({
         id,
-        company_id: '',
+        company_id: companyId,
         user_id: userId,
         title,
         created_at: now,
@@ -69,9 +71,11 @@ export async function deleteChatById(chatId: string, userId: string) {
 }
 
 export async function saveMessages({
+  companyId,
   chatId,
   messages,
 }: {
+  companyId: string
   chatId: string
   messages: Message[]
 }) {
@@ -99,21 +103,23 @@ export async function saveMessages({
           })
         }
 
+        console.log('content', content)
+
         return {
-          id: message.id,
           chat_id: chatId,
+          company_id: companyId,
           role: message.role,
           content: content,
           created_at: message.created_at || new Date().toISOString(),
         }
       })
 
-      // TODO:
-      // const { error } = await client.from('messages').insert({
-      //   company_id: '',
-      //   ...formattedMessages,
-      // })
-      // if (error) throw error
+      console.log('formattedMessages', formattedMessages)
+      if (formattedMessages.length === 0) return
+
+      const { error } = await client.from('messages').insert(formattedMessages)
+
+      if (error) throw error
     },
     [{ chatId, messages }],
     [`chat_${chatId}_messages`, `chat_${chatId}`]

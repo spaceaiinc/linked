@@ -16,34 +16,39 @@ export function AppInfo() {
   const features = [
     {
       icon: <BrainCircuitIcon className="w-4 h-4" />,
-      title: 'Multiple AI Models',
-      description: 'OpenAI, Anthropic and Groq via Vercel AI SDK',
-    },
-    {
-      icon: <SparklesIcon className="w-4 h-4" />,
-      title: 'Generative UI',
-      description: 'Dynamic components and interactive app suggestions',
+      title: 'パーソナライズDM生成',
+      description: 'パーソナライズされたDMを生成します',
     },
     {
       icon: <SearchIcon className="w-4 h-4" />,
-      title: 'Smart Browsing',
-      description: 'Real-time web search with content analysis',
+      title: '候補者検索',
+      description: '候補者のSNSアカウントを検索します',
     },
     {
-      icon: <ImageIcon className="w-4 h-4" />,
-      title: 'Multimodal',
-      description: 'Interact with images and files via Cloudflare Storage',
+      icon: <SearchIcon className="w-4 h-4" />,
+      title: 'LinkedIn企業ページ検索',
+      description: 'LinkedInの企業ページを検索します',
     },
-    {
-      icon: <GlobeIcon className="w-4 h-4" />,
-      title: 'Web Search',
-      description: 'Real-time information via Serper API and Jina AI',
-    },
-    {
-      icon: <FileTextIcon className="w-4 h-4" />,
-      title: 'Canvas',
-      description: 'Generate and edit documents with AI',
-    },
+    // {
+    //   icon: <SearchIcon className="w-4 h-4" />,
+    //   title: 'Smart Browsing',
+    //   description: 'Real-time web search with content analysis',
+    // },
+    // {
+    //   icon: <ImageIcon className="w-4 h-4" />,
+    //   title: 'Multimodal',
+    //   description: 'Interact with images and files via Cloudflare Storage',
+    // },
+    // {
+    //   icon: <GlobeIcon className="w-4 h-4" />,
+    //   title: 'Web Search',
+    //   description: 'Real-time information via Serper API and Jina AI',
+    // },
+    // {
+    //   icon: <FileTextIcon className="w-4 h-4" />,
+    //   title: 'Canvas',
+    //   description: 'Generate and edit documents with AI',
+    // },
   ]
 
   return (
@@ -59,11 +64,10 @@ export function AppInfo() {
           {/* Title */}
           <div className="text-center space-y-1">
             <h1 className="text-xl font-semibold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Advanced AI Assistant
+              AIエージェントチャット
             </h1>
             <p className="text-sm text-muted-foreground/80">
-              A powerful chatbot with generative UI and smart browsing
-              capabilities
+              おすすめのワークフロー
             </p>
           </div>
 
@@ -93,7 +97,7 @@ export function AppInfo() {
           </div>
 
           {/* Technical Info */}
-          <div className="space-y-2 bg-gradient-to-br from-zinc-50/80 to-white/60 rounded-xl p-3 border">
+          {/* <div className="space-y-2 bg-gradient-to-br from-zinc-50/80 to-white/60 rounded-xl p-3 border">
             <div className="flex items-center gap-2 px-1">
               <WrenchIcon className="w-4 h-4 text-primary/70" />
               <span className="text-sm font-medium text-foreground/90">
@@ -126,7 +130,7 @@ export function AppInfo() {
                 documentation →
               </Link>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </motion.div>
