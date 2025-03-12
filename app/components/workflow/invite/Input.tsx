@@ -19,13 +19,21 @@ import {
 import { useDropzone } from 'react-dropzone'
 import { Input } from '@/app/components/ui/input'
 import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
-import { providerAtom, userAtom } from '@/lib/atom'
+import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractColumnData } from '@/lib/csv'
 import CheckboxGroup from '@/app/components/ui/checkbox-group'
 import { createClient } from '@/lib/utils/supabase/client'
 import { Workflow } from '@/lib/types/supabase'
 import { WorkflowType } from '@/lib/types/master'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../ui/select'
 
 const mainVariant = {
   initial: { x: 0, y: 0 },
@@ -83,6 +91,7 @@ export default function InviteInputCapture({
   const [provider] = useAtom(providerAtom)
   const [defaultActiveTab, setDefaultActiveTab] = useState<string>('')
   const [workflowInDb, setWorkflowInDb] = useState<Workflow | null>(null)
+  const [workflows] = useAtom(workflowsAtom)
 
   useEffect(() => {
     // fetch workflow data
@@ -189,6 +198,7 @@ export default function InviteInputCapture({
   let keywordsField: FormFields | undefined
   let companyUrlsField: FormFields | undefined
   let networkDistanceField: FormFields | undefined
+  let leadListIdField: FormFields | undefined
   toolConfig.fields?.forEach((field) => {
     if (field.name === 'search_url') {
       searchUrlField = field
@@ -198,6 +208,8 @@ export default function InviteInputCapture({
       companyUrlsField = field
     } else if (field.name === 'network_distance') {
       networkDistanceField = field
+    } else if (field.name === 'target_workflow_id') {
+      leadListIdField = field
     }
   })
 
@@ -406,7 +418,47 @@ export default function InviteInputCapture({
                                       リード
                                     </label>
                                     <div className="relative mt-1">
-                                      Coming Soon...
+                                      <Select
+                                        value={formData[leadListIdField?.name!]}
+                                        onValueChange={(value) =>
+                                          handleChange(
+                                            {
+                                              target: { value } as any,
+                                            } as React.ChangeEvent<HTMLSelectElement>,
+                                            leadListIdField?.name!
+                                          )
+                                        }
+                                      >
+                                        <SelectTrigger
+                                          className="w-full bg-gray-50/50 border border-gray-100 rounded-lg px-4 py-3 
+                  text-gray-900 focus:ring-2 focus:ring-primary/10 focus:border-primary/30 
+                  transition-all duration-200"
+                                        >
+                                          <SelectValue placeholder="ワークフローを選択" />
+                                        </SelectTrigger>
+                                        <SelectContent className="border-gray-100 rounded-xl overflow-hidden">
+                                          <SelectGroup>
+                                            {workflows?.map((workflow) => {
+                                              if (
+                                                workflow.type !==
+                                                  WorkflowType.SEARCH &&
+                                                workflow.type !==
+                                                  WorkflowType.LEAD_LIST
+                                              )
+                                                return null
+                                              return (
+                                                <SelectItem
+                                                  key={workflow.id}
+                                                  value={workflow.id}
+                                                  className="hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-900 focus:text-gray-900 px-4 py-2.5 cursor-pointer"
+                                                >
+                                                  {workflow.name}
+                                                </SelectItem>
+                                              )
+                                            })}
+                                          </SelectGroup>
+                                        </SelectContent>
+                                      </Select>
                                     </div>
                                   </div>
                                 </div>
