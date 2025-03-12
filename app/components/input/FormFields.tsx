@@ -4,6 +4,14 @@ import { Textarea } from '@/app/components/ui/textarea'
 import { Label } from '@/app/components/ui/label'
 import { type FormFields } from '@/lib/types/toolconfig'
 import CheckboxGroup from '../ui/checkbox-group'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select'
 
 interface RenderFieldsProps {
   fields: FormFields[]
@@ -103,6 +111,41 @@ export const RenderFields: React.FC<RenderFieldsProps> = ({
                 handleChange={handleChange}
               />
             )}
+            {field.type === 'select' && (
+              <Select
+                value={formData[field.name!]}
+                onValueChange={(value) =>
+                  handleChange(
+                    {
+                      target: { value } as any,
+                    } as React.ChangeEvent<HTMLSelectElement>,
+                    field.name!
+                  )
+                }
+              >
+                <SelectTrigger
+                  className="w-full bg-gray-50/50 border border-gray-100 rounded-lg px-4 py-3 
+                  text-gray-900 focus:ring-2 focus:ring-primary/10 focus:border-primary/30 
+                  transition-all duration-200"
+                >
+                  <SelectValue placeholder="Select an option" />
+                </SelectTrigger>
+                <SelectContent className="border-gray-100 rounded-xl overflow-hidden">
+                  <SelectGroup>
+                    {field.options?.map((option) => (
+                      <SelectItem
+                        key={option.value}
+                        value={option.value}
+                        className="hover:bg-gray-50 focus:bg-gray-50 hover:text-gray-900 focus:text-gray-900 px-4 py-2.5 cursor-pointer"
+                      >
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+
             {/* エラーメッセージの表示 */}
             {/* {field.name && errors[field.name] && (
               <p className="text-red-500 text-sm mt-1">

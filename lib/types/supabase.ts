@@ -1621,7 +1621,7 @@ export interface MessageAnnotation {
 
 // Update Message interface to match AI library format
 export interface Message {
-  id: string
+  id?: string
   chat_id: string
   role: MessageRole
   content: string | Record<string, unknown>
@@ -1666,7 +1666,7 @@ export function handleDatabaseError(error: PostgrestError | null) {
 
 // Add DatabaseMessage type to match the database schema
 export interface DatabaseMessage {
-  id: string
+  id?: string
   chat_id: string
   role: string
   content: string // Always stored as string in database
@@ -1695,7 +1695,6 @@ export function convertToDBMessage(message: Message): DatabaseMessage {
   }
 
   return {
-    id: message.id,
     chat_id: message.chat_id,
     role: message.role,
     content: content as string,

@@ -1,9 +1,9 @@
 import { Suspense } from 'react'
-import { Sidebar } from '@/app/components/dashboard/Sidebar'
 import { createClient } from '@/lib/utils/supabase/server'
 import { Container } from '@/app/components/dashboard/Container'
 import LoadingSpinner from '@/app/components/Loading'
 import { ToolConfig } from '@/lib/types/toolconfig'
+import { UnifiedSidebar } from './UnifiedSidebar'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -23,21 +23,27 @@ export async function DashboardLayout({
 
   return (
     <>
-      <div className="flex overflow-hidden bg-white">
-        <Sidebar user={user} />
-        <div className="lg:pl-[15rem] lg:pt-2 bg-white flex-1">
-          {/* <div className="flex-1 bg-white lg:rounded-tl-xl border border-transparent lg:border-neutral-200 overflow-hidden"> */}
-          <Suspense fallback={<LoadingSpinner />}>
-            <MainContent
-              toolConfig={toolConfig}
-              showGreeting={showGreeting}
-              user={user}
-            >
-              {children}
-            </MainContent>
-          </Suspense>
-          {/* <ContentFooter /> */}
-          {/* </div> */}
+      <div className="flex h-screen overflow-hidden">
+        {/* サイドバー部分 - 固定位置 */}
+        <UnifiedSidebar user={user} showChatHistory={true} />
+
+        {/* メインコンテンツエリア - スクロール可能 */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="lg:pl-2 lg:pt-2 bg-gray-100 min-h-screen">
+            <div className="flex-1 bg-white lg:rounded-tl-xl border border-transparent lg:border-neutral-200">
+              <Suspense fallback={<LoadingSpinner />}>
+                <MainContent
+                  toolConfig={toolConfig}
+                  showGreeting={showGreeting}
+                  user={user}
+                >
+                  {children}
+                </MainContent>
+              </Suspense>
+              {/* <ContentFooter /> */}
+              {/* </div> */}
+            </div>
+          </div>
         </div>
       </div>
       {/* <Suspense fallback={<LoadingSpinner />}>
