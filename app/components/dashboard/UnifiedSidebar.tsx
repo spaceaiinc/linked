@@ -77,23 +77,17 @@ export function UnifiedSidebar({
 
   // Separate chat link from other navlinks
   const chatLink = navlinks.find((link) => link.label === 'チャット')
+  const handleSignOut = async () => {
+    await fetch('/api/auth/signout', {
+      method: 'POST',
+    })
+    window.location.href = '/auth'
+  }
 
   const renderLinks = useCallback(
     (links: any[], heading: string, defaultExternal: boolean = false) => {
       // Add logout/login link to otherLinks when rendering that section
-      const linksToRender =
-        heading === 'Other'
-          ? [
-              ...links,
-              user
-                ? {
-                    href: '/api/auth/signout',
-                    label: `ログアウト(${user.email?.split('@')[0]})`,
-                    icon: IconLogout,
-                  }
-                : { href: '/auth', label: 'ログイン', icon: IconLogin },
-            ]
-          : links
+      const linksToRender = heading === 'Other' ? [...links] : links
 
       return (
         <>
@@ -277,6 +271,41 @@ export function UnifiedSidebar({
                 {/* {renderLinks(landingPages, "Landing Pages", true)}
                 {renderLinks(freeTools, "Free Tools", true)} */}
                 {renderLinks(otherLinks, 'Other', true)}
+                {user ? (
+                  <a
+                    onClick={handleSignOut}
+                    key={'/auth'}
+                    className={twMerge(
+                      'text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm',
+                      isActive('/auth') && 'bg-white shadow-lg text-primary'
+                    )}
+                  >
+                    <IconLogout
+                      className={twMerge(
+                        'h-4 w-4 flex-shrink-0',
+                        isActive('/auth') && 'text-sky-500'
+                      )}
+                    />
+                    <span>ログアウト ({user?.email?.split('@')[0]})</span>
+                  </a>
+                ) : (
+                  <Link
+                    href="/auth"
+                    prefetch={false}
+                    className={twMerge(
+                      'text-primary hover:text-primary/50 transition duration-200 flex items-center space-x-2 py-2 px-4 rounded-md text-sm',
+                      isActive('/auth') && 'bg-white shadow-lg text-primary'
+                    )}
+                  >
+                    <IconLogin
+                      className={twMerge(
+                        'h-4 w-4 flex-shrink-0',
+                        'text-sky-500'
+                      )}
+                    />
+                    <span>ログイン</span>
+                  </Link>
+                )}
               </div>
             </div>
           </div>
