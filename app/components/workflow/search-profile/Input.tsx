@@ -9,52 +9,22 @@ import { Button } from '@/app/components/ui/button'
 import { searchProfileResponse } from '@/lib/hooks/searchProfileResponse'
 import Login from '@/app/components/input/login'
 import { motion } from 'framer-motion'
-import { FileIcon, UploadCloudIcon, LinkIcon, TextIcon } from 'lucide-react'
+import { LinkIcon, TextIcon } from 'lucide-react'
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
 } from '@/app/components/ui/tabs'
-import { useDropzone } from 'react-dropzone'
 import { Input } from '@/app/components/ui/input'
-import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
-import { providerAtom, userAtom } from '@/lib/atom'
+import { IconBrandLinkedin, IconHeart } from '@tabler/icons-react'
+import { providerAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
-import { extractColumnData } from '@/lib/csv'
+import { extractLinkedInId } from '@/lib/csv'
 import CheckboxGroup from '@/app/components/ui/checkbox-group'
 import { createClient } from '@/lib/utils/supabase/client'
 import { Workflow } from '@/lib/types/supabase'
-import { WorkflowType } from '@/lib/types/master'
-
-const mainVariant = {
-  initial: { x: 0, y: 0 },
-  animate: { x: 20, y: -20, opacity: 0.9 },
-}
-
-function GridPattern() {
-  const columns = 41
-  const rows = 11
-  return (
-    <div className="flex bg-gray-100 dark:bg-neutral-900 flex-shrink-0 flex-wrap justify-center items-center gap-x-px gap-y-px scale-105">
-      {Array.from({ length: rows }).map((_, row) =>
-        Array.from({ length: columns }).map((_, col) => {
-          const index = row * columns + col
-          return (
-            <div
-              key={`${col}-${row}`}
-              className={`w-10 h-10 flex flex-shrink-0 rounded-[2px] ${
-                index % 2 === 0
-                  ? 'bg-gray-50 dark:bg-neutral-950'
-                  : 'bg-gray-50 dark:bg-neutral-950 shadow-[0px_0px_1px_3px_rgba(255,255,255,1)_inset] dark:shadow-[0px_0px_1px_3px_rgba(0,0,0,1)_inset]'
-              }`}
-            />
-          )
-        })
-      )}
-    </div>
-  )
-}
+import { ActiveTab, WorkflowType } from '@/lib/types/master'
 
 interface SearchProfileInputCaptureProps {
   workflowId: string
@@ -78,8 +48,6 @@ export default function SearchProfileInputCapture({
   )
 
   const [activeTab, setActiveTab] = useState<string>('0')
-  const [fileUrl, setFileUrl] = useState<string>('')
-  const [uploading, setUploading] = useState<boolean>(false)
   const [provider, __] = useAtom(providerAtom)
   const [defaultActiveTab, setDefaultActiveTab] = useState<string>('')
   const [workflowInDb, setWorkflowInDb] = useState<Workflow | null>(null)
@@ -123,6 +91,14 @@ export default function SearchProfileInputCapture({
           customHandleChange(workflow.target_workflow_id, 'target_workflow_id')
           setActiveTab('2')
           setDefaultActiveTab('2')
+        } else if (workflow.search_reaction_profile_public_identifier) {
+          customHandleChange(
+            'https://www.linkedin.com/in/' +
+              workflow.search_reaction_profile_public_identifier,
+            'search_reaction_profile_public_identifier'
+          )
+          setActiveTab('5')
+          setDefaultActiveTab('5')
         }
         customHandleChange(workflow.limit_count.toString(), 'limit_count')
         // customHandleChange(workflow.scheduled_days.join(','), 'scheduled_days')
@@ -150,44 +126,27 @@ export default function SearchProfileInputCapture({
     formData['active_tab'] = activeTab
     formData['workflow_id'] = workflowId
     formData['type'] = WorkflowType.SEARCH.toString()
-    if (fileUrl) {
-      const targetPublicIdentifiers = await extractColumnData(
-        fileUrl,
-        formData['extract_column'] || 'public_identifier'
+    if (formData['search_reaction_profile_public_identifier']) {
+      const linkedInId = extractLinkedInId(
+        formData['search_reaction_profile_public_identifier']
       )
-      customHandleChange(
-        targetPublicIdentifiers.join(','),
-        'target_public_identifiers'
-      )
-      formData['target_public_identifiers'] = targetPublicIdentifiers.join(',')
+      if (!linkedInId) {
+        return alert('Invalid LinkedIn URL')
+      }
+      formData['search_reaction_profile_public_identifier'] = linkedInId
     }
     await generateResponse(formData, event)
   }
-
-  const handleFileUpload = async (files: File[]) => {
-    setUploading(true)
-    const file = files[0]
-    if (!file) return
-    const csvUrl = URL.createObjectURL(file)
-    setFileUrl(csvUrl)
-    setUploading(false)
-  }
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    multiple: false,
-    onDrop: handleFileUpload,
-    accept: {
-      'text/csv': ['.csv'],
-    },
-    maxSize: 10 * 1024 * 1024, // 10MB
-  })
 
   let searchUrlField: FormFields | undefined
   let keywordsField: FormFields | undefined
   let companyUrlsField: FormFields | undefined
   let networkDistanceField: FormFields | undefined
+  let searchReactionProfilePublicIdentifierField: FormFields | undefined
   toolConfig.fields?.forEach((field) => {
-    if (field.name === 'search_url') {
+    if (field.name === 'search_reaction_profile_public_identifier') {
+      searchReactionProfilePublicIdentifierField = field
+    } else if (field.name === 'search_url') {
       searchUrlField = field
     } else if (field.name === 'keywords') {
       keywordsField = field
@@ -220,10 +179,11 @@ export default function SearchProfileInputCapture({
                         >
                           <div className="flex justify-center">
                             <TabsList className="flex w-[700px] h-12 items-center bg-neutral-100/50 dark:bg-neutral-900/50 backdrop-blur-sm rounded-full p-1">
-                              {(defaultActiveTab === '0' ||
+                              {(defaultActiveTab ===
+                                ActiveTab.SEARCH.toString() ||
                                 !defaultActiveTab) && (
                                 <TabsTrigger
-                                  value="0"
+                                  value={ActiveTab.SEARCH.toString()}
                                   className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
                                 >
                                   <div className="flex items-center gap-2">
@@ -232,10 +192,11 @@ export default function SearchProfileInputCapture({
                                   </div>
                                 </TabsTrigger>
                               )}
-                              {(defaultActiveTab === '1' ||
+                              {(defaultActiveTab ===
+                                ActiveTab.KEYWORDS.toString() ||
                                 !defaultActiveTab) && (
                                 <TabsTrigger
-                                  value="1"
+                                  value={ActiveTab.KEYWORDS.toString()}
                                   className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
                                 >
                                   <div className="flex items-center gap-2">
@@ -246,47 +207,24 @@ export default function SearchProfileInputCapture({
                                   </div>
                                 </TabsTrigger>
                               )}
-                              {/* {(defaultActiveTab === '2' ||
+                              {(defaultActiveTab ===
+                                ActiveTab.SEARCH_REACTION.toString() ||
                                 !defaultActiveTab) && (
-                                <>
-                                  <TabsTrigger
-                                    value="2"
-                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <IconFile className="h-4 w-4" />
-                                      <span className="font-medium">
-                                        リード
-                                      </span>
-                                    </div>
-                                  </TabsTrigger>
-                                  <TabsTrigger
-                                    value="3"
-                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <LinkIcon className="h-4 w-4" />
-                                      <span className="font-medium">
-                                        CSV URL
-                                      </span>
-                                    </div>
-                                  </TabsTrigger>
-                                  <TabsTrigger
-                                    value="4"
-                                    className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <UploadCloudIcon className="h-4 w-4" />
-                                      <span className="font-medium">
-                                        アップロード
-                                      </span>
-                                    </div>
-                                  </TabsTrigger>
-                                </>
-                              )} */}
+                                <TabsTrigger
+                                  value={ActiveTab.SEARCH_REACTION.toString()}
+                                  className="flex-1 rounded-full px-6 py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-neutral-800 data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all duration-300"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <IconHeart className="h-4 w-4" />
+                                    <span className="font-medium">
+                                      いいね・コメント
+                                    </span>
+                                  </div>
+                                </TabsTrigger>
+                              )}
                             </TabsList>
                           </div>
-                          <TabsContent value="0">
+                          <TabsContent value={ActiveTab.SEARCH.toString()}>
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -306,7 +244,10 @@ export default function SearchProfileInputCapture({
                                         onChange={(e) =>
                                           handleChange(e, 'search_url')
                                         }
-                                        required={activeTab === '0'}
+                                        required={
+                                          activeTab ===
+                                          ActiveTab.SEARCH.toString()
+                                        }
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
@@ -316,7 +257,7 @@ export default function SearchProfileInputCapture({
                               </motion.div>
                             </div>
                           </TabsContent>
-                          <TabsContent value="1">
+                          <TabsContent value={ActiveTab.KEYWORDS.toString()}>
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -360,7 +301,7 @@ export default function SearchProfileInputCapture({
                                         placeholder={
                                           workflowInDb
                                             ?.company_private_identifiers.length
-                                            ? `既に設定されています。企業ID:${workflowInDb?.company_private_identifiers}`
+                                            ? `既に設定されてるため変更できません。企業ID:${workflowInDb?.company_private_identifiers}`
                                             : 'https://www.linkedin.com/company/...'
                                         }
                                         disabled={
@@ -389,7 +330,9 @@ export default function SearchProfileInputCapture({
                               </motion.div>
                             </div>
                           </TabsContent>
-                          <TabsContent value="2">
+                          <TabsContent
+                            value={ActiveTab.SEARCH_REACTION.toString()}
+                          >
                             <div className="pb-10 w-full max-w-md mx-auto">
                               <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -400,130 +343,39 @@ export default function SearchProfileInputCapture({
                                 <div className="space-y-3">
                                   <div>
                                     <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      リード
-                                    </label>
-                                    <div className="relative mt-1">
-                                      Coming Soon...
-                                    </div>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            </div>
-                          </TabsContent>
-                          <TabsContent value="3">
-                            <div className="pb-10 w-full max-w-md mx-auto">
-                              <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="space-y-4 p-6 rounded-xl bg-white dark:bg-neutral-900 shadow-[0_0_1px_1px_rgba(0,0,0,0.05)] dark:shadow-[0_0_1px_1px_rgba(255,255,255,0.05)]"
-                              >
-                                <div className="space-y-3">
-                                  <div>
-                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      CSV URL
+                                      {
+                                        searchReactionProfilePublicIdentifierField?.label
+                                      }
+                                      <span className="text-xs text-neutral-400 dark:text-neutral-500">
+                                        ※「1回毎の対象数」分の直近の投稿を検索します
+                                      </span>
                                     </label>
                                     <div className="relative mt-1">
                                       <Input
-                                        placeholder="https://example.com/data.csv"
-                                        value={fileUrl}
-                                        onChange={(e) =>
-                                          setFileUrl(e.target.value)
+                                        placeholder="https://www.linkedin.com/in/..."
+                                        value={
+                                          formData[
+                                            searchReactionProfilePublicIdentifierField
+                                              ?.name!
+                                          ]
                                         }
-                                        required={activeTab === '3'}
+                                        onChange={(e) =>
+                                          handleChange(
+                                            e,
+                                            'search_reaction_profile_public_identifier'
+                                          )
+                                        }
+                                        required={
+                                          activeTab ===
+                                          ActiveTab.SEARCH_REACTION.toString()
+                                        }
                                         className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
                                       />
                                       <LinkIcon className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                                     </div>
                                   </div>
-                                  <div>
-                                    <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                      対象カラム名
-                                    </label>
-                                    <div className="relative mt-1">
-                                      <Input
-                                        placeholder="public_identifier"
-                                        value={formData['extract_column']}
-                                        onChange={(e) =>
-                                          handleChange(e, 'extract_column')
-                                        }
-                                        required={activeTab === '3'}
-                                        className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
-                                      />
-                                    </div>
-                                  </div>
                                 </div>
                               </motion.div>
-                            </div>
-                          </TabsContent>
-
-                          <TabsContent value="4">
-                            <div {...getRootProps()}>
-                              <motion.div
-                                whileHover="animate"
-                                className="p-10 group/file block rounded-lg cursor-pointer w-full relative overflow-hidden"
-                              >
-                                <div className="absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]">
-                                  <GridPattern />
-                                </div>
-                                <div className="flex flex-col items-center justify-center">
-                                  <input
-                                    {...getInputProps()}
-                                    // required={activeTab === '4'}
-                                  />
-
-                                  <p className="relative z-20 font-sans font-bold text-neutral-700 dark:text-neutral-300 text-base">
-                                    ファイルをアップロード
-                                  </p>
-                                  <p className="relative z-20 font-sans font-normal text-neutral-400 dark:text-neutral-400 text-base mt-2">
-                                    {uploading
-                                      ? 'Uploading...'
-                                      : isDragActive
-                                        ? 'Drop your File here...'
-                                        : 'Drag and drop your File here or click to browse'}
-                                  </p>
-
-                                  <div className="relative w-full mt-10 max-w-xl mx-auto">
-                                    <motion.div
-                                      layoutId="file-upload"
-                                      variants={mainVariant}
-                                      transition={{
-                                        type: 'spring',
-                                        stiffness: 300,
-                                        damping: 20,
-                                      }}
-                                      className="relative group-hover/file:shadow-2xl z-40 bg-white dark:bg-neutral-900 flex items-center justify-center h-32 mt-4 w-full max-w-[8rem] mx-auto rounded-md shadow-[0px_10px_50px_rgba(0,0,0,0.1)]"
-                                    >
-                                      {uploading ? (
-                                        <span className="loading loading-spinner loading-md" />
-                                      ) : isDragActive ? (
-                                        <FileIcon className="h-8 w-8 text-primary animate-pulse" />
-                                      ) : (
-                                        <FileIcon className="h-8 w-8 text-neutral-600 dark:text-neutral-300" />
-                                      )}
-                                    </motion.div>
-                                  </div>
-                                  <p className="relative z-20 text-xs text-neutral-400 dark:text-neutral-500 mt-6">
-                                    Supported format: CSV up to 10MB
-                                  </p>
-                                </div>
-                              </motion.div>
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-                                対象カラム名
-                              </label>
-                              <div className="relative mt-1">
-                                <Input
-                                  placeholder="public_identifier"
-                                  value={formData['extract_column']}
-                                  onChange={(e) =>
-                                    handleChange(e, 'extract_column')
-                                  }
-                                  required={activeTab === '4'}
-                                  className="h-10 pl-3 pr-9 bg-neutral-50 dark:bg-neutral-800/50 border-neutral-200 dark:border-neutral-700 rounded-lg focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all duration-300"
-                                />
-                              </div>
                             </div>
                           </TabsContent>
                         </Tabs>

@@ -5,6 +5,7 @@ import {
   IconHome,
   IconLayoutDashboard,
 } from '@tabler/icons-react'
+import { IconMessage } from '../ui/icons'
 
 type NavLink = {
   href: string
@@ -39,9 +40,10 @@ export const overviewLinks: NavLink[] = [
 ]
 
 export const navlinks: NavLink[] = [
-  // { href: '/chat', label: 'チャット', icon: IconMessage },
   { href: '/dashboard', label: 'ダッシュボード', icon: IconHome },
   { href: '/leads', label: 'リード', icon: IconFileText },
+  // { href: '/similar-leads', label: '類似候補者リスト', icon: IconFileText },
+  // { href: '/chat', label: 'チャット', icon: IconMessage },
 ]
 
 export const otherLinks = [

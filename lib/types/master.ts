@@ -11,6 +11,7 @@ export enum WorkflowType {
   LEAD_LIST = 0, // lead list表示用
   SEARCH = 1,
   INVITE = 2,
+  SIMILAR_SEARCH = 3,
 }
 
 export enum ActiveTab {
@@ -19,6 +20,7 @@ export enum ActiveTab {
   LEAD_LIST = 2,
   FILE_URL = 3,
   UPLOAD = 4,
+  SEARCH_REACTION = 5,
 }
 
 export enum NetworkDistance {
@@ -47,4 +49,14 @@ export enum LeadStatus {
   FOLLOW_UP_SENT_FAILED = 31,
   FOLLOW_UP_SENT = 40,
   REPLIED = 50,
+}
+
+export enum ReactionType {
+  LIKE = 0,
+  COMMENT = 1,
+  EMPATHY = 2,
+  ENTERTAINMENT = 3,
+  INTEREST = 4,
+  PRAISE = 5,
+  APPRECIATION = 6,
 }

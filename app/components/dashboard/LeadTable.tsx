@@ -23,13 +23,16 @@ import {
 } from '@/app/components/ui/table'
 import { useDebounce } from '@/lib/hooks/useDebounce'
 import { format } from 'date-fns'
-import { Lead } from '@/lib/types/supabase'
 import { Badge } from '../ui/badge'
 import Papa from 'papaparse'
 import { LeadStatus } from '@/lib/types/master'
+import { LeadForDisplay } from '@/lib/csv'
+import { useState } from 'react'
+import { LeadDetailModal } from './LeadDialog'
+import { LeadStatusBadge } from './LeadBatch'
 
 interface LeadTableProps {
-  leads: Lead[]
+  leads: LeadForDisplay[]
 }
 
 export function LeadTable({ leads }: LeadTableProps) {
@@ -37,7 +40,7 @@ export function LeadTable({ leads }: LeadTableProps) {
   const [filterValue, setFilterValue] = React.useState('')
   const debouncedFilterValue = useDebounce(filterValue, 300)
 
-  const columns: ColumnDef<Lead>[] = React.useMemo(
+  const columns: ColumnDef<LeadForDisplay>[] = React.useMemo(
     () => [
       {
         accessorKey: 'latest_status',
@@ -59,33 +62,6 @@ export function LeadTable({ leads }: LeadTableProps) {
           <div className="flex items-center whitespace-nowrap">
             <LeadStatusBadge status={row.getValue('latest_status')} />
           </div>
-        ),
-      },
-      {
-        accessorKey: 'public_identifier',
-        header: 'Profile URL',
-        cell: ({ row }) => (
-          <>
-            {row.getValue('public_identifier') ? (
-              <div className="text-sm text-muted-foreground max-w-md truncate">
-                <a
-                  href={
-                    'https://www.linkedin.com/in/' +
-                    row.getValue('public_identifier')
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline"
-                >
-                  {row.getValue('public_identifier') || '-'}
-                </a>
-              </div>
-            ) : (
-              <div className="text-sm text-muted-foreground max-w-md truncate">
-                -
-              </div>
-            )}
-          </>
         ),
       },
       {
@@ -121,6 +97,216 @@ export function LeadTable({ leads }: LeadTableProps) {
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground max-w-md truncate">
             {row.getValue('headline') || '-'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'public_identifier',
+        header: 'LinkedIn URL',
+        cell: ({ row }) => (
+          <>
+            {row.getValue('public_identifier') ? (
+              <div className="text-sm text-muted-foreground max-w-md truncate">
+                <a
+                  href={
+                    'https://www.linkedin.com/in/' +
+                    row.getValue('public_identifier')
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                >
+                  {row.getValue('public_identifier') || '-'}
+                </a>
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground max-w-md truncate">
+                -
+              </div>
+            )}
+          </>
+        ),
+      },
+      // {
+      //   accessorKey: 'public_identifier',
+      //   header: 'Facebook URL',
+      //   cell: ({ row }) => (
+      //     <>
+      //       {row.getValue('public_identifier') ? (
+      //         <div className="text-sm text-muted-foreground max-w-md truncate">
+      //           <a
+      //             href={'https://facebook.com/'}
+      //             target="_blank"
+      //             rel="noreferrer"
+      //             className="underline"
+      //           >
+      //             {'-'}
+      //           </a>
+      //         </div>
+      //       ) : (
+      //         <div className="text-sm text-muted-foreground max-w-md truncate">
+      //           -
+      //         </div>
+      //       )}
+      //     </>
+      //   ),
+      // },
+      // {
+      //   accessorKey: 'public_identifier',
+      //   header: 'X URL',
+      //   cell: ({ row }) => (
+      //     <>
+      //       {row.getValue('public_identifier') ? (
+      //         <div className="text-sm text-muted-foreground max-w-md truncate">
+      //           <a
+      //             href={'https://x.com/in/'}
+      //             target="_blank"
+      //             rel="noreferrer"
+      //             className="underline"
+      //           >
+      //             {'-'}
+      //           </a>
+      //         </div>
+      //       ) : (
+      //         <div className="text-sm text-muted-foreground max-w-md truncate">
+      //           -
+      //         </div>
+      //       )}
+      //     </>
+      //   ),
+      // },
+      {
+        accessorKey: 'network_distance',
+        header: 'Network Distance',
+        cell: ({ row }) => (
+          <>
+            {row.getValue('network_distance') ? (
+              <div className="flex items-center whitespace-nowrap">
+                <Badge className="bg-primary text-white hover:bg-primary/80 text-xs">
+                  {row.getValue('network_distance')}
+                </Badge>
+              </div>
+            ) : (
+              <div className="text-sm text-muted-foreground max-w-md truncate">
+                -
+              </div>
+            )}
+          </>
+        ),
+      },
+      {
+        accessorKey: 'like_count',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              className="hover:bg-muted/50"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Like Count
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('like_count') || '0'}
+          </div>
+        ),
+      },
+      // {
+      //   accessorKey: 'like_post_urls',
+      //   header: 'Like Post URLs',
+      //   cell: ({ row }) => {
+      //     const urls: string = row.getValue('like_post_urls')
+      //     const urlsArray = urls.split(',')
+      //     return (
+      //       <>
+      //         {urls ? (
+      //           <>
+      //             <div className="text-sm text-muted-foreground max-w-md flex flex-wrap gap-2">
+      //               {urlsArray.map((url, urlIndex) => (
+      //                 <a
+      //                   key={url + '-' + urlIndex}
+      //                   href={url}
+      //                   target="_blank"
+      //                   rel="noreferrer"
+      //                   className="underline"
+      //                 >
+      //                   投稿{urlIndex + 1},{' '}
+      //                 </a>
+      //               ))}
+      //             </div>
+      //           </>
+      //         ) : (
+      //           <div className="text-sm text-muted-foreground max-w-md truncate">
+      //             -
+      //           </div>
+      //         )}
+      //       </>
+      //     )
+      //   },
+      // },
+
+      {
+        accessorKey: 'comment_count',
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              className="hover:bg-muted/50"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === 'asc')
+              }
+            >
+              Comment Count
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+          )
+        },
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-lg truncate">
+            {row.getValue('comment_count') || '0'}
+          </div>
+        ),
+      },
+
+      // {
+      //   accessorKey: 'empathy_count',
+      //   header: 'Empathy Count',
+      //   cell: ({ row }) => (
+      //     <div className="text-sm text-muted-foreground max-w-lg truncate">
+      //       {row.getValue('empathy_count') || '0'}
+      //     </div>
+      //   ),
+      // },
+
+      {
+        accessorKey: 'connections_count',
+        header: 'Connections',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('connections_count') || '0'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'shared_connections_count',
+        header: 'Shared Connections',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('shared_connections_count') || '0'}
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'follower_count',
+        header: 'Followers',
+        cell: ({ row }) => (
+          <div className="text-sm text-muted-foreground max-w-md truncate">
+            {row.getValue('follower_count') || '0'}
           </div>
         ),
       },
@@ -179,52 +365,6 @@ export function LeadTable({ leads }: LeadTableProps) {
       //     )
       //   },
       // },
-      {
-        accessorKey: 'network_distance',
-        header: 'Network Distance',
-        cell: ({ row }) => (
-          <>
-            {row.getValue('network_distance') ? (
-              <div className="flex items-center whitespace-nowrap">
-                <Badge className="bg-primary text-white hover:bg-primary/80 text-xs">
-                  {row.getValue('network_distance')}
-                </Badge>
-              </div>
-            ) : (
-              <div className="text-sm text-muted-foreground max-w-md truncate">
-                -
-              </div>
-            )}
-          </>
-        ),
-      },
-      {
-        accessorKey: 'connections_count',
-        header: 'Connections',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('connections_count') || '0'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'shared_connections_count',
-        header: 'Shared Connections',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('shared_connections_count') || '0'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'follower_count',
-        header: 'Followers',
-        cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground max-w-md truncate">
-            {row.getValue('follower_count') || '0'}
-          </div>
-        ),
-      },
       {
         accessorKey: 'summary',
         header: 'Summary',
@@ -438,13 +578,13 @@ export function LeadTable({ leads }: LeadTableProps) {
         gen.first_name
           ?.toLowerCase()
           .includes(debouncedFilterValue.toLowerCase()) ||
-        gen.last_name
-          .toLowerCase()
+        gen?.last_name
+          ?.toLowerCase()
           .includes(debouncedFilterValue.toLowerCase()) ||
-        gen.headline
-          .toLowerCase()
+        gen?.headline
+          ?.toLowerCase()
           .includes(debouncedFilterValue.toLowerCase()) ||
-        gen.summary.toLowerCase().includes(debouncedFilterValue.toLowerCase())
+        gen?.summary?.toLowerCase().includes(debouncedFilterValue.toLowerCase())
     )
   }, [leads, debouncedFilterValue])
 
@@ -505,26 +645,75 @@ export function LeadTable({ leads }: LeadTableProps) {
   )
 
   const handleExport = React.useCallback(() => {
+    // 現在の日時をファイル名用にフォーマット
     const date = new Date()
     const year = date.getFullYear()
-    const month = date.getMonth() + 1
-    const day = date.getDate()
-    const hours = date.getHours()
-    const minutes = date.getMinutes()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
     const outputFilePath = `linkedin_profile_${year}${month}${day}${hours}${minutes}.csv`
-    const processedLeads = leads.map((lead) => {
-      const {
-        id,
-        company_id,
-        created_at,
-        updated_at,
-        deleted_at,
-        provider_id,
-        ...rest
-      } = lead
-      return rest
+
+    // 除外したいカラムのリスト
+    const excludeColumns = [
+      'id',
+      'company_id',
+      'created_at',
+      'updated_at',
+      'deleted_at',
+      'provider_id',
+      'network_distance',
+      'deleted_at',
+      'lead_statuses',
+      'lead_workflows',
+      'lead_reactions',
+      'keywords',
+      'thread',
+      'generated_invitation_message',
+      'invitation_message',
+      'invitation_sent_at',
+      'invitation_replied_at',
+      'first_message',
+      'first_message_days',
+      'generated_first_message',
+      'first_message_sent_at',
+      'first_message_read_at',
+      'first_message_replied_at',
+      'second_message',
+      'second_message_days',
+      'generated_second_message',
+      'second_message_sent_at',
+      'second_message_read_at',
+      'second_message_replied_at',
+      'third_message',
+      'third_message_days',
+      'generated_third_message',
+      'third_message_sent_at',
+      'third_message_read_at',
+      'third_message_replied_at',
+    ]
+
+    // filteredLeadsから不要なカラムを除外
+    const cleanedData = filteredLeads.map((lead) => {
+      // Record<string, unknown>で任意のキーと値を持つオブジェクトを作成
+      const cleanedLead: Record<string, unknown> = {}
+      lead.public_profile_url = `https://www.linkedin.com/in/${lead.public_identifier}`
+
+      // 型キャストをせずに動的にプロパティを設定
+      Object.keys(lead).forEach((key) => {
+        if (!excludeColumns.includes(key)) {
+          // インデックスアクセスを使用して値をコピー
+          cleanedLead[key] = lead[key as keyof typeof lead]
+        }
+      })
+
+      return cleanedLead
     })
-    const csv = Papa.unparse(processedLeads, { newline: '\n' })
+
+    // CSVに変換
+    const csv = Papa.unparse(cleanedData, { newline: '\n' })
+
+    // ダウンロード処理
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
     const url = URL.createObjectURL(blob)
@@ -534,8 +723,20 @@ export function LeadTable({ leads }: LeadTableProps) {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+
+    // クリーンアップ
+    URL.revokeObjectURL(url)
+
     console.log(`CSV file has been saved to ${outputFilePath}`)
   }, [filteredLeads])
+
+  const [selectedLead, setSelectedLead] = useState<LeadForDisplay | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const openLeadDetails = (lead: LeadForDisplay) => {
+    setSelectedLead(lead)
+    setModalOpen(true)
+  }
 
   return (
     <div className="space-y-4">
@@ -595,6 +796,7 @@ export function LeadTable({ leads }: LeadTableProps) {
                         ? lastRowRef
                         : null
                     }
+                    onClick={() => openLeadDetails(row.original)}
                     data-state={row.getIsSelected() && 'selected'}
                     className="cursor-pointer hover:bg-muted/50"
                   >
@@ -611,6 +813,11 @@ export function LeadTable({ leads }: LeadTableProps) {
             )}
           </TableBody>
         </Table>
+        <LeadDetailModal
+          lead={selectedLead}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+        />
       </div>
       <div className="flex items-center justify-end space-x-2 py-4">
         <Button
@@ -630,46 +837,6 @@ export function LeadTable({ leads }: LeadTableProps) {
           Next
         </Button>
       </div>
-    </div>
-  )
-}
-
-interface LeadStatusBadgeProps {
-  status: LeadStatus
-}
-
-const LeadStatusBadge: React.FC<LeadStatusBadgeProps> = ({ status }) => {
-  // Define colors based on status
-  const getBadgeColor = (status: LeadStatus): string => {
-    switch (status) {
-      case LeadStatus.SEARCHED:
-        return 'bg-gray-500 hover:bg-gray-600'
-      case LeadStatus.INVITED_FAILED:
-        return 'bg-red-500 hover:bg-red-600'
-      case LeadStatus.IN_QUEUE:
-        return 'bg-blue-500 hover:bg-blue-600'
-      case LeadStatus.ALREADY_INVITED:
-        return 'bg-yellow-500 hover:bg-yellow-600'
-      case LeadStatus.INVITED:
-        return 'bg-green-500 hover:bg-green-600'
-      case LeadStatus.ACCEPTED:
-        return 'bg-blue-300 hover:bg-blue-400'
-      case LeadStatus.FOLLOW_UP_SENT_FAILED:
-        return 'bg-orange-500 hover:bg-orange-600'
-      case LeadStatus.FOLLOW_UP_SENT:
-        return 'bg-indigo-500 hover:bg-indigo-600'
-      case LeadStatus.REPLIED:
-        return 'bg-purple-500 hover:bg-purple-600'
-      default:
-        return 'bg-gray-500 hover:bg-gray-600'
-    }
-  }
-
-  return (
-    <div className="flex items-center whitespace-nowrap">
-      <Badge className={`${getBadgeColor(status)} text-white text-xs`}>
-        {LeadStatus[status]}
-      </Badge>
     </div>
   )
 }
