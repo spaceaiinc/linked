@@ -150,7 +150,7 @@ export async function POST(req: Request) {
         const response = await searchProfileHandler(searchProfileRequest)
         console.log('response', response)
         await new Promise((resolve) => setTimeout(resolve, 5000))
-        if (response.ok) {
+        if (response?.ok) {
           const responseData = await response.json()
           console.log('responseData', responseData)
           return responseData

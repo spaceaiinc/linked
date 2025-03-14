@@ -17,6 +17,14 @@ export const tools = [
       'キーワードまたは、ユーザーIDのCSVからつながり申請を行います。',
   },
   // {
+  //   title: '類似候補者検索',
+  //   type: WorkflowType.SIMILAR_SEARCH,
+  //   tags: [WorkflowType[WorkflowType.SIMILAR_SEARCH]],
+  //   image: '/apps/linkedin-logo.jpg',
+  //   description:
+  //     '選択したユーザーに経歴、スキル、希望情報が類似した候補者を検索します。',
+  // },
+  // {
   //   href: '/search/job',
   //   title: '求人検索',
   //   tags: [],

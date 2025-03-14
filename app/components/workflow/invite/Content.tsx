@@ -6,13 +6,12 @@ import { IconPoint } from '@tabler/icons-react'
 import { useAtom } from 'jotai'
 import { userAtom } from '@/lib/atom'
 import { useEffect, useState } from 'react'
-import { Lead } from '@/lib/types/supabase'
 import { getLeadsByWorkflowId } from '@/lib/db/queries/leadClient'
-import { convertToDisplay } from '@/lib/csv'
+import { convertToDisplay, LeadForDisplay } from '@/lib/csv'
 import { LeadTable } from '@/app/components/dashboard/LeadTable'
 
 export default function InviteContent({ workflowId }: { workflowId: string }) {
-  const [leads, setLeads] = useState<Lead[]>([])
+  const [leads, setLeads] = useState<LeadForDisplay[]>([])
   const [user, _] = useAtom(userAtom)
   useEffect(() => {
     const f = async () => {
@@ -20,7 +19,7 @@ export default function InviteContent({ workflowId }: { workflowId: string }) {
       if (fetchedLeads && fetchedLeads.length) {
         const convertedRow = convertToDisplay(fetchedLeads)
         if (convertedRow && convertedRow.length)
-          setLeads(convertedRow as Lead[] | [])
+          setLeads(convertedRow as LeadForDisplay[] | [])
       }
     }
     f()

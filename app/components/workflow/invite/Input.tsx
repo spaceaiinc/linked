@@ -19,7 +19,7 @@ import {
 import { useDropzone } from 'react-dropzone'
 import { Input } from '@/app/components/ui/input'
 import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
-import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
+import { providerAtom, workflowsAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractColumnData } from '@/lib/csv'
 import CheckboxGroup from '@/app/components/ui/checkbox-group'

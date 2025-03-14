@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 import { Lead, LeadInsert, PublicSchemaTables } from './types/supabase'
-import { LeadStatus, NetworkDistance } from './types/master'
+import { LeadStatus, NetworkDistance, ReactionType } from './types/master'
 
 export type LeadForDisplay = Omit<
   PublicSchemaTables['leads']['Insert'],
@@ -9,7 +9,31 @@ export type LeadForDisplay = Omit<
   | 'created_at'
   | 'updated_at'
   | 'deleted_at'
-  | 'statuses'
+  | 'lead_statuses'
+  | 'lead_workflows'
+  | 'lead_reactions'
+  | 'keywords'
+  | 'thread'
+  | 'generated_invitation_message'
+  | 'invitation_sent_at'
+  | 'invitation_replied_at'
+  | 'first_message'
+  | 'first_message_days'
+  | 'generated_first_message'
+  | 'first_message_sent_at'
+  | 'first_message_read_at'
+  | 'first_message_replied_at'
+  | 'second_message'
+  | 'second_message_days'
+  | 'generated_second_message'
+  | 'second_message_sent_at'
+  | 'second_message_read_at'
+  | 'second_message_replied_at'
+  | 'third_message'
+  | 'third_message_days'
+  | 'generated_third_message'
+  | 'third_message_sent_at'
+  | 'third_message_read_at'
 > & {
   public_profile_url: string
   network_distance: string
@@ -21,6 +45,20 @@ export type LeadForDisplay = Omit<
   lead_languages: string
   lead_certifications: string
   lead_projects: string
+  like_count: number
+  like_post_urls: string
+  comment_count: number
+  comment_post_urls: string
+  empathy_count: number
+  empathy_post_urls: string
+  interest_count: number
+  interest_post_urls: string
+  entertainment_count: number
+  entertainment_post_urls: string
+  praise_count: number
+  praise_post_urls: string
+  appreciation_count: number
+  appreciation_post_urls: string
   created_at?: string
 }
 
@@ -31,7 +69,7 @@ export const convertToDisplay = (
     console.log('No data to convert')
     return []
   }
-  const rows = inputData.map((profile: Lead | LeadInsert) => {
+  const rows = inputData.map((profile: Lead | LeadInsert): LeadForDisplay => {
     const baseInfo: LeadForDisplay = {
       public_profile_url: profile?.public_identifier
         ? `https://www.linkedin.com/in/${profile?.public_identifier}`
@@ -48,6 +86,20 @@ export const convertToDisplay = (
       lead_languages: '',
       lead_certifications: '',
       lead_projects: '',
+      like_count: 0,
+      like_post_urls: '',
+      comment_count: 0,
+      comment_post_urls: '',
+      empathy_count: 0,
+      empathy_post_urls: '',
+      entertainment_count: 0,
+      entertainment_post_urls: '',
+      praise_count: 0,
+      praise_post_urls: '',
+      appreciation_count: 0,
+      appreciation_post_urls: '',
+      interest_count: 0,
+      interest_post_urls: '',
     }
     if (profile.lead_statuses?.length)
       baseInfo.latest_status = profile.lead_statuses.sort((a, b) => {
@@ -131,6 +183,32 @@ export const convertToDisplay = (
         .join('\n\n')
       baseInfo.lead_projects = projectsText
     }
+    if (profile.lead_reactions) {
+      profile.lead_reactions.forEach((reaction) => {
+        if (reaction.reaction_type === ReactionType.LIKE) {
+          baseInfo.like_count++
+          baseInfo.like_post_urls += `${reaction.post_url}\n`
+        } else if (reaction.reaction_type === ReactionType.COMMENT) {
+          baseInfo.comment_count++
+          baseInfo.comment_post_urls += `${reaction.post_url}\n`
+        } else if (reaction.reaction_type === ReactionType.EMPATHY) {
+          baseInfo.empathy_count++
+          baseInfo.empathy_post_urls += `${reaction.post_url}\n`
+        } else if (reaction.reaction_type === ReactionType.INTEREST) {
+          baseInfo.interest_count++
+          baseInfo.interest_post_urls += `${reaction.post_url}\n`
+        } else if (reaction.reaction_type === ReactionType.ENTERTAINMENT) {
+          baseInfo.entertainment_count++
+          baseInfo.entertainment_post_urls += `${reaction.post_url}\n`
+        } else if (reaction.reaction_type === ReactionType.PRAISE) {
+          baseInfo.praise_count++
+          baseInfo.praise_post_urls += `${reaction.post_url}\n`
+        } else {
+          baseInfo.appreciation_count++
+          baseInfo.appreciation_post_urls += `${reaction.post_url}\n`
+        }
+      })
+    }
 
     return baseInfo
   })
@@ -181,7 +259,7 @@ export async function extractColumnData(
 }
 
 // LinkedInのURLからIDを抽出する関数
-function extractLinkedInId(url: string) {
+export function extractLinkedInId(url: string) {
   try {
     // URLが文字列でない場合はnullを返す
     if (typeof url !== 'string') return null
