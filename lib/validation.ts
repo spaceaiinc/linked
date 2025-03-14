@@ -212,6 +212,18 @@ export const searchProfileSchema = yup
         otherwise: (schema) => schema,
       }),
 
+    search_reaction_profile_public_identifier: yup
+      .string()
+      .nullable()
+      .when('active_tab', {
+        is: ActiveTab.SEARCH_REACTION,
+        then: (schema) =>
+          schema.required(
+            'Profile Public Identifier is required when active tab is 5'
+          ),
+        otherwise: (schema) => schema,
+      }),
+
     // フォーム関連フィールド
     limit_count: yup
       .number()
@@ -335,7 +347,16 @@ export const searchProfileSchema = yup
               'Target Public Identifiers are required when active tab is 3 or 4',
           })
         }
+      } else if (active_tab === ActiveTab.SEARCH_REACTION) {
+        if (!values.search_reaction_profile_public_identifier) {
+          return this.createError({
+            path: 'search_reaction_profile_public_identifier',
+            message:
+              'Profile Public Identifier is required when active tab is 5',
+          })
+        }
       }
+
       // それ以外の場合、エラー
       else {
         return this.createError({

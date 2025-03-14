@@ -92,6 +92,14 @@ export const toolConfig: ToolConfig = {
       custom: true,
     },
     {
+      label: 'プロフィールURL',
+      name: 'search_reaction_profile_public_identifier',
+      type: 'input',
+      placeholder: '',
+      required: false,
+      custom: true,
+    },
+    {
       label: 'target public identifiers',
       name: 'target_public_identifiers',
       type: 'input',
@@ -144,7 +152,7 @@ export const toolConfig: ToolConfig = {
       placeholder: '20',
       initialValue: '20',
       required: false,
-      max: 200,
+      max: 500,
       min: 1,
       // validation: yup.number().required('検索数は必須です'),
     },

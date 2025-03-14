@@ -436,6 +436,7 @@ export type Database = {
           keywords: string
           company_private_identifiers: string[]
           network_distance: number[]
+          search_reaction_profile_public_identifier: string
           invitation_message: string
           invitation_sent_at: string
           first_message: string
@@ -479,6 +480,7 @@ export type Database = {
           company_private_identifiers?: string[]
           target_workflow_id?: string
           network_distance?: number[]
+          search_reaction_profile_public_identifier?: string
           invitation_message?: string
           invitation_sent_at?: string
           first_message?: string
@@ -523,6 +525,7 @@ export type Database = {
           company_private_identifiers?: string[]
           target_workflow_id?: string
           network_distance?: number[]
+          search_reaction_profile_public_identifier?: string
           invitation_message?: string
           invitation_sent_at?: string
           first_message?: string
@@ -1303,6 +1306,66 @@ export type Database = {
           },
         ]
       }
+      lead_reactions: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          reacted_at: string
+          reaction_type: number
+          post_url: string
+          post_private_identifier: string
+          private_identifier: string
+          content: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          lead_id: string
+          reacted_at: string
+          reaction_type: number
+          post_url: string
+          post_private_identifier: string
+          private_identifier: string
+          content: string
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          lead_id: string
+          reacted_at: string
+          reaction_type: number
+          post_url: string
+          post_private_identifier: string
+          private_identifier: string
+          content: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lead_reactions_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'lead_reactions_lead_id_fkey'
+            columns: ['lead_id']
+            isOneToOne: false
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1490,6 +1553,7 @@ export type LeadInsert = PublicSchemaTables['leads']['Insert'] & {
     | PublicSchemaTables['lead_certifications']['Insert'][]
     | undefined
   lead_projects?: PublicSchemaTables['lead_projects']['Insert'][] | undefined
+  lead_reactions?: PublicSchemaTables['lead_reactions']['Insert'][] | undefined
 }
 
 export type Lead = PublicSchemaTables['leads']['Row'] & {
@@ -1502,6 +1566,7 @@ export type Lead = PublicSchemaTables['leads']['Row'] & {
   lead_languages: PublicSchemaTables['lead_languages']['Row'][]
   lead_certifications: PublicSchemaTables['lead_certifications']['Row'][]
   lead_projects: PublicSchemaTables['lead_projects']['Row'][]
+  lead_reactions: PublicSchemaTables['lead_reactions']['Row'][]
 
   status?: number
   workflow_id?: string

@@ -18,6 +18,7 @@ function getLeadBaseProps(
     lead_languages,
     lead_certifications,
     lead_projects,
+    lead_reactions,
     ...leadBase
   } = lead
 
@@ -42,29 +43,11 @@ export async function fetchLeadsWithLatestStatusAndWorkflow(
     return []
   }
   try {
-    // まず、指定されたワークフローIDに関連するリードIDを取得
-    const { data: workflowLeadsData, error: workflowError } = await supabase
-      .from('lead_workflows')
-      .select('lead_id')
-      .eq('workflow_id', workflowId)
-
-    if (workflowError) {
-      console.error('ワークフローリードの取得エラー:', workflowError)
-      return []
-    }
-
-    if (!workflowLeadsData || workflowLeadsData.length === 0) {
-      return []
-    }
-
-    // リードIDの配列を作成
-    const leadIds = workflowLeadsData.map((item) => item.lead_id)
-
-    // 取得したリードIDに基づいてリードデータを取得
+    // 一つのクエリでワークフローIDに関連するリードを取得
     const { data: leadsData, error } = await supabase
       .from('leads')
-      .select('*, lead_statuses(*), lead_workflows(*)')
-      .in('id', leadIds)
+      .select('*, lead_statuses(*), lead_workflows!inner(*)')
+      .eq('lead_workflows.workflow_id', workflowId)
 
     if (error) {
       console.error('リードデータの取得エラー:', error)
@@ -162,62 +145,7 @@ export async function fetchLeadsWithLatestStatusFilter(
         console.error(`バッチ ${i + 1} のエラー:`, error)
         continue
       }
-
       allLeadsResults.push(...batchLeads)
-
-      // if (batchLeads && batchLeads.length > 0) {
-      //   // 各リードに対して最新のステータスを判断し、フィルタリング
-      //   const filteredLeads = batchLeads.map((lead) => {
-      //     // lead_statusesが配列の場合、タイムスタンプで並べ替えて最新のものを特定
-      //     if (
-      //       Array.isArray(lead.lead_statuses) &&
-      //       lead.lead_statuses.length > 0
-      //     ) {
-      //       // created_atやupdated_atなど、タイムスタンプのフィールド名に合わせて調整
-      //       const sortedStatuses = [...lead.lead_statuses].sort((a, b) => {
-      //         // 降順（最新が先頭）
-      //         return (
-      //           new Date(b.created_at).getTime() -
-      //           new Date(a.created_at).getTime()
-      //         )
-      //       })
-
-      //       // 最新のステータスのみを保持
-      //       console.log('sortedStatuses:', sortedStatuses)
-      //       const latestStatus = sortedStatuses[0]
-      //       return {
-      //         ...lead,
-      //         lead_statuses: latestStatus,
-      //         // _isTargetStatus: [
-      //         //   LeadStatus.SEARCHED,
-      //         //   LeadStatus.IN_QUEUE,
-      //         // ].includes(latestStatus.status),
-      //       }
-      //     }
-      //     // lead_statusesが単一オブジェクトの場合（すでに最新）
-      //     else if (lead.lead_statuses) {
-      //       return {
-      //         ...lead,
-      //         // _isTargetStatus: [
-      //         //   LeadStatus.SEARCHED,
-      //         //   LeadStatus.IN_QUEUE,
-      //         // ].includes(lead.lead_statuses.status),
-      //       }
-      //     }
-      //     return { ...lead }
-      //     // return { ...lead, _isTargetStatus: false }
-      //   })
-      //   // 最新のステータスがSEARCHEDまたはIN_QUEUEのリードだけをフィルタリング
-      //   // .filter((lead) => lead._isTargetStatus)
-
-      //   // 内部フラグを削除
-      //   const cleanedLeads = filteredLeads.map((lead) => {
-      //     const { _isTargetStatus, ...cleanLead } = lead
-      //     return cleanLead
-      //   })
-
-      //   allLeadsResults.push(...cleanedLeads)
-      // }
     } catch (error) {
       console.error(`バッチ ${i + 1} の例外:`, error)
     }
@@ -386,6 +314,7 @@ export async function upsertLead({
 
   const leadPromises = leads.map(async (leadWithStatus) => {
     const { leadId, leadStatus, lead } = leadWithStatus
+
     const leadInsert: PublicSchemaTables['leads']['Insert'] =
       getLeadBaseProps(lead)
     if (leadId) leadInsert.id = leadId
@@ -395,7 +324,7 @@ export async function upsertLead({
       .from('leads')
       .upsert(leadInsert, { onConflict: 'id' })
       .select(
-        '*, lead_workflows(*), lead_statuses(*), lead_work_experiences(*), lead_volunteering_experiences(*), lead_educations(*), lead_skills(*), lead_languages(*), lead_certifications(*), lead_projects(*)'
+        '*, lead_workflows(*), lead_statuses(*), lead_work_experiences(*), lead_volunteering_experiences(*), lead_educations(*), lead_skills(*), lead_languages(*), lead_certifications(*), lead_projects(*), lead_reactions(*)'
       )
       .single()
     if (errorOfInsertLead) {
@@ -436,8 +365,6 @@ export async function upsertLead({
       console.error('Error in find lead status:', errorOfFindLeadStatus)
       return null
     }
-    console.log('responseOfFindLeadStatuses:', responseOfFindLeadStatuses)
-    console.log('leadStatus:', leadStatus)
     if (
       !responseOfFindLeadStatuses.length ||
       (responseOfFindLeadStatuses[0].status < leadStatus &&
@@ -728,7 +655,143 @@ export async function upsertLead({
       }
     }
 
+    // update reactions
+    const reactionsPromises = lead.lead_reactions?.map(async (reaction) => {
+      if (!reaction || !upsertLead?.id) {
+        return
+      }
+      let matchedReaction = false
+      upsertLead.lead_reactions.map((reactionInDb) => {
+        if (reactionInDb.private_identifier === reaction.private_identifier) {
+          matchedReaction = true
+          return
+        }
+      })
+      if (matchedReaction) {
+        return
+      }
+
+      reaction.lead_id = upsertLead.id
+
+      try {
+        const { error: errorOfInsertReaction } = await supabase
+          .from('lead_reactions')
+          .insert(reaction)
+
+        if (errorOfInsertReaction) {
+          console.error('Error in insert reaction:', errorOfInsertReaction)
+          return
+        }
+
+        return reaction
+      } catch (error) {
+        console.error('Error processing reaction:', error)
+        return
+      }
+    })
+
+    try {
+      // Only await if there are promises to wait for
+      if (reactionsPromises !== undefined && reactionsPromises.length > 0) {
+        await Promise.all(reactionsPromises)
+      }
+    } catch (error) {
+      console.error('Error in reactions promises:', error)
+    }
+
     return upsertLead
+  })
+
+  const results = await Promise.all(leadPromises)
+  const filteredResults = results.filter(
+    (result) => result !== null && result !== undefined
+  ) as Lead[]
+  return filteredResults
+}
+
+export async function updateLeadStatusByTargetWorkflowId({
+  supabase,
+  targetWorkflowId,
+  targetStatus,
+  companyId,
+  workflowId,
+}: {
+  supabase: SupabaseClient
+  targetWorkflowId: string
+  targetStatus: LeadStatus
+  companyId: string
+  workflowId: string
+}): Promise<Lead[]> {
+  const { data: leadsData, error: leadsError } = await supabase
+    .from('leads')
+    .select(
+      '*, lead_workflows!inner(*), lead_statuses(*), lead_work_experiences(*), lead_volunteering_experiences(*), lead_educations(*), lead_skills(*), lead_languages(*), lead_certifications(*), lead_projects(*), lead_reactions(*)'
+    )
+    .eq('lead_workflows.workflow_id', targetWorkflowId)
+    .order('updated_at', { ascending: false })
+
+  if (leadsError) {
+    console.error('Error fetching leads:', leadsError)
+    return []
+  }
+
+  if (!leadsData || !Array.isArray(leadsData) || !leadsData.length) {
+    return []
+  }
+
+  const leads = leadsData as Lead[]
+
+  const leadPromises = leads.map(async (lead) => {
+    // update lead workflows
+    const leadWorkflows: PublicSchemaTables['lead_workflows']['Insert'] = {
+      workflow_id: workflowId,
+      lead_id: lead.id,
+      company_id: companyId,
+    }
+
+    const { error: errorOfInsertLeadWorkflow } = await supabase
+      .from('lead_workflows')
+      .upsert(leadWorkflows, { onConflict: 'workflow_id, lead_id' })
+    if (errorOfInsertLeadWorkflow) {
+      console.error('Error in insert lead workflow:', errorOfInsertLeadWorkflow)
+      return null
+    }
+
+    // update lead status
+    const { data: responseOfFindLeadStatuses, error: errorOfFindLeadStatus } =
+      await supabase
+        .from('lead_statuses')
+        .select('*')
+        .eq('lead_id', lead.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+    if (errorOfFindLeadStatus) {
+      console.error('Error in find lead status:', errorOfFindLeadStatus)
+      return null
+    }
+    if (
+      !responseOfFindLeadStatuses.length ||
+      (responseOfFindLeadStatuses[0].status < targetStatus &&
+        (responseOfFindLeadStatuses[0].status == LeadStatus.IN_QUEUE ||
+          responseOfFindLeadStatuses[0].status == LeadStatus.INVITED_FAILED ||
+          responseOfFindLeadStatuses[0].status == LeadStatus.SEARCHED))
+    ) {
+      const leadStatuses: PublicSchemaTables['lead_statuses']['Insert'] = {
+        status: targetStatus,
+        lead_id: lead.id,
+        company_id: companyId,
+      }
+
+      const { error: errorOfInsertLeadStatus } = await supabase
+        .from('lead_statuses')
+        .insert(leadStatuses)
+      if (errorOfInsertLeadStatus) {
+        console.error('Error in insert lead status:', errorOfInsertLeadStatus)
+        return null
+      }
+    }
+
+    return lead
   })
 
   const results = await Promise.all(leadPromises)
