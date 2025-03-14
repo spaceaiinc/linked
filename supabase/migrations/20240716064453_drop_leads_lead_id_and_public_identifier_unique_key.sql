@@ -1,0 +1,2 @@
+ALTER TABLE public.leads
+DROP CONSTRAINT leads_provider_id_public_identifier_key;

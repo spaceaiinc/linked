@@ -9,10 +9,13 @@ import {
   unipilePeformSearchProfileWithStatus,
   fetchLeadsWithLatestStatusFilter,
   fetchLeadsWithLatestStatusAndWorkflow,
+  updateLeadStatusByTargetWorkflowId,
 } from '@/lib/db/queries/leadServer'
 import {
   ActiveTab,
   LeadStatus,
+  NetworkDistance,
+  ReactionType,
   WorkflowStatus,
   WorkflowType,
 } from '@/lib/types/master'
@@ -28,8 +31,8 @@ import { searchProfileSchema } from '@/lib/validation'
 import { NextResponse } from 'next/server'
 import { supabase as serviceSupabase } from '@/lib/utils/supabase/service'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { decode } from 'punycode'
 import { decodeJapaneseOnly } from '@/lib/utils/decode'
+import { extractLinkedInId } from '@/lib/csv'
 
 export async function POST(req: Request) {
   /**
@@ -48,16 +51,19 @@ export async function POST(req: Request) {
     param.network_distance = []
     param.target_public_identifiers = []
     param.target_workflow_id = undefined
+    param.search_reaction_profile_public_identifier = undefined
   } else if (param.active_tab === ActiveTab.KEYWORDS) {
     param.search_url = undefined
     param.target_public_identifiers = []
     param.target_workflow_id = undefined
+    param.search_reaction_profile_public_identifier = undefined
   } else if (param.active_tab === ActiveTab.LEAD_LIST) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
     param.network_distance = []
     param.target_public_identifiers = []
+    param.search_reaction_profile_public_identifier = undefined
   } else if (
     param.active_tab === ActiveTab.FILE_URL ||
     param.active_tab === ActiveTab.UPLOAD
@@ -66,6 +72,14 @@ export async function POST(req: Request) {
     param.keywords = undefined
     param.company_urls = []
     param.network_distance = []
+    param.search_reaction_profile_public_identifier = undefined
+  } else if (param.active_tab === ActiveTab.SEARCH_REACTION) {
+    param.search_url = undefined
+    param.keywords = undefined
+    param.company_urls = []
+    param.network_distance = []
+    param.target_public_identifiers = []
+    param.target_workflow_id = undefined
   }
 
   const scheduled =
@@ -452,6 +466,14 @@ export async function POST(req: Request) {
         })
 
         await Promise.all(profilePromises)
+      } else {
+        await updateLeadStatusByTargetWorkflowId({
+          supabase,
+          targetWorkflowId: param.target_workflow_id,
+          targetStatus: LeadStatus.IN_QUEUE,
+          companyId: provider.company_id,
+          workflowId: param.workflow_id,
+        })
       }
       if (!fromSchedule) {
         const workflow: Database['public']['Tables']['workflows']['Update'] = {
@@ -485,7 +507,11 @@ export async function POST(req: Request) {
         responseOfInsertWorkflow = workflowData
         console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
       }
-    } else if (param.search_url || param.keywords || param.company_urls) {
+    } else if (
+      param.search_url ||
+      param.keywords ||
+      param.company_urls.length
+    ) {
       console.log('continue with keywords')
       if (param.search_url)
         // TODO: url prefix
@@ -632,7 +658,6 @@ export async function POST(req: Request) {
           }
           const leadsInDb: Lead[] = leadsDataInDb as Lead[]
           const profilePromises = dataOfSearchList.map(async (item) => {
-            console.log('item:', item)
             let matched = false
             leadsInDb.forEach((leadInDb) => {
               if (
@@ -776,6 +801,234 @@ export async function POST(req: Request) {
         responseOfInsertWorkflow = workflowData
         console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
       }
+    } else if (
+      param.active_tab === ActiveTab.SEARCH_REACTION &&
+      param.search_reaction_profile_public_identifier
+    ) {
+      console.log('continue with search_reaction_profile_public_identifier')
+      let searchReactionProfilePrivateIdentifier = provider.private_identifier
+      if (
+        provider.public_identifier !==
+        param.search_reaction_profile_public_identifier
+      ) {
+        const getProfileResponse = await unipileClient.users.getProfile({
+          account_id: param.account_id,
+          identifier: param.search_reaction_profile_public_identifier,
+        })
+        if (!getProfileResponse || getProfileResponse === undefined) return
+        if ('provider_id' in getProfileResponse) {
+          searchReactionProfilePrivateIdentifier =
+            getProfileResponse.provider_id
+        }
+        await new Promise((resolve) => setTimeout(resolve, 5000))
+      }
+
+      const getAllPostsResponse = await unipileClient.users.getAllPosts({
+        account_id: param.account_id,
+        identifier: searchReactionProfilePrivateIdentifier,
+        limit: param.limit_count * 3,
+      })
+      if (!getAllPostsResponse || getAllPostsResponse === undefined) return
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+
+      const getAllPostCommentsPromises = getAllPostsResponse.items.map(
+        async (post) => {
+          if (!post || post === undefined) return
+          if (
+            post.author.public_identifier !==
+            param.search_reaction_profile_public_identifier
+          ) {
+            console.log('Skipping post - not authored by the provider')
+            return
+          }
+
+          const getAllPostCommentsResponse =
+            await unipileClient.users.getAllPostComments({
+              account_id: param.account_id,
+              post_id: post.social_id,
+              limit: 10,
+            })
+          if (
+            !getAllPostCommentsResponse ||
+            getAllPostCommentsResponse === undefined
+          )
+            return
+
+          getAllPostCommentsResponse.items.map((comment) => {
+            leadsWithStatus.push({
+              leadId: '',
+              leadStatus: LeadStatus.SEARCHED,
+              lead: {
+                provider_id: provider.id,
+                company_id: provider.company_id,
+                // public_identifier: comment?.author_details?.profile_url
+                //   ? extractLinkedInId(comment?.author_details?.profile_url) ||
+                //     ''
+                //   : '',
+                private_identifier: comment?.author_details?.id || '',
+                headline: comment?.author_details?.headline || '',
+                full_name: comment?.author || '',
+                network_distance: comment?.author_details?.network_distance
+                  ? NetworkDistance[comment?.author_details?.network_distance]
+                  : undefined,
+                lead_reactions: [
+                  {
+                    company_id: provider.company_id,
+                    reacted_at: new Date().toISOString(),
+                    // reacted_at: new Date(comment.date).toISOString(),
+                    lead_id: '',
+                    reaction_type: ReactionType.COMMENT,
+                    post_url: post.share_url,
+                    post_private_identifier: post.social_id,
+                    private_identifier: comment.id,
+                    content: comment.text,
+                  },
+                ],
+              },
+            })
+          })
+
+          await new Promise((resolve) => setTimeout(resolve, 5000))
+        }
+      )
+
+      await Promise.all(getAllPostCommentsPromises)
+      const getAllPostReactionsPromises = getAllPostsResponse.items.map(
+        async (post) => {
+          if (!post || post === undefined) return
+          const postPrivateIdentifier = post.social_id.replace(
+            'urn:li:activity:',
+            ''
+          )
+
+          // get likes
+          const getReactionsUrl = `https://${env.UNIPILE_DNS}/api/v1/posts/${post.social_id}/reactions?account_id=${param.account_id}&limit=100`
+          const getReactionsOptions = {
+            method: 'GET',
+            headers: {
+              'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
+              accept: 'application/json',
+              'content-type': 'application/json',
+            },
+          }
+          const getReactionsResponse = await fetch(
+            getReactionsUrl,
+            getReactionsOptions
+          )
+          if (getReactionsResponse.status !== 200) {
+            return NextResponse.json(
+              { error: 'An error occurred while getting reactions' },
+              { status: 500 }
+            )
+          }
+          const dataOfGetReactions = await getReactionsResponse.json()
+          console.log('dataOfGetReactions', dataOfGetReactions)
+          dataOfGetReactions.items.map(
+            (reaction: {
+              value: string
+              author: {
+                profile_url: string
+                id: any
+                headline: any
+                name: any
+                network_distance: string | number
+              }
+            }) => {
+              const networkDistance = reaction?.author
+                ?.network_distance as string
+              leadsWithStatus.push({
+                leadId: '',
+                leadStatus: LeadStatus.SEARCHED,
+                lead: {
+                  provider_id: provider.id,
+                  company_id: provider.company_id,
+                  // public_identifier: reaction?.author?.profile_url
+                  //   ? extractLinkedInId(reaction?.author?.profile_url) || ''
+                  //   : '',
+                  private_identifier: reaction?.author?.id || '',
+                  headline: reaction?.author?.headline || '',
+                  full_name: reaction?.author?.name || '',
+                  network_distance: networkDistance
+                    ? NetworkDistance[
+                        networkDistance as keyof typeof NetworkDistance
+                      ]
+                    : undefined,
+                  lead_reactions: [
+                    {
+                      company_id: provider.company_id,
+                      reacted_at: new Date().toISOString(),
+                      lead_id: '',
+                      reaction_type:
+                        ReactionType[
+                          reaction.value as keyof typeof ReactionType
+                        ],
+                      post_url: post.share_url,
+                      post_private_identifier: postPrivateIdentifier,
+                      private_identifier: reaction.author.id,
+                      content: '',
+                    },
+                  ],
+                },
+              })
+            }
+          )
+        }
+      )
+
+      await Promise.all(getAllPostReactionsPromises)
+
+      // もしprivate_identifierが同じleadがいる場合は、一つのleadsにして、reactionsを追加
+      const leadsWithStatusMap = new Map<string, leadWithStatus>()
+      leadsWithStatus.forEach((lead) => {
+        if (
+          lead.lead.private_identifier === undefined ||
+          lead.lead.lead_reactions === undefined
+        )
+          return
+        if (leadsWithStatusMap.has(lead.lead.private_identifier)) {
+          const existingLead = leadsWithStatusMap.get(
+            lead.lead.private_identifier
+          )
+          if (existingLead) {
+            existingLead.lead.lead_reactions?.push(...lead.lead.lead_reactions)
+            leadsWithStatusMap.set(lead.lead.private_identifier, existingLead)
+          }
+        } else {
+          leadsWithStatusMap.set(lead.lead.private_identifier, lead)
+        }
+      })
+      leadsWithStatus = Array.from(leadsWithStatusMap.values())
+
+      const workflow: Database['public']['Tables']['workflows']['Update'] = {
+        id: param.workflow_id,
+        company_id: provider.company_id,
+        provider_id: provider.id,
+        name: param.name,
+        scheduled_hours: param.scheduled_hours || [],
+        scheduled_days: param.scheduled_days || [],
+        scheduled_months: param.scheduled_months || [],
+        scheduled_weekdays: param.scheduled_weekdays || [],
+        search_reaction_profile_public_identifier:
+          param.search_reaction_profile_public_identifier,
+        limit_count: Number(param.limit_count),
+        invitation_message: param.invitation_message || '',
+      }
+
+      const { data: workflowData, error: updateWorkflowError } = await supabase
+        .from('workflows')
+        .update(workflow)
+        .eq('id', param.workflow_id)
+        .select('*')
+        .single()
+      if (updateWorkflowError) {
+        console.error('Error in inserting workflow:', updateWorkflowError)
+        return NextResponse.json(
+          { error: 'Internal server error' },
+          { status: 500 }
+        )
+      }
+      responseOfInsertWorkflow = workflowData
+      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
     } else {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
@@ -792,7 +1045,6 @@ export async function POST(req: Request) {
         scheduled_months: param.scheduled_months,
         scheduled_weekdays: param.scheduled_weekdays,
       })
-      console.log('convertedLead', convertedLead)
     }
     if (leadsWithStatus.length) {
       const convertedLead = await upsertLead({
@@ -806,7 +1058,6 @@ export async function POST(req: Request) {
         scheduled_months: param.scheduled_months,
         scheduled_weekdays: param.scheduled_weekdays,
       })
-      console.log('convertedLead', convertedLead)
     }
     if (unipiePerformSearchProfilesWithStatus.length) {
       const convertedLead = await upsertLeadByUnipilePerformSearchProfile({
@@ -820,7 +1071,6 @@ export async function POST(req: Request) {
         scheduled_months: param.scheduled_months,
         scheduled_weekdays: param.scheduled_weekdays,
       })
-      console.log('convertedLead', convertedLead)
     }
 
     status = WorkflowStatus.SUCCESS
@@ -831,7 +1081,7 @@ export async function POST(req: Request) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Error in POST /api/provider/invite:', error)
+    console.error('Error in POST /api/workflow/search-profile:', error)
     return NextResponse.json(
       { error: 'Internal server error: ' + error },
       { status: 500 }

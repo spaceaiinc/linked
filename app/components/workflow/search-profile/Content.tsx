@@ -8,7 +8,7 @@ import { userAtom } from '@/lib/atom'
 import { useEffect, useState } from 'react'
 import { Lead } from '@/lib/types/supabase'
 import { getLeadsByWorkflowId } from '@/lib/db/queries/leadClient'
-import { convertToDisplay } from '@/lib/csv'
+import { convertToDisplay, LeadForDisplay } from '@/lib/csv'
 import { LeadTable } from '@/app/components/dashboard/LeadTable'
 
 export default function SearchProfileContent({
@@ -16,7 +16,7 @@ export default function SearchProfileContent({
 }: {
   workflowId: string
 }) {
-  const [leads, setLeads] = useState<Lead[]>([])
+  const [leads, setLeads] = useState<LeadForDisplay[]>([])
   const [user, _] = useAtom(userAtom)
   useEffect(() => {
     const f = async () => {
@@ -24,7 +24,7 @@ export default function SearchProfileContent({
       if (fetchedLeads && fetchedLeads.length) {
         const convertedRow = convertToDisplay(fetchedLeads)
         if (convertedRow && convertedRow.length)
-          setLeads(convertedRow as Lead[] | [])
+          setLeads(convertedRow as LeadForDisplay[] | [])
       }
     }
     f()
@@ -65,7 +65,7 @@ export default function SearchProfileContent({
           <span className="w-4 h-4 mt-1">
             <IconPoint className="w-4 h-4" />
           </span>
-          <span className="ml-2">1回毎の検索数は、現在200件まで可能です。</span>
+          <span className="ml-2">1回毎の検索数は、現在500件まで可能です。</span>
         </li>
         <li className="text-l flex">
           <span className="w-4 h-4 mt-1">
