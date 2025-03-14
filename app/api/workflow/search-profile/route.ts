@@ -624,6 +624,7 @@ export async function POST(req: Request) {
             )
           }
           const dataOfSearch = await responseOfSearch.json()
+          console.log('dataOfSearch', dataOfSearch)
           nextCursor = dataOfSearch.cursor || ''
           console.log('nextCursor', nextCursor)
           if (
@@ -633,6 +634,7 @@ export async function POST(req: Request) {
           )
             dataOfSearchList.push(...dataOfSearch.items)
           await new Promise((resolve) => setTimeout(resolve, 5000))
+          if (nextCursor === '') break
         }
 
         console.log('dataOfSearchList', dataOfSearchList)
