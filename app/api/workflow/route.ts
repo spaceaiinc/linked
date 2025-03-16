@@ -57,7 +57,6 @@ export async function POST(req: Request) {
         { status: 500 }
       )
     }
-    console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
     if (!workflowData.id) {
       return NextResponse.json(
         { error: 'Internal server error: workflow id is not found' },
