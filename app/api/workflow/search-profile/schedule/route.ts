@@ -41,7 +41,6 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.log('ProviderSearchProfilePostScheduleParam', param)
     if (param.schedule_id !== '09chdwbiowrivdjwksncdkqod89cy0hqdco') {
       return NextResponse.json(
         { error: 'schedule_id is invalid' },
@@ -54,15 +53,11 @@ export async function POST(req: Request) {
       new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })
     )
     // adminクライアントを作成（RLSをバイパス）
-    console.log('env.NEXT_PUBLIC_SUPABASE_URL', env.NEXT_PUBLIC_SUPABASE_URL)
-    console.log('env.SUPABASE_SERVICE_KEY', env.SUPABASE_SERVICE_KEY)
-    console.log('day', now.getDay(), 'hours', now.getHours())
     const { data: workflowsData, error } = await supabase
       .from('workflows')
       .select('*')
       .eq('deleted_at', '-infinity')
       .eq('status', WorkflowRunStatus.ON)
-    console.log('workflowsData', workflowsData, 'error', error)
     if (error) {
       return new Response(error.message, { status: 500 })
     }
@@ -78,13 +73,11 @@ export async function POST(req: Request) {
       }
       return false
     })
-    console.log('scheduledWorkflows', scheduledWorkflows)
     const workflows = scheduledWorkflows as Workflow[]
-    console.log('workflows', workflows)
 
     //　workflowsのscheduled_hoursとdaysとweeksが現在時刻と一致するものを返す
+    console.log('schedule matched workflows: ', workflows)
     const workflowPromises = workflows.map(async (workflow: Workflow) => {
-      console.log('workflow', workflow)
       const { data: providerData, error } = await supabase
         .from('providers')
         .select('*')
@@ -148,22 +141,19 @@ export async function POST(req: Request) {
 
       try {
         const response = await searchProfileHandler(searchProfileRequest)
-        console.log('response', response)
         await new Promise((resolve) => setTimeout(resolve, 5000))
         if (response?.ok) {
+          console.log('Workflow processed successfully', response)
           const responseData = await response.json()
-          console.log('responseData', responseData)
           return responseData
         }
         return response
       } catch (error) {
-        console.error('Failed to generate responses:', error)
         return { error: 'Failed to process workflow' }
       }
     })
 
     const workflowResults = await Promise.all(workflowPromises)
-    console.log('workflowResults', workflowResults)
     return NextResponse.json(workflowResults)
   } catch (error) {
     console.error('Error in POST /api/workflow/search-profile/schedule:', error)
