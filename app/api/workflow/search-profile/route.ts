@@ -136,7 +136,6 @@ export async function POST(req: Request) {
           provider.id,
           param.target_public_identifiers
         )
-        console.log('leadsDataInDb', leadsDataInDb)
         const leadsInDb: Lead[] = leadsDataInDb as Lead[]
 
         const insertLeadPromises = param.target_public_identifiers.map(
@@ -159,7 +158,6 @@ export async function POST(req: Request) {
                       new Date(a.created_at).getTime()
                     )
                   })
-                  console.log('lead.lead_statuses[0]', lead.lead_statuses[0])
                   if (
                     lead.lead_statuses[0]?.status === LeadStatus.SEARCHED ||
                     lead.lead_statuses[0]?.status === LeadStatus.INVITED_FAILED
@@ -271,11 +269,11 @@ export async function POST(req: Request) {
               unipileClient.users
                 .sendInvitation(sendInvitationParam)
                 .then((responseOfSendInvitation) => {
-                  console.log(
-                    'responseOfSendInvitation',
-                    responseOfSendInvitation
-                  )
-                  leadStatus = LeadStatus.INVITED
+                  if (responseOfSendInvitation.invitation_id) {
+                    leadStatus = LeadStatus.INVITED
+                  } else {
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
                 })
                 .catch((error) => {
                   // error type ref: https://developer.unipile.com/reference/userscontroller_adduserbyidentifier
@@ -305,8 +303,6 @@ export async function POST(req: Request) {
         const filteredSearchedLeadList = searchedLeadList.filter(
           (lead) => lead !== undefined
         ) as unipileProfileWithStatus[]
-        console.log('filteredSearchedLeadList', filteredSearchedLeadList)
-
         const upsertedLeadList =
           await upsertLeadByUnipileUserProfileApiResponse({
             supabase,
@@ -319,7 +315,6 @@ export async function POST(req: Request) {
             scheduled_months: param.scheduled_months,
             scheduled_weekdays: param.scheduled_weekdays,
           })
-        console.log('upsertedLeadList', upsertedLeadList)
       }
       const workflow: Database['public']['Tables']['workflows']['Update'] = {
         id: param.workflow_id,
@@ -349,7 +344,6 @@ export async function POST(req: Request) {
         )
       }
       responseOfInsertWorkflow = workflowData
-      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
 
       /**
        * if search_url exists, search profiles
@@ -363,7 +357,6 @@ export async function POST(req: Request) {
           LeadStatus.IN_QUEUE,
           param.limit_count
         )
-        console.log('targetLeads', targetLeadData)
         const targetLeads = targetLeadData as Lead[]
         const profilePromises = targetLeads?.map(async (lead: Lead) => {
           if (!lead || lead === undefined) return
@@ -394,11 +387,11 @@ export async function POST(req: Request) {
                 .sendInvitation(sendInvitationParam)
 
                 .then((responseOfSendInvitation) => {
-                  console.log(
-                    'responseOfSendInvitation',
-                    responseOfSendInvitation
-                  )
-                  leadStatus = LeadStatus.INVITED
+                  if (responseOfSendInvitation.invitation_id) {
+                    leadStatus = LeadStatus.INVITED
+                  } else {
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
                 })
                 .catch((error) => {
                   if (error?.body?.type === 'errors/already_invited_recently') {
@@ -436,11 +429,11 @@ export async function POST(req: Request) {
               unipileClient.users
                 .sendInvitation(sendInvitationParam)
                 .then((responseOfSendInvitation) => {
-                  console.log(
-                    'responseOfSendInvitation',
-                    responseOfSendInvitation
-                  )
-                  leadStatus = LeadStatus.INVITED
+                  if (responseOfSendInvitation.invitation_id) {
+                    leadStatus = LeadStatus.INVITED
+                  } else {
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
                 })
                 .catch((error) => {
                   if (error?.body?.type === 'errors/already_invited_recently') {
@@ -617,16 +610,13 @@ export async function POST(req: Request) {
           })
 
           if (responseOfSearch.status !== 200) {
-            console.log('responseOfSearch', responseOfSearch)
             return NextResponse.json(
               { error: 'An error occurred while searching' },
               { status: 500 }
             )
           }
           const dataOfSearch = await responseOfSearch.json()
-          console.log('dataOfSearch', dataOfSearch)
           nextCursor = dataOfSearch.cursor || ''
-          console.log('nextCursor', nextCursor)
           if (
             dataOfSearch !== undefined &&
             dataOfSearch.items &&
@@ -636,8 +626,6 @@ export async function POST(req: Request) {
           await new Promise((resolve) => setTimeout(resolve, 5000))
           if (nextCursor === '') break
         }
-
-        console.log('dataOfSearchList', dataOfSearchList)
 
         if (
           param.type === WorkflowType.SEARCH &&
@@ -735,11 +723,11 @@ export async function POST(req: Request) {
                   .sendInvitation(sendInvitationParam)
 
                   .then((responseOfSendInvitation) => {
-                    console.log(
-                      'responseOfSendInvitation',
-                      responseOfSendInvitation
-                    )
-                    leadStatus = LeadStatus.INVITED
+                    if (responseOfSendInvitation.invitation_id) {
+                      leadStatus = LeadStatus.INVITED
+                    } else {
+                      leadStatus = LeadStatus.INVITED_FAILED
+                    }
                   })
                   .catch((error) => {
                     if (
@@ -801,7 +789,6 @@ export async function POST(req: Request) {
           )
         }
         responseOfInsertWorkflow = workflowData
-        console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
       }
     } else if (
       param.active_tab === ActiveTab.SEARCH_REACTION &&
@@ -863,10 +850,6 @@ export async function POST(req: Request) {
               lead: {
                 provider_id: provider.id,
                 company_id: provider.company_id,
-                // public_identifier: comment?.author_details?.profile_url
-                //   ? extractLinkedInId(comment?.author_details?.profile_url) ||
-                //     ''
-                //   : '',
                 private_identifier: comment?.author_details?.id || '',
                 headline: comment?.author_details?.headline || '',
                 full_name: comment?.author || '',
@@ -924,7 +907,6 @@ export async function POST(req: Request) {
             )
           }
           const dataOfGetReactions = await getReactionsResponse.json()
-          console.log('dataOfGetReactions', dataOfGetReactions)
           dataOfGetReactions.items.map(
             (reaction: {
               value: string
@@ -944,9 +926,6 @@ export async function POST(req: Request) {
                 lead: {
                   provider_id: provider.id,
                   company_id: provider.company_id,
-                  // public_identifier: reaction?.author?.profile_url
-                  //   ? extractLinkedInId(reaction?.author?.profile_url) || ''
-                  //   : '',
                   private_identifier: reaction?.author?.id || '',
                   headline: reaction?.author?.headline || '',
                   full_name: reaction?.author?.name || '',
@@ -1030,13 +1009,12 @@ export async function POST(req: Request) {
         )
       }
       responseOfInsertWorkflow = workflowData
-      console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
     } else {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
 
     if (unipileProfilesWithStatus.length) {
-      const convertedLead = await upsertLeadByUnipileUserProfileApiResponse({
+      await upsertLeadByUnipileUserProfileApiResponse({
         supabase,
         unipileProfiles: unipileProfilesWithStatus,
         providerId: provider.id as string,
@@ -1049,7 +1027,7 @@ export async function POST(req: Request) {
       })
     }
     if (leadsWithStatus.length) {
-      const convertedLead = await upsertLead({
+      await upsertLead({
         supabase,
         leads: leadsWithStatus,
         providerId: provider.id as string,
@@ -1062,7 +1040,7 @@ export async function POST(req: Request) {
       })
     }
     if (unipiePerformSearchProfilesWithStatus.length) {
-      const convertedLead = await upsertLeadByUnipilePerformSearchProfile({
+      await upsertLeadByUnipilePerformSearchProfile({
         supabase,
         unipileProfiles: unipiePerformSearchProfilesWithStatus,
         providerId: provider.id as string,
@@ -1097,13 +1075,7 @@ export async function POST(req: Request) {
         status: status,
       }
 
-    const responseOfInsertWorkflowHistory = await supabase
-      .from('workflow_histories')
-      .insert(workflowHistories)
-    console.log(
-      'responseOfInsertWorkflowHistory:',
-      responseOfInsertWorkflowHistory
-    )
+    await supabase.from('workflow_histories').insert(workflowHistories)
   }
 }
 
