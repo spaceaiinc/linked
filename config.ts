@@ -28,21 +28,18 @@ export const companyConfig = {
 const productionUrl =
   process.env.NEXT_PUBLIC_PRODUCTION_URL || 'https://linked.spaceai.jp'
 export const companyName = 'Linked'
-export const defaultTitle = 'Linked - Platform that helps your business grow'
+export const defaultTitle = 'Linked(リンクト) | LinkedInリード獲得支援サービス'
 export const defaultDescription =
-  'Linked is a platform that helps your business grow.'
+  'Linked(リンクト)は、LinkedInリード獲得支援サービスです。'
 export const defaultKeywords =
-  'openai, gpt-3, ai app, ai, artificial intelligence, machine learning, deep learning, nlp, natural language processing, text generation, text completion, text classification, text summarization, text translation, text to speech, speech recognition, image recognition, image generation, image editing, image classification, image segmentation, image enhancement, image compression, image super-resolution, image synthesis, image-to-image translation, image captioning, image colorization, image denoising, image inpainting, image restoration, image style transfer, image watermarking, image recognition, image generation, image editing, image classification, image segmentation, image enhancement, image compression, image super-resolution, image synthesis, image-to-image translation, image captioning, image colorization, image denoising, image inpainting, image restoration, image style transfer, image watermarking'
+  'linkedin, リード獲得, リード獲得支援, リード獲得支援サービス, SNS運用, SNS運用代行, SNS運用支援, SNS運用支援サービス'
 export const defaultOgImage = '/og.png'
 export const favicon = '/favicon.ico'
 
 // LEGAL STUFF
-export const privacyPolicyUrl = 'https://spaceai.jp/privacy-policy'
+export const privacyPolicyUrl = 'https://spaceai.jp/ja/privacy-policy'
 export const tosUrl = 'https://spaceai.jp/linked/tos'
-export const securityUrl = 'https://spaceai.jp/security'
-
-// Auth
-export const authImage = '/hero.webp'
+export const securityUrl = 'https://spaceai.jp/ja/security'
 
 // Inside routing
 export const homePage = '/'

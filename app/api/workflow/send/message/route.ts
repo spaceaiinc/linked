@@ -51,34 +51,27 @@ export async function POST(req: Request) {
     try {
       target_private_identifiers.forEach(async (target_account_id) => {
         // get all chats
-        const responseOfGetAllChats = await unipileClient.messaging.getAllChats(
-          {
-            account_id: target_account_id,
-          }
-        )
-        if (
-          !responseOfGetAllChats ||
-          responseOfGetAllChats.items.length === 0
-        ) {
+        const getAllChatsResponse = await unipileClient.messaging.getAllChats({
+          account_id: target_account_id,
+        })
+        if (!getAllChatsResponse || getAllChatsResponse.items.length === 0) {
           // create new chat if not exists
-          const responseOfStartNewChat =
+          const startNewChatResponse =
             await unipileClient.messaging.startNewChat({
               account_id: target_account_id,
               text: message,
               attendees_ids: [],
             })
-          console.log('responseOfStartNewChat', responseOfStartNewChat)
+          console.log('startNewChatResponse', startNewChatResponse)
         }
 
         // send message
         // developer.unipile.com/reference/chatscontroller_sendmessageinchat
-        const responseOfSendMessage = await unipileClient.messaging.sendMessage(
-          {
-            chat_id: responseOfGetAllChats.items[0].id,
-            text: message,
-          }
-        )
-        console.log('responseOfSendMessage', responseOfSendMessage)
+        const sendMessageResponse = await unipileClient.messaging.sendMessage({
+          chat_id: getAllChatsResponse.items[0].id,
+          text: message,
+        })
+        console.log('sendMessageResponse', sendMessageResponse)
       })
     } catch (error) {
       console.log(error)

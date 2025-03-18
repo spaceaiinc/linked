@@ -65,9 +65,9 @@ export async function POST(req: Request) {
       }
 
       fetch(url, options)
-        .then(async (responseOfSearchPost) => {
+        .then(async (searchPostsResponse) => {
           // get ids from search results
-          if (!responseOfSearchPost.ok) {
+          if (!searchPostsResponse.ok) {
             return NextResponse.json(
               { error: 'An error occurred while searching' },
               { status: 500 }
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
           // ...
           // ]
           //   }
-          const dataOfSearchPost = await responseOfSearchPost.json()
+          const dataOfSearchPost = await searchPostsResponse.json()
           dataOfSearchPost.items.map(async (item: { id: string }) => {
             // add a reaction to the post
             try {

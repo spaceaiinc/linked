@@ -52,10 +52,10 @@ export default function Apps() {
         throw new Error('Network response was not ok')
       }
 
-      const responseOfCreateWorkflow = await response.json()
-      responseOfCreateWorkflow.workflow_id
+      const createWorkflowResponse = await response.json()
+      createWorkflowResponse.workflow_id
         ? window.location.replace(
-            `/workflow/${responseOfCreateWorkflow.workflow_id}`
+            `/workflow/${createWorkflowResponse.workflow_id}`
           )
         : alert('Failed to create workflow')
     },

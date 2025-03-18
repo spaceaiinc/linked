@@ -5,7 +5,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import axios from 'axios'
 
-const LinkedinMarketingTool = () => {
+const Hero = () => {
   return (
     <div className="font-sans text-gray-800">
       {/* ヘッダー */}
@@ -619,4 +619,4 @@ const Footer = () => {
   )
 }
 
-export default LinkedinMarketingTool
+export default Hero
