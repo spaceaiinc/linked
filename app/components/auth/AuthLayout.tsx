@@ -1,38 +1,35 @@
 'use client'
 
 import GoogleSignInButton from '@/app/components/auth/GoogleSignInButton'
-import AuthForm from '@/app/components/auth/AuthForm'
-import MessageDisplay from '@/app/components/auth/MessageDisplay'
-import React, { useState } from 'react'
 import Logo from '@/app/components/Logo'
 import { tosUrl, privacyPolicyUrl } from '@/config'
 
 export default function AuthComponent() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState('')
-  const [messageType, setMessageType] = useState('')
+  // const [, setIsLoading] = useState(false)
+  // const [message, setMessage] = useState('')
+  // const [messageType, setMessageType] = useState('')
 
-  const handleLogin = (email: string) => {
-    setIsLoading(true)
-    fetch('/api/auth', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setMessage(data.message)
-        setMessageType(data.status === 'Success' ? 'success' : 'error')
-        setIsLoading(false)
-      })
-      .catch((error) => {
-        setMessage('An error occurred.')
-        setMessageType('error')
-        setIsLoading(false)
-      })
-  }
+  // const handleLogin = (email: string) => {
+  //   setIsLoading(true)
+  //   fetch('/api/auth', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ email }),
+  //   })
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setMessage(data.message)
+  //       setMessageType(data.status === 'Success' ? 'success' : 'error')
+  //       setIsLoading(false)
+  //     })
+  //     .catch((error) => {
+  //       setMessage('An error occurred.')
+  //       setMessageType('error')
+  //       setIsLoading(false)
+  //     })
+  // }
 
   return (
     <section className="py-12 bg-base-100 sm:py-16 lg:py-20 w-full h-screen">
@@ -45,17 +42,17 @@ export default function AuthComponent() {
                 <Logo />
               </div>
               {/* MESSAGES */}
-              {message && (
+              {/* {message && (
                 <MessageDisplay message={message} messageType={messageType} />
-              )}
+              )} */}
               <div>
                 <h1 className="text-xl font-medium mt-8 text-base-content">
-                  Please signin to continue.
+                  新規登録・ログイン
                 </h1>
                 {/* <p className="mt-4 text-sm text-base-content">
                   Please login or sign up to continue.
                 </p> */}
-                <div className="py-6">
+                {/* <div className="py-6">
                   <AuthForm
                     next={'/dashboard'}
                     onSuccess={(msg) => {
@@ -70,7 +67,7 @@ export default function AuthComponent() {
                 </div>
                 <div className="flex items-center justify-center">
                   <span className="text-xs text-gray-400">or</span>
-                </div>
+                </div> */}
                 <div className="py-6">
                   <div className="relative group">
                     <div className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg filter group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 "></div>
@@ -88,21 +85,21 @@ export default function AuthComponent() {
                     /> */}
 
                     <p className="mt-10 text-xs text-gray-400">
-                      When creating a new account, you agree to the
+                      アカウントを作成することで、
                       <a href={tosUrl} target="_blank" className="underline">
                         {' '}
-                        terms &amp; conditions
+                        利用規約
                       </a>{' '}
-                      and
+                      と
                       <a
                         href={privacyPolicyUrl}
                         target="_blank"
                         className="underline"
                       >
                         {' '}
-                        privacy policy
+                        プライバシーポリシー
                       </a>
-                      .{' '}
+                      に同意するものとします。
                     </p>
                   </div>
                 </div>
@@ -118,7 +115,7 @@ export default function AuthComponent() {
             <div className="group relative overflow-hidden transition duration-300 hover:opacity-100">
               <div className="p-12 relative overflow-hidden rounded-lg">
                 <img
-                  src="/hero.webp"
+                  src="/demo.png"
                   className="w-full group-hover:scale-105  duration-300 transition rounded-md v-lazy-image v-lazy-image-loaded"
                   alt="Auth Image"
                 />

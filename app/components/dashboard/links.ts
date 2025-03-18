@@ -18,12 +18,12 @@ type NavLink = {
 
 export const freeTools = [
   {
-    href: 'https://anotherwrapper.com/tools/llm-pricing',
+    href: 'https://spaceai.jp/tools/llm-pricing',
     label: 'LLM Pricing Comparison',
     icon: IconCurrencyDollar,
   },
   {
-    href: 'https://anotherwrapper.com/tools/ai-app-generator',
+    href: 'https://spaceai.jp/tools/ai-app-generator',
     label: 'AI App Generator',
     icon: IconRobot,
   },
@@ -32,7 +32,7 @@ export const freeTools = [
 export const overviewLinks: NavLink[] = [
   { href: '/apps', label: 'Overview', icon: IconLayoutDashboard },
   {
-    href: 'https://anotherwrapper.lemonsqueezy.com/affiliates',
+    href: 'https://spaceai.lemonsqueezy.com/affiliates',
     isExternal: true,
     label: 'Affiliates (50%)',
     icon: IconCurrencyDollar,

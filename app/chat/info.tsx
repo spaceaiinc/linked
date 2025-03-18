@@ -123,7 +123,7 @@ export function AppInfo() {
             <div className="text-xs text-muted-foreground/70 pt-2 border-t border-border/40">
               Read more in the{' '}
               <Link
-                href="https://docs.anotherwrapper.com/ai/chat"
+                href="https://docs.spaceai.jp/ai/chat"
                 target="_blank"
                 className="text-primary hover:text-primary/80 font-medium transition-colors hover:underline"
               >
