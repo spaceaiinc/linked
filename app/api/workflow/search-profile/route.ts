@@ -94,7 +94,7 @@ export async function POST(req: Request) {
 
   let nextCursor = ''
   let status = WorkflowStatus.FAILED
-  let responseOfInsertWorkflow = null
+  let insertWorkflowResponse = null
   let unipileProfilesWithStatus: unipileProfileWithStatus[] = []
   let leadsWithStatus: leadWithStatus[] = []
   let unipiePerformSearchProfilesWithStatus: unipilePeformSearchProfileWithStatus[] =
@@ -217,13 +217,13 @@ export async function POST(req: Request) {
               lead_id: leadDataId,
               company_id: provider.company_id,
             }
-            const { error: errorOfInsertLeadStatus } = await supabase
+            const { error: insertLeadStatusError } = await supabase
               .from('lead_statuses')
               .insert(leadStatus)
-            if (errorOfInsertLeadStatus) {
+            if (insertLeadStatusError) {
               console.error(
                 'Error in insert lead status:',
-                errorOfInsertLeadStatus
+                insertLeadStatusError
               )
               return NextResponse.json(
                 { error: 'Internal server error' },
@@ -268,8 +268,8 @@ export async function POST(req: Request) {
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
                 .sendInvitation(sendInvitationParam)
-                .then((responseOfSendInvitation) => {
-                  if (responseOfSendInvitation.invitation_id) {
+                .then((sendInvitationResponse) => {
+                  if (sendInvitationResponse.invitation_id) {
                     leadStatus = LeadStatus.INVITED
                   } else {
                     leadStatus = LeadStatus.INVITED_FAILED
@@ -343,7 +343,7 @@ export async function POST(req: Request) {
           { status: 500 }
         )
       }
-      responseOfInsertWorkflow = workflowData
+      insertWorkflowResponse = workflowData
 
       /**
        * if search_url exists, search profiles
@@ -386,8 +386,8 @@ export async function POST(req: Request) {
               unipileClient.users
                 .sendInvitation(sendInvitationParam)
 
-                .then((responseOfSendInvitation) => {
-                  if (responseOfSendInvitation.invitation_id) {
+                .then((sendInvitationResponse) => {
+                  if (sendInvitationResponse.invitation_id) {
                     leadStatus = LeadStatus.INVITED
                   } else {
                     leadStatus = LeadStatus.INVITED_FAILED
@@ -428,8 +428,8 @@ export async function POST(req: Request) {
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
                 .sendInvitation(sendInvitationParam)
-                .then((responseOfSendInvitation) => {
-                  if (responseOfSendInvitation.invitation_id) {
+                .then((sendInvitationResponse) => {
+                  if (sendInvitationResponse.invitation_id) {
                     leadStatus = LeadStatus.INVITED
                   } else {
                     leadStatus = LeadStatus.INVITED_FAILED
@@ -497,8 +497,8 @@ export async function POST(req: Request) {
             { status: 500 }
           )
         }
-        responseOfInsertWorkflow = workflowData
-        console.log('responseOfInsertWorkflow:', responseOfInsertWorkflow)
+        insertWorkflowResponse = workflowData
+        console.log('insertWorkflowResponse:', insertWorkflowResponse)
       }
     } else if (
       param.search_url ||
@@ -506,6 +506,27 @@ export async function POST(req: Request) {
       param.company_urls.length
     ) {
       console.log('continue with keywords')
+      // 保存されている最新のhistoriesからcursorを取得
+      const { data: historiesData, error: selectHistoriesError } =
+        await supabase
+          .from('workflow_histories')
+          .select('*')
+          .eq('workflow_id', param.workflow_id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+      if (selectHistoriesError) {
+        console.error('Error in get histories:', selectHistoriesError)
+        return NextResponse.json(
+          { error: 'Internal server error' },
+          { status: 500 }
+        )
+      }
+
+      if (historiesData && historiesData.length) {
+        nextCursor = historiesData[0].cursor
+      }
+      console.log('latest nextCursor in db:', nextCursor)
+
       if (param.search_url)
         // TODO: url prefix
         param.search_url = param.search_url.replace(
@@ -527,7 +548,7 @@ export async function POST(req: Request) {
               )
             }
             const companyPublicIdentifier = splitedCompanyUrl[1].split('/')[0]
-            const responseOfGetCompany = await fetch(
+            const getCompanyResponse = await fetch(
               `https://${
                 env.UNIPILE_DNS
               }/api/v1/linkedin/company/${companyPublicIdentifier}?account_id=${param.account_id}`,
@@ -539,15 +560,15 @@ export async function POST(req: Request) {
                 },
               }
             )
-            console.log('responseOfGetCompany', responseOfGetCompany)
+            console.log('getCompanyResponse', getCompanyResponse)
 
-            if (responseOfGetCompany.status !== 200) {
+            if (getCompanyResponse.status !== 200) {
               return NextResponse.json(
                 { error: 'An error occurred while getting company' },
                 { status: 500 }
               )
             }
-            const dataOfGetCompany = await responseOfGetCompany.json()
+            const dataOfGetCompany = await getCompanyResponse.json()
             return dataOfGetCompany
           }
         )
@@ -599,7 +620,7 @@ export async function POST(req: Request) {
           }/api/v1/linkedin/search?${nextCursor && 'cursor=' + nextCursor + '&'}account_id=${param.account_id}&limit=${nowLimitCount}`
           console.log('url', url, 'body', searchProfileBody)
 
-          const responseOfSearch = await fetch(url, {
+          const performSearchResponse = await fetch(url, {
             method: 'POST',
             headers: {
               'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
@@ -609,13 +630,13 @@ export async function POST(req: Request) {
             body: JSON.stringify(searchProfileBody),
           })
 
-          if (responseOfSearch.status !== 200) {
+          if (performSearchResponse.status !== 200) {
             return NextResponse.json(
               { error: 'An error occurred while searching' },
               { status: 500 }
             )
           }
-          const dataOfSearch = await responseOfSearch.json()
+          const dataOfSearch = await performSearchResponse.json()
           nextCursor = dataOfSearch.cursor || ''
           if (
             dataOfSearch !== undefined &&
@@ -634,13 +655,14 @@ export async function POST(req: Request) {
           const privateIdentifiers = dataOfSearchList.map(
             (item) => item.private_identifier
           )
-          const { data: leadsDataInDb, error: errorOfLeadInDb } = await supabase
-            .from('leads')
-            .select('*')
-            .eq('provider_id', provider.id)
-            .in('public_identifier', privateIdentifiers)
-          if (errorOfLeadInDb) {
-            console.error('Error in get lead:', errorOfLeadInDb)
+          const { data: leadsDataInDb, error: selectLeadsError } =
+            await supabase
+              .from('leads')
+              .select('*')
+              .eq('provider_id', provider.id)
+              .in('public_identifier', privateIdentifiers)
+          if (selectLeadsError) {
+            console.error('Error in get lead:', selectLeadsError)
             return NextResponse.json(
               { error: 'Internal server error' },
               { status: 500 }
@@ -722,8 +744,8 @@ export async function POST(req: Request) {
                 unipileClient.users
                   .sendInvitation(sendInvitationParam)
 
-                  .then((responseOfSendInvitation) => {
-                    if (responseOfSendInvitation.invitation_id) {
+                  .then((sendInvitationResponse) => {
+                    if (sendInvitationResponse.invitation_id) {
                       leadStatus = LeadStatus.INVITED
                     } else {
                       leadStatus = LeadStatus.INVITED_FAILED
@@ -788,7 +810,7 @@ export async function POST(req: Request) {
             { status: 500 }
           )
         }
-        responseOfInsertWorkflow = workflowData
+        insertWorkflowResponse = workflowData
       }
     } else if (
       param.active_tab === ActiveTab.SEARCH_REACTION &&
@@ -1008,7 +1030,7 @@ export async function POST(req: Request) {
           { status: 500 }
         )
       }
-      responseOfInsertWorkflow = workflowData
+      insertWorkflowResponse = workflowData
     } else {
       return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
     }
@@ -1056,7 +1078,7 @@ export async function POST(req: Request) {
     status = WorkflowStatus.SUCCESS
     return NextResponse.json(
       {
-        workflow: responseOfInsertWorkflow,
+        workflow: insertWorkflowResponse,
       },
       { status: 200 }
     )

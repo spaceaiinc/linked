@@ -33,7 +33,6 @@ export async function POST(req: Request) {
     /**
      * create workflow
      */
-    let responseOfInsertWorkflow = null
     const workflow: Database['public']['Tables']['workflows']['Insert'] = {
       company_id: provider.company_id,
       provider_id: provider.id,
