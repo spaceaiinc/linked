@@ -1,4 +1,4 @@
-# Linked
+# Linked For Public
 
 ## Prerequisites
 
