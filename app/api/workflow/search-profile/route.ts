@@ -248,8 +248,8 @@ export async function POST(req: Request) {
               identifier: publicIdentifier,
               linkedin_sections: '*',
             })
-            if (!getProfileResponse || getProfileResponse === undefined) return
             await new Promise((resolve) => setTimeout(resolve, 5000))
+            if (!getProfileResponse || getProfileResponse === undefined) return
 
             let leadStatus = LeadStatus.SEARCHED
             if (
@@ -264,6 +264,7 @@ export async function POST(req: Request) {
                 account_id: param.account_id,
                 provider_id: getProfileResponse.provider_id,
               }
+              await new Promise((resolve) => setTimeout(resolve, 5000))
               if (param.invitation_message)
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
@@ -381,6 +382,7 @@ export async function POST(req: Request) {
                 account_id: param.account_id,
                 provider_id: getProfileResponse.provider_id,
               }
+
               if (param.invitation_message)
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
@@ -648,135 +650,134 @@ export async function POST(req: Request) {
           if (nextCursor === '') break
         }
 
-        if (
-          param.type === WorkflowType.SEARCH &&
-          dataOfSearchList.length < 51
-        ) {
-          const privateIdentifiers = dataOfSearchList.map(
-            (item) => item.private_identifier
-          )
-          const { data: leadsDataInDb, error: selectLeadsError } =
-            await supabase
-              .from('leads')
-              .select('*')
-              .eq('provider_id', provider.id)
-              .in('public_identifier', privateIdentifiers)
-          if (selectLeadsError) {
-            console.error('Error in get lead:', selectLeadsError)
-            return NextResponse.json(
-              { error: 'Internal server error' },
-              { status: 500 }
-            )
-          }
-          const leadsInDb: Lead[] = leadsDataInDb as Lead[]
-          const profilePromises = dataOfSearchList.map(async (item) => {
-            let matched = false
-            leadsInDb.forEach((leadInDb) => {
-              if (
-                leadInDb.public_identifier ===
-                decodeJapaneseOnly(item.public_identifier)
-              ) {
-                leadsWithStatus.push({
-                  leadId: leadInDb.id,
-                  leadStatus: LeadStatus.SEARCHED,
-                  lead: leadInDb,
+        // if (
+        //   param.type === WorkflowType.SEARCH &&
+        //   dataOfSearchList.length < 51
+        // ) {
+        //   const privateIdentifiers = dataOfSearchList.map(
+        //     (item) => item.private_identifier
+        //   )
+        //   const { data: leadsDataInDb, error: selectLeadsError } =
+        //     await supabase
+        //       .from('leads')
+        //       .select('*')
+        //       .eq('provider_id', provider.id)
+        //       .in('public_identifier', privateIdentifiers)
+        //   if (selectLeadsError) {
+        //     console.error('Error in get lead:', selectLeadsError)
+        //     return NextResponse.json(
+        //       { error: 'Internal server error' },
+        //       { status: 500 }
+        //     )
+        //   }
+        //   const leadsInDb: Lead[] = leadsDataInDb as Lead[]
+        //   const profilePromises = dataOfSearchList.map(async (item) => {
+        //     let matched = false
+        //     leadsInDb.forEach((leadInDb) => {
+        //       if (
+        //         leadInDb.public_identifier ===
+        //         decodeJapaneseOnly(item.public_identifier)
+        //       ) {
+        //         leadsWithStatus.push({
+        //           leadId: leadInDb.id,
+        //           leadStatus: LeadStatus.SEARCHED,
+        //           lead: leadInDb,
+        //         })
+        //         matched = true
+        //         return
+        //       }
+        //       return
+        //     })
+        //     if (matched) return
+        //     if (
+        //       !item.public_identifier ||
+        //       item.public_identifier === '' ||
+        //       item.public_identifier === 'null' ||
+        //       item.public_identifier === null
+        //     ) {
+        //       unipileProfilesWithStatus.push({
+        //         leadId: '',
+        //         leadStatus: LeadStatus.SEARCHED,
+        //         unipileProfile: item,
+        //       })
+        //       return
+        //     }
+
+        //     const getProfileResponse = await unipileClient.users.getProfile({
+        //       account_id: param.account_id,
+        //       identifier: item.public_identifier,
+        //       linkedin_sections: '*',
+        //     })
+        //     // 2 sec wait for each profile fetch
+        //     await new Promise((resolve) => setTimeout(resolve, 5000))
+        //     return getProfileResponse
+        //   })
+        //   const unipileProfileList = await Promise.all(profilePromises)
+        //   // Wait for all profile fetches to complete
+        //   const leadPromises = unipileProfileList
+        //     .filter((profile) => profile !== undefined && profile !== null)
+        //     .map(async (profile) => {
+        //       if (!profile || profile === undefined) return null
+        //       unipileProfilesWithStatus.push({
+        //         unipileProfile: profile,
+        //         leadStatus: LeadStatus.SEARCHED,
+        //         leadId: '',
+        //       })
+        //       return
+        //     })
+
+        //   await Promise.all(leadPromises)
+        // } else {
+        const dataOfSearchListPromises = dataOfSearchList.map(
+          async (profile) => {
+            if (!profile || profile === undefined) return null
+            let leadStatus = LeadStatus.SEARCHED
+            if (param.type === WorkflowType.INVITE && 'id' in profile) {
+              const sendInvitationParam: {
+                account_id: string
+                provider_id: string
+                message?: string
+              } = {
+                account_id: param.account_id,
+                provider_id: profile.id,
+              }
+              await new Promise((resolve) => setTimeout(resolve, 5000))
+              if (param.invitation_message)
+                sendInvitationParam.message = param.invitation_message
+              unipileClient.users
+                .sendInvitation(sendInvitationParam)
+
+                .then((sendInvitationResponse) => {
+                  if (sendInvitationResponse.invitation_id) {
+                    leadStatus = LeadStatus.INVITED
+                  } else {
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
                 })
-                matched = true
-                return
-              }
-              return
-            })
-            if (matched) return
-            if (
-              !item.public_identifier ||
-              item.public_identifier === '' ||
-              item.public_identifier === 'null' ||
-              item.public_identifier === null
-            ) {
-              unipileProfilesWithStatus.push({
-                leadId: '',
-                leadStatus: LeadStatus.SEARCHED,
-                unipileProfile: item,
-              })
-              return
+                .catch((error) => {
+                  if (error?.body?.type === 'errors/already_invited_recently') {
+                    console.log(
+                      'Skipping lead - invitation was already sent recently'
+                    )
+                    leadStatus = LeadStatus.ALREADY_INVITED
+                  } else {
+                    console.error('Error in send invitation:', error)
+                    leadStatus = LeadStatus.INVITED_FAILED
+                  }
+                })
+              await new Promise((resolve) => setTimeout(resolve, 5000))
             }
 
-            const getProfileResponse = await unipileClient.users.getProfile({
-              account_id: param.account_id,
-              identifier: item.public_identifier,
-              linkedin_sections: '*',
+            unipiePerformSearchProfilesWithStatus.push({
+              unipileProfile: profile,
+              leadStatus: leadStatus,
+              leadId: '',
             })
-            // 2 sec wait for each profile fetch
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-            return getProfileResponse
-          })
-          const unipileProfileList = await Promise.all(profilePromises)
-          // Wait for all profile fetches to complete
-          const leadPromises = unipileProfileList
-            .filter((profile) => profile !== undefined && profile !== null)
-            .map(async (profile) => {
-              if (!profile || profile === undefined) return null
-              unipileProfilesWithStatus.push({
-                unipileProfile: profile,
-                leadStatus: LeadStatus.SEARCHED,
-                leadId: '',
-              })
-              return
-            })
-
-          await Promise.all(leadPromises)
-        } else {
-          const dataOfSearchListPromises = dataOfSearchList.map(
-            async (profile) => {
-              if (!profile || profile === undefined) return null
-              let leadStatus = LeadStatus.SEARCHED
-              if (param.type === WorkflowType.INVITE && 'id' in profile) {
-                const sendInvitationParam: {
-                  account_id: string
-                  provider_id: string
-                  message?: string
-                } = {
-                  account_id: param.account_id,
-                  provider_id: profile.id,
-                }
-                if (param.invitation_message)
-                  sendInvitationParam.message = param.invitation_message
-                unipileClient.users
-                  .sendInvitation(sendInvitationParam)
-
-                  .then((sendInvitationResponse) => {
-                    if (sendInvitationResponse.invitation_id) {
-                      leadStatus = LeadStatus.INVITED
-                    } else {
-                      leadStatus = LeadStatus.INVITED_FAILED
-                    }
-                  })
-                  .catch((error) => {
-                    if (
-                      error?.body?.type === 'errors/already_invited_recently'
-                    ) {
-                      console.log(
-                        'Skipping lead - invitation was already sent recently'
-                      )
-                      leadStatus = LeadStatus.ALREADY_INVITED
-                    } else {
-                      console.error('Error in send invitation:', error)
-                      leadStatus = LeadStatus.INVITED_FAILED
-                    }
-                  })
-                await new Promise((resolve) => setTimeout(resolve, 5000))
-              }
-
-              unipiePerformSearchProfilesWithStatus.push({
-                unipileProfile: profile,
-                leadStatus: leadStatus,
-                leadId: '',
-              })
-              return
-            }
-          )
-          await Promise.all(dataOfSearchListPromises)
-        }
+            return
+          }
+        )
+        await Promise.all(dataOfSearchListPromises)
+        // }
       }
       if (!fromSchedule) {
         const workflow: Database['public']['Tables']['workflows']['Update'] = {
@@ -826,12 +827,12 @@ export async function POST(req: Request) {
           account_id: param.account_id,
           identifier: param.search_reaction_profile_public_identifier,
         })
+        await new Promise((resolve) => setTimeout(resolve, 5000))
         if (!getProfileResponse || getProfileResponse === undefined) return
         if ('provider_id' in getProfileResponse) {
           searchReactionProfilePrivateIdentifier =
             getProfileResponse.provider_id
         }
-        await new Promise((resolve) => setTimeout(resolve, 5000))
       }
 
       const getAllPostsResponse = await unipileClient.users.getAllPosts({
