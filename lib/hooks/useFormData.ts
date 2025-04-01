@@ -5,7 +5,7 @@ import { FormFields } from '@/lib/types/toolconfig'
 export const useFormData = (initialFields: FormFields[]) => {
   const initialState = initialFields.reduce(
     (acc: { [key: string]: string }, field: FormFields) => {
-      acc[field.name!] = field.initialValue || ''
+      acc[field.name!] = ''
       return acc
     },
     {}
@@ -28,5 +28,19 @@ export const useFormData = (initialFields: FormFields[]) => {
     setFormData((prevState) => ({ ...prevState, [key]: value }))
   }
 
-  return [formData, handleChange, customHandleChange] as const
+  const reset = (value: { value: string; key: string }[]) => {
+    const resetState = value.reduce(
+      (
+        acc: { [key: string]: string },
+        field: { value: string; key: string }
+      ) => {
+        acc[field.key] = field.value
+        return acc
+      },
+      {}
+    )
+    setFormData(resetState)
+  }
+
+  return [formData, handleChange, customHandleChange, reset] as const
 }
