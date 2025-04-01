@@ -32,9 +32,9 @@ import { NextResponse } from 'next/server'
 import { supabase as serviceSupabase } from '@/lib/utils/supabase/service'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { decodeJapaneseOnly } from '@/lib/utils/decode'
-import { extractLinkedInId } from '@/lib/csv'
 
 export async function POST(req: Request) {
+  // TODO: 処理を分割する
   /**
    * validate param
    */
@@ -303,18 +303,18 @@ export async function POST(req: Request) {
         const filteredSearchedLeadList = searchedLeadList.filter(
           (lead) => lead !== undefined
         ) as unipileProfileWithStatus[]
-        const upsertedLeadList =
-          await upsertLeadByUnipileUserProfileApiResponse({
-            supabase,
-            unipileProfiles: filteredSearchedLeadList,
-            providerId: provider.id as string,
-            workflowId: param.workflow_id as string,
-            companyId: provider.company_id,
-            scheduled_days: param.scheduled_days,
-            scheduled_hours: param.scheduled_hours,
-            scheduled_months: param.scheduled_months,
-            scheduled_weekdays: param.scheduled_weekdays,
-          })
+        // const upsertedLeadList =
+        await upsertLeadByUnipileUserProfileApiResponse({
+          supabase,
+          unipileProfiles: filteredSearchedLeadList,
+          providerId: provider.id as string,
+          workflowId: param.workflow_id as string,
+          companyId: provider.company_id,
+          scheduled_days: param.scheduled_days,
+          scheduled_hours: param.scheduled_hours,
+          scheduled_months: param.scheduled_months,
+          scheduled_weekdays: param.scheduled_weekdays,
+        })
       }
       const workflow: Database['public']['Tables']['workflows']['Update'] = {
         id: param.workflow_id,
@@ -328,6 +328,11 @@ export async function POST(req: Request) {
         target_workflow_id: param.workflow_id || '',
         limit_count: Number(param.limit_count),
         invitation_message: param.invitation_message || '',
+        invitation_message_dify_api_key:
+          param.invitation_message_dify_api_key || '',
+        run_limit_count: param.run_limit_count,
+        agent_type: param.agent_type,
+        last_updated_user_id: param.last_updated_user_id,
       }
 
       const { data: workflowData, error: updateWorkflowError } = await supabase
@@ -480,8 +485,12 @@ export async function POST(req: Request) {
           scheduled_weekdays: param.scheduled_weekdays || [],
           target_workflow_id: param.target_workflow_id,
           limit_count: Number(param.limit_count),
-          // TODO: MSG COlumn
           invitation_message: param.invitation_message || '',
+          invitation_message_dify_api_key:
+            param.invitation_message_dify_api_key || '',
+          run_limit_count: param.run_limit_count,
+          agent_type: param.agent_type,
+          last_updated_user_id: param.last_updated_user_id,
         }
 
         const { data: workflowData, error } = await supabase
@@ -795,6 +804,11 @@ export async function POST(req: Request) {
           limit_count: Number(param.limit_count),
           // TODO: MSG COlumn
           invitation_message: param.invitation_message || '',
+          invitation_message_dify_api_key:
+            param.invitation_message_dify_api_key || '',
+          run_limit_count: param.run_limit_count,
+          agent_type: param.agent_type,
+          last_updated_user_id: param.last_updated_user_id,
         }
 
         const { data: workflowData, error } = await supabase
@@ -1015,6 +1029,11 @@ export async function POST(req: Request) {
           param.search_reaction_profile_public_identifier,
         limit_count: Number(param.limit_count),
         invitation_message: param.invitation_message || '',
+        invitation_message_dify_api_key:
+          param.invitation_message_dify_api_key || '',
+        run_limit_count: param.run_limit_count,
+        agent_type: param.agent_type,
+        last_updated_user_id: param.last_updated_user_id,
       }
 
       const { data: workflowData, error: updateWorkflowError } = await supabase
