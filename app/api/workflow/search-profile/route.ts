@@ -10,7 +10,7 @@ import {
   fetchLeadsWithLatestStatusFilter,
   fetchLeadsWithLatestStatusAndWorkflow,
   updateLeadStatusByTargetWorkflowId,
-} from '@/lib/db/queries/leadServer'
+} from '@/lib/db/queries/lead'
 import {
   ActiveTab,
   LeadStatus,
@@ -248,7 +248,7 @@ export async function POST(req: Request) {
               identifier: publicIdentifier,
               linkedin_sections: '*',
             })
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 500))
             if (!getProfileResponse || getProfileResponse === undefined) return
 
             let leadStatus = LeadStatus.SEARCHED
@@ -264,7 +264,7 @@ export async function POST(req: Request) {
                 account_id: param.account_id,
                 provider_id: getProfileResponse.provider_id,
               }
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
               if (param.invitation_message)
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
@@ -288,7 +288,7 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
 
             const unipileProfile: unipileProfileWithStatus = {
@@ -368,7 +368,7 @@ export async function POST(req: Request) {
               linkedin_sections: '*',
             })
 
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 500))
             let leadStatus = LeadStatus.SEARCHED
             if (
               param.type === WorkflowType.INVITE &&
@@ -406,7 +406,7 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
 
             unipileProfilesWithStatus.push({
@@ -448,7 +448,7 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
 
             leadsWithStatus.push({
@@ -646,7 +646,7 @@ export async function POST(req: Request) {
             dataOfSearch.items.length
           )
             dataOfSearchList.push(...dataOfSearch.items)
-          await new Promise((resolve) => setTimeout(resolve, 5000))
+          await new Promise((resolve) => setTimeout(resolve, 500))
           if (nextCursor === '') break
         }
 
@@ -712,7 +712,7 @@ export async function POST(req: Request) {
             }
 
             // 各リクエスト前に5秒待機
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 500))
 
             // プロファイル取得
             try {
@@ -752,7 +752,7 @@ export async function POST(req: Request) {
                   account_id: param.account_id,
                   provider_id: profile.id,
                 }
-                await new Promise((resolve) => setTimeout(resolve, 5000))
+                await new Promise((resolve) => setTimeout(resolve, 500))
                 if (param.invitation_message)
                   sendInvitationParam.message = param.invitation_message
                 unipileClient.users
@@ -778,7 +778,7 @@ export async function POST(req: Request) {
                       leadStatus = LeadStatus.INVITED_FAILED
                     }
                   })
-                await new Promise((resolve) => setTimeout(resolve, 5000))
+                await new Promise((resolve) => setTimeout(resolve, 500))
               }
 
               unipiePerformSearchProfilesWithStatus.push({
@@ -840,7 +840,7 @@ export async function POST(req: Request) {
           account_id: param.account_id,
           identifier: param.search_reaction_profile_public_identifier,
         })
-        await new Promise((resolve) => setTimeout(resolve, 5000))
+        await new Promise((resolve) => setTimeout(resolve, 500))
         if (!getProfileResponse || getProfileResponse === undefined) return
         if ('provider_id' in getProfileResponse) {
           searchReactionProfilePrivateIdentifier =
@@ -854,7 +854,7 @@ export async function POST(req: Request) {
         limit: param.limit_count * 3,
       })
       if (!getAllPostsResponse || getAllPostsResponse === undefined) return
-      await new Promise((resolve) => setTimeout(resolve, 5000))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const getAllPostCommentsPromises = getAllPostsResponse.items.map(
         async (post) => {
@@ -909,7 +909,7 @@ export async function POST(req: Request) {
             })
           })
 
-          await new Promise((resolve) => setTimeout(resolve, 5000))
+          await new Promise((resolve) => setTimeout(resolve, 500))
         }
       )
 
