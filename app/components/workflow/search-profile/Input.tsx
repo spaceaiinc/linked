@@ -18,7 +18,7 @@ import {
 } from '@/app/components/ui/tabs'
 import { Input } from '@/app/components/ui/input'
 import { IconBrandLinkedin, IconHeart } from '@tabler/icons-react'
-import { providerAtom } from '@/lib/atom'
+import { providerAtom, userAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractLinkedInId } from '@/lib/csv'
 import CheckboxGroup from '@/app/components/ui/checkbox-group'
@@ -47,6 +47,7 @@ export default function SearchProfileInputCapture({
     toolConfig.fields!
   )
 
+  const [user] = useAtom(userAtom)
   const [activeTab, setActiveTab] = useState<string>('0')
   const [provider, __] = useAtom(providerAtom)
   const [defaultActiveTab, setDefaultActiveTab] = useState<string>('')
@@ -65,11 +66,21 @@ export default function SearchProfileInputCapture({
       if (error) {
         console.error('Error fetching workflow:', error)
       }
+
       if (workflowData) {
         const workflow: Workflow = workflowData
         setWorkflowInDb(workflow)
         customHandleChange(workflowId, 'workflow_id')
         customHandleChange(workflow.name, 'name')
+        customHandleChange(
+          workflow.run_limit_count.toString(),
+          'run_limit_count'
+        )
+        customHandleChange(workflow.agent_type.toString(), 'agent_type')
+        customHandleChange(
+          workflow.invitation_message_dify_api_key,
+          'invitation_message_dify_api_key'
+        )
         if (workflow.search_url) {
           customHandleChange(workflow.search_url, 'search_url')
           setActiveTab('0')
@@ -122,6 +133,7 @@ export default function SearchProfileInputCapture({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!provider?.account_id) return alert('Provider not connected')
+    formData['last_updated_user_id'] = user?.id || ''
     formData['account_id'] = provider?.account_id
     formData['active_tab'] = activeTab
     formData['workflow_id'] = workflowId

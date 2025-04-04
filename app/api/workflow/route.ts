@@ -17,6 +17,13 @@ export async function POST(req: Request) {
      * authenticate
      */
     const supabase = createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user || !user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { data: provider } = await supabase
       .from('providers')
       .select('id, company_id')
@@ -38,6 +45,7 @@ export async function POST(req: Request) {
       provider_id: provider.id,
       type: Number(param.type),
       limit_count: 20,
+      last_updated_user_id: user?.id,
       name:
         WorkflowType[param.type] +
         ' WORKFLOW ' +

@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import LoadingPage from '@/app/components/Loading'
 import { Workflow } from '@/lib/types/supabase'
 import InviteContent from '@/app/components/workflow/invite/Content'
+import SendMessageContent from '@/app/components/workflow/send-message/Content'
 
 export default function Page() {
   const [user, _] = useAtom(userAtom)
@@ -21,12 +22,12 @@ export default function Page() {
   const router = useRouter()
 
   const params = useParams()
-  const id = params.id as string
-  const [workflowId, setWorkflowId] = useState<string | null>(null)
+  const id = params.id
+  const [workflowId, setWorkflowId] = useState<string>('')
 
   useEffect(() => {
     if (id) {
-      setWorkflowId(id)
+      setWorkflowId(id as string)
       workflows.map((workflow) => {
         if (workflow.id === id) setWorkflow(workflow)
       })
@@ -91,10 +92,13 @@ export default function Page() {
       ) : provider ? (
         <>
           {workflow?.type == WorkflowType.SEARCH && (
-            <SearchProfileContent workflowId={workflowId as string} />
+            <SearchProfileContent workflowId={workflowId} />
           )}
           {workflow?.type == WorkflowType.INVITE && (
-            <InviteContent workflowId={workflowId as string} />
+            <InviteContent workflowId={workflowId} />
+          )}
+          {workflow?.type == WorkflowType.SEND_MESSAGE && (
+            <SendMessageContent workflowId={workflowId} />
           )}
         </>
       ) : (

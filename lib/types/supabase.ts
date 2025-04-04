@@ -1,5 +1,6 @@
 import { SupabaseClient } from '@supabase/supabase-js'
 import { LeadStatus } from './master'
+import { run } from 'node:test'
 
 export type Json =
   | string
@@ -460,6 +461,17 @@ export type Database = {
           email_notify_manual_success: boolean
           email_notify_auto_success: boolean
           slack_webhook_url: string
+          last_updated_user_id: string
+          run_limit_count: number
+          agent_type: number
+          invitation_message_dify_api_key: string
+          first_message_dify_api_key: string
+          first_message_trigger_type: number
+          second_message_dify_api_key: string
+          second_message_trigger_type: number
+          third_message_dify_api_key: string
+          third_message_trigger_type: number
+          job_position: string
         }
         Insert: {
           id?: string
@@ -504,6 +516,17 @@ export type Database = {
           email_notify_manual_success?: boolean
           email_notify_auto_success?: boolean
           slack_webhook_url?: string
+          last_updated_user_id: string
+          run_limit_count?: number
+          agent_type?: number
+          invitation_message_dify_api_key?: string
+          first_message_dify_api_key?: string
+          first_message_trigger_type?: number
+          second_message_dify_api_key?: string
+          second_message_trigger_type?: number
+          third_message_dify_api_key?: string
+          third_message_trigger_type?: number
+          job_position?: string
         }
         Update: {
           id: string
@@ -549,6 +572,17 @@ export type Database = {
           email_notify_manual_success?: boolean
           email_notify_auto_success?: boolean
           slack_webhook_url?: string
+          run_limit_count?: number
+          last_updated_user_id: string
+          agent_type?: number
+          invitation_message_dify_api_key?: string
+          first_message_dify_api_key?: string
+          first_message_trigger_type?: number
+          second_message_dify_api_key?: string
+          second_message_trigger_type?: number
+          third_message_dify_api_key?: string
+          third_message_trigger_type?: number
+          job_position?: string
         }
         Relationships: [
           {
