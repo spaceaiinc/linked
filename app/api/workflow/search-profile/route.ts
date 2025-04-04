@@ -48,6 +48,7 @@ export async function POST(req: Request) {
   if (param.active_tab === ActiveTab.SEARCH) {
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.target_public_identifiers = []
     param.target_workflow_id = undefined
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.target_public_identifiers = []
     param.search_reaction_profile_public_identifier = undefined
@@ -71,12 +73,14 @@ export async function POST(req: Request) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.search_reaction_profile_public_identifier = undefined
   } else if (param.active_tab === ActiveTab.SEARCH_REACTION) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.target_public_identifiers = []
     param.target_workflow_id = undefined
@@ -505,7 +509,8 @@ export async function POST(req: Request) {
     } else if (
       param.search_url ||
       param.keywords ||
-      param.company_urls.length
+      param.company_urls.length ||
+      param.company_private_identifiers.length
     ) {
       console.log('continue with keywords')
       // 保存されている最新のhistoriesからcursorを取得
