@@ -185,6 +185,7 @@ export const toolConfig: ToolConfig = {
       inputType: 'string',
       placeholder: '',
       required: false,
+      custom: true,
     },
     {
       label: '求人ポジション',
@@ -193,6 +194,7 @@ export const toolConfig: ToolConfig = {
       inputType: 'string',
       placeholder: '',
       required: false,
+      custom: true,
     },
     {
       label: '時間(JST)',
