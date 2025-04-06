@@ -257,11 +257,10 @@ export function LeadReport({
       {statusCounts.length === 0 ? (
         <div className="bg-blue-50 p-6 rounded-lg mb-8 text-center">
           <h2 className="text-xl font-semibold mb-2">
-            No lead status data available
+            表示する進捗がありません
           </h2>
           <p className="text-gray-600">
-            There is no lead status data for the past 3 months. Try extending
-            the time period or adding more leads.
+            <a href="/dashboard">新規ワークフローを作成する</a>
           </p>
         </div>
       ) : (
