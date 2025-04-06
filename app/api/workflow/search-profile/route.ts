@@ -10,7 +10,7 @@ import {
   fetchLeadsWithLatestStatusFilter,
   fetchLeadsWithLatestStatusAndWorkflow,
   updateLeadStatusByTargetWorkflowId,
-} from '@/lib/db/queries/leadServer'
+} from '@/lib/db/queries/lead'
 import {
   ActiveTab,
   LeadStatus,
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
   if (param.active_tab === ActiveTab.SEARCH) {
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.target_public_identifiers = []
     param.target_workflow_id = undefined
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.target_public_identifiers = []
     param.search_reaction_profile_public_identifier = undefined
@@ -71,12 +73,14 @@ export async function POST(req: Request) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.search_reaction_profile_public_identifier = undefined
   } else if (param.active_tab === ActiveTab.SEARCH_REACTION) {
     param.search_url = undefined
     param.keywords = undefined
     param.company_urls = []
+    param.company_private_identifiers = []
     param.network_distance = []
     param.target_public_identifiers = []
     param.target_workflow_id = undefined
@@ -248,8 +252,8 @@ export async function POST(req: Request) {
               identifier: publicIdentifier,
               linkedin_sections: '*',
             })
+            await new Promise((resolve) => setTimeout(resolve, 500))
             if (!getProfileResponse || getProfileResponse === undefined) return
-            await new Promise((resolve) => setTimeout(resolve, 5000))
 
             let leadStatus = LeadStatus.SEARCHED
             if (
@@ -264,6 +268,7 @@ export async function POST(req: Request) {
                 account_id: param.account_id,
                 provider_id: getProfileResponse.provider_id,
               }
+              await new Promise((resolve) => setTimeout(resolve, 500))
               if (param.invitation_message)
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
@@ -287,7 +292,7 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
 
             const unipileProfile: unipileProfileWithStatus = {
@@ -372,7 +377,7 @@ export async function POST(req: Request) {
               linkedin_sections: '*',
             })
 
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 500))
             let leadStatus = LeadStatus.SEARCHED
             if (
               param.type === WorkflowType.INVITE &&
@@ -386,6 +391,7 @@ export async function POST(req: Request) {
                 account_id: param.account_id,
                 provider_id: getProfileResponse.provider_id,
               }
+
               if (param.invitation_message)
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
@@ -409,7 +415,7 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
 
             unipileProfilesWithStatus.push({
@@ -451,7 +457,7 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 5000))
+              await new Promise((resolve) => setTimeout(resolve, 500))
             }
 
             leadsWithStatus.push({
@@ -512,7 +518,8 @@ export async function POST(req: Request) {
     } else if (
       param.search_url ||
       param.keywords ||
-      param.company_urls.length
+      param.company_urls.length ||
+      param.company_private_identifiers.length
     ) {
       console.log('continue with keywords')
       // 保存されている最新のhistoriesからcursorを取得
@@ -653,13 +660,13 @@ export async function POST(req: Request) {
             dataOfSearch.items.length
           )
             dataOfSearchList.push(...dataOfSearch.items)
-          await new Promise((resolve) => setTimeout(resolve, 5000))
+          await new Promise((resolve) => setTimeout(resolve, 500))
           if (nextCursor === '') break
         }
 
         if (
           param.type === WorkflowType.SEARCH &&
-          dataOfSearchList.length < 51
+          dataOfSearchList.length < 150
         ) {
           const privateIdentifiers = dataOfSearchList.map(
             (item) => item.private_identifier
@@ -669,7 +676,7 @@ export async function POST(req: Request) {
               .from('leads')
               .select('*')
               .eq('provider_id', provider.id)
-              .in('public_identifier', privateIdentifiers)
+              .in('private_identifier', privateIdentifiers)
           if (selectLeadsError) {
             console.error('Error in get lead:', selectLeadsError)
             return NextResponse.json(
@@ -678,9 +685,15 @@ export async function POST(req: Request) {
             )
           }
           const leadsInDb: Lead[] = leadsDataInDb as Lead[]
-          const profilePromises = dataOfSearchList.map(async (item) => {
+
+          // シーケンシャル処理に変更（Promise.allを使わない）
+          const unipileProfileList = []
+
+          for (const item of dataOfSearchList) {
             let matched = false
-            leadsInDb.forEach((leadInDb) => {
+
+            // 既存のデータとのマッチング確認
+            for (const leadInDb of leadsInDb) {
               if (
                 leadInDb.public_identifier ===
                 decodeJapaneseOnly(item.public_identifier)
@@ -691,11 +704,13 @@ export async function POST(req: Request) {
                   lead: leadInDb,
                 })
                 matched = true
-                return
+                break
               }
-              return
-            })
-            if (matched) return
+            }
+
+            if (matched) continue
+
+            // public_identifierの検証
             if (
               !item.public_identifier ||
               item.public_identifier === '' ||
@@ -707,33 +722,36 @@ export async function POST(req: Request) {
                 leadStatus: LeadStatus.SEARCHED,
                 unipileProfile: item,
               })
-              return
+              continue
             }
 
-            const getProfileResponse = await unipileClient.users.getProfile({
-              account_id: param.account_id,
-              identifier: item.public_identifier,
-              linkedin_sections: '*',
-            })
-            // 2 sec wait for each profile fetch
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-            return getProfileResponse
-          })
-          const unipileProfileList = await Promise.all(profilePromises)
-          // Wait for all profile fetches to complete
-          const leadPromises = unipileProfileList
-            .filter((profile) => profile !== undefined && profile !== null)
-            .map(async (profile) => {
-              if (!profile || profile === undefined) return null
-              unipileProfilesWithStatus.push({
-                unipileProfile: profile,
-                leadStatus: LeadStatus.SEARCHED,
-                leadId: '',
-              })
-              return
-            })
+            // 各リクエスト前に5秒待機
+            await new Promise((resolve) => setTimeout(resolve, 500))
 
-          await Promise.all(leadPromises)
+            // プロファイル取得
+            try {
+              const getProfileResponse = await unipileClient.users.getProfile({
+                account_id: param.account_id,
+                identifier: item.public_identifier,
+                linkedin_sections: '*',
+              })
+
+              if (getProfileResponse) {
+                unipileProfilesWithStatus.push({
+                  unipileProfile: getProfileResponse,
+                  leadStatus: LeadStatus.SEARCHED,
+                  leadId: '',
+                })
+                unipileProfileList.push(getProfileResponse)
+              }
+            } catch (error) {
+              console.error('Error fetching profile:', error)
+              // エラーが発生しても処理を続行
+            }
+          }
+
+          // 全てのプロファイル処理が完了
+          console.log(`Processed ${unipileProfileList.length} profiles`)
         } else {
           const dataOfSearchListPromises = dataOfSearchList.map(
             async (profile) => {
@@ -748,6 +766,7 @@ export async function POST(req: Request) {
                   account_id: param.account_id,
                   provider_id: profile.id,
                 }
+                await new Promise((resolve) => setTimeout(resolve, 500))
                 if (param.invitation_message)
                   sendInvitationParam.message = param.invitation_message
                 unipileClient.users
@@ -773,7 +792,7 @@ export async function POST(req: Request) {
                       leadStatus = LeadStatus.INVITED_FAILED
                     }
                   })
-                await new Promise((resolve) => setTimeout(resolve, 5000))
+                await new Promise((resolve) => setTimeout(resolve, 500))
               }
 
               unipiePerformSearchProfilesWithStatus.push({
@@ -840,12 +859,12 @@ export async function POST(req: Request) {
           account_id: param.account_id,
           identifier: param.search_reaction_profile_public_identifier,
         })
+        await new Promise((resolve) => setTimeout(resolve, 500))
         if (!getProfileResponse || getProfileResponse === undefined) return
         if ('provider_id' in getProfileResponse) {
           searchReactionProfilePrivateIdentifier =
             getProfileResponse.provider_id
         }
-        await new Promise((resolve) => setTimeout(resolve, 5000))
       }
 
       const getAllPostsResponse = await unipileClient.users.getAllPosts({
@@ -854,7 +873,7 @@ export async function POST(req: Request) {
         limit: param.limit_count * 3,
       })
       if (!getAllPostsResponse || getAllPostsResponse === undefined) return
-      await new Promise((resolve) => setTimeout(resolve, 5000))
+      await new Promise((resolve) => setTimeout(resolve, 500))
 
       const getAllPostCommentsPromises = getAllPostsResponse.items.map(
         async (post) => {
@@ -909,7 +928,7 @@ export async function POST(req: Request) {
             })
           })
 
-          await new Promise((resolve) => setTimeout(resolve, 5000))
+          await new Promise((resolve) => setTimeout(resolve, 500))
         }
       )
 
