@@ -111,11 +111,11 @@ export default function AuthComponent() {
           </div>
 
           {/* IMAGES PART */}
-          {/* <div className="w-full md:w-92 lg:w-1/2 overflow-hidden text-center bg-primary rounded-2xl order-2 md:order-1">
+          {/* <div className="w-full md:w-92 lg:w-1/2 overflow-hidden text-center bg-transparent rounded-2xl order-2 md:order-1">
             <div className="group relative overflow-hidden transition duration-300 hover:opacity-100">
               <div className="p-12 relative overflow-hidden rounded-lg">
                 <img
-                  src="/demo.png"
+                  src="/demo/lead-report.png"
                   className="w-full group-hover:scale-105  duration-300 transition rounded-md v-lazy-image v-lazy-image-loaded"
                   alt="Auth Image"
                 />

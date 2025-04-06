@@ -137,15 +137,15 @@ const HeroSection = () => {
     <section className="pt-32 pb-20 text-center bg-gradient-to-b from-gray-100 to-gray-200">
       <div className="max-w-6xl mx-auto px-5">
         <h1 className="text-5xl font-bold mb-5 leading-tight md:text-5xl text-4xl">
-          LinkedInのリード獲得を
+          LinkedIn上のリード獲得を
           <span className="bg-[#0a66c2] text-white px-2 ml-1 leading-relaxed whitespace-nowrap inline-block transform rotate-[-1deg]">
-            自動化
+            最適化
           </span>
         </h1>
         <p className="text-xl mb-10 text-gray-600">
-          リード抽出からつながり申請、エンゲージメント管理まで
+          リード抽出からつながり申請、レポート分析まで
           <br />
-          LinkedInマーケティングを自動化するオールインワンツール
+          LinkedIn上での営業・採用・マーケティングを自動化するオールインワンツール
         </p>
         <a
           href="/auth"
@@ -154,7 +154,7 @@ const HeroSection = () => {
           無料で始める
         </a>
         <img
-          src={'demo-lead.png'}
+          src={'demo/lead-report.png'}
           alt="LinkedInマーケティングツールのイメージ"
           className="max-w-[80%] mx-auto block mt-10 rounded-lg shadow-xl"
         />
@@ -168,9 +168,9 @@ const FeaturesSection = () => {
   const features = [
     {
       // icon: '📊',
-      title: 'リード作成',
+      title: 'リードリスト作成',
       description:
-        'キーワード、企業ページなど検索条件に合致するユーザーを検索。プロフィール情報、メールアドレス、職歴、学歴までエクスポートできます。',
+        'キーワード、企業ページなど検索条件に合致するユーザーを検索。プロフィール情報・職歴・学歴までエクスポートできます。',
     },
     {
       // icon: '🔄',
@@ -182,7 +182,8 @@ const FeaturesSection = () => {
       // icon: '👍',
       title: 'エンゲージメント管理',
       description:
-        'キーマンの投稿を自動検出しいいね・コメント。あなたの投稿にいいねしたユーザーへの自動いいね・コメントで潜在層の関係構築をサポート。',
+        'あなたの投稿にいいね・コメント・アクセスしたユーザーをリスト化することができます。',
+      // '指定ユーザーの投稿への自動いいね・コメント。あなたの投稿にいいねしたユーザーへの自動いいね・コメントで潜在層の関係構築をサポート。',
     },
   ]
 
@@ -216,24 +217,33 @@ const HowToSection = () => {
       title: 'ターゲット設定',
       description:
         'キーワード、企業ページ、役職などの検索条件からアプローチしたい企業のユーザーを検索することができます。',
+      image: '/demo/create-workflow.png',
+      alt: 'ターゲット設定のイメージ',
     },
     {
       number: 2,
       title: '自動アプローチ',
       description:
         'つながり申請の自動送信と、キーマンの投稿への自動エンゲージメントで関係構築をサポート。カスタマイズ可能なメッセージテンプレートで高い返信率を実現。',
+      image: '/demo/lead-table.png',
+      alt: '自動アプローチのイメージ',
     },
     {
       number: 3,
       title: '関係構築の自動化',
       description:
-        '投稿にいいねしたユーザーを自動検出し、最適なタイミングでDM送信。効率的な関係構築をサポートします',
+        '投稿にいいね・コメント・アクセスしたユーザーを抽出し、最適なタイミングでDM送信。効率的な関係構築をサポートします',
+      // '投稿にいいねしたユーザーを自動検出し、最適なタイミングでDM送信。効率的な関係構築をサポートします',
+      image: '/demo/modal-a.png',
+      alt: '関係構築の自動化のイメージ',
     },
     {
       number: 4,
       title: 'データ分析と最適化',
       description:
-        'アクティビティレポートでコンバージョンを可視化。反応率の高いターゲット層や効果的なメッセージを特定し、戦略を継続的に最適化できます。',
+        'アクティビティレポートでアカウント毎・検索条件毎のコンバージョンを可視化。反応率の高いターゲット層や効果的なメッセージを特定し、戦略を継続的に最適化できます。',
+      image: '/demo/lead-report.png',
+      alt: 'データ分析と最適化のイメージ',
     },
   ]
 
@@ -245,16 +255,22 @@ const HowToSection = () => {
       </h2>
       <div className="max-w-3xl mx-auto px-5">
         {steps.map((step, index) => (
-          <div
-            key={index}
-            className="flex md:flex-row flex-col md:text-left text-center items-center mb-16"
-          >
-            <div className="bg-[#0a66c2] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold md:mr-8 md:mb-0 mb-4 flex-shrink-0">
-              {step.number}
+          <div key={index} className="mb-20 last:mb-0">
+            <div className="flex md:flex-row flex-col md:text-left text-center items-center mb-8">
+              <div className="bg-[#0a66c2] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold md:mr-8 md:mb-0 mb-4 flex-shrink-0">
+                {step.number}
+              </div>
+              <div>
+                <h3 className="text-2xl font-semibold mb-3">{step.title}</h3>
+                <p className="text-gray-600">{step.description}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-2xl font-semibold mb-3">{step.title}</h3>
-              <p className="text-gray-600">{step.description}</p>
+            <div className="mt-6 bg-white p-4 rounded-lg shadow-lg overflow-hidden transition-transform hover:transform hover:scale-[1.02] duration-300">
+              <img
+                src={step.image}
+                alt={step.alt}
+                className="w-full rounded-md"
+              />
             </div>
           </div>
         ))}
@@ -302,7 +318,6 @@ const PricingSection = () => {
         '無制限のフローを保存可能',
         '自動エンゲージメント機能',
         '専属コンサルタントによる分析・最適化',
-        '優先サポート（チャット）',
       ],
       ctaText: 'デモを予約',
     },
@@ -343,7 +358,7 @@ const PricingSection = () => {
               ))}
             </ul>
             <a
-              href="#contact"
+              href={plan.ctaText === '今すぐ始める' ? '/auth' : '/#contact'}
               className="bg-[#0a66c2] text-white px-6 py-3 rounded-full font-bold inline-block transition-colors hover:bg-[#004182]"
             >
               {plan.ctaText}
@@ -585,9 +600,7 @@ const Footer = () => {
       <div className="grid md:grid-cols-4 grid-cols-1 gap-10 max-w-6xl mx-auto">
         <div>
           <div className="text-3xl font-bold mb-5">Linked.</div>
-          <p className="mb-5">
-            Linked(リンクト)は、LinkedInのリード獲得業務をサポートするオールインワンツールです。
-          </p>
+          <p className="mb-5">リード獲得を次のレベルへ</p>
         </div>
 
         {footerLinks.map((column, columnIndex) => (
@@ -613,7 +626,7 @@ const Footer = () => {
         ))}
       </div>
       <div className="text-center pt-10 mt-10 border-t border-gray-700 text-sm">
-        &copy; 2025 Linked. All rights reserved.
+        &copy; 2025 Space AI. All rights reserved.
       </div>
     </footer>
   )
