@@ -118,59 +118,6 @@ export default function Apps() {
         </div>
       ) : provider ? (
         <>
-          {' '}
-          <section id="suggested_workflows">
-            <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
-              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                ワークフローを作成
-              </h2>
-              <div className="py-10 w-full flex justify-center">
-                <div className={getGridClass()}>
-                  {tools.map((workflow, index) => (
-                    <a
-                      key={index}
-                      onClick={() => {
-                        createWorkflow(workflow.type)
-                      }}
-                      className="w-full cursor-pointer"
-                    >
-                      <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
-                        {/* 左側：画像 */}
-                        <div className="w-1/3 pr-4">
-                          {workflow.image && (
-                            <img
-                              src={workflow.image}
-                              alt={workflow.title}
-                              className="w-full h-auto border border-base-200 rounded-md"
-                            />
-                          )}
-                        </div>
-                        {/* 右側：テキスト情報 */}
-                        <div className="w-2/3 flex flex-col">
-                          <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                            {workflow.title}
-                          </h3>
-                          <p className="text-sm text-neutral-400 mt-2">
-                            {workflow.description}
-                          </p>
-                          <div className="mt-4 flex gap-2 flex-wrap">
-                            {workflow.tags.map((tag, index) => (
-                              <span
-                                key={tag}
-                                className="border bg-base-100 text-base-content py-1 px-3 text-sm rounded-xl"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
           {workflows.length > 0 && (
             <section id="workflows">
               <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
@@ -255,7 +202,59 @@ export default function Apps() {
                 </div>
               </div>
             </section>
-          )}
+          )}{' '}
+          <section id="suggested_workflows">
+            <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
+              <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
+                ワークフローを作成
+              </h2>
+              <div className="py-10 w-full flex justify-center">
+                <div className={getGridClass()}>
+                  {tools.map((workflow, index) => (
+                    <a
+                      key={index}
+                      onClick={() => {
+                        createWorkflow(workflow.type)
+                      }}
+                      className="w-full cursor-pointer"
+                    >
+                      <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
+                        {/* 左側：画像 */}
+                        <div className="w-1/3 pr-4">
+                          {workflow.image && (
+                            <img
+                              src={workflow.image}
+                              alt={workflow.title}
+                              className="w-full h-auto border border-base-200 rounded-md"
+                            />
+                          )}
+                        </div>
+                        {/* 右側：テキスト情報 */}
+                        <div className="w-2/3 flex flex-col">
+                          <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
+                            {workflow.title}
+                          </h3>
+                          <p className="text-sm text-neutral-400 mt-2">
+                            {workflow.description}
+                          </p>
+                          <div className="mt-4 flex gap-2 flex-wrap">
+                            {workflow.tags.map((tag, index) => (
+                              <span
+                                key={tag}
+                                className="border bg-base-100 text-base-content py-1 px-3 text-sm rounded-xl"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
         </>
       ) : (
         <div className="flex flex-col items-center justify-center min-h-[75vh]">
