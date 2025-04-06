@@ -9,24 +9,21 @@ import LoadingPage from '@/app/components/Loading'
 import { LeadTable } from '@/app/components/dashboard/LeadTable'
 import { convertToDisplay, LeadForDisplay } from '@/lib/csv'
 import { getLeadsByProviderId } from '@/lib/db/queries/leadClient'
+import { Lead } from '@/lib/types/supabase'
 
 export default function Page() {
   const [user, _] = useAtom(userAtom)
   const [provider, __] = useAtom(providerAtom)
   const [isLoading, setIsLoading] = useState(true)
 
-  const [leads, setLeads] = useState<LeadForDisplay[]>([])
+  const [leads, setLeads] = useState<Lead[]>([])
   useEffect(() => {
     const f = async () => {
       if (!provider) return
       const fetchedLeads = await getLeadsByProviderId({
         providerId: provider?.id,
       })
-      if (fetchedLeads && fetchedLeads.length) {
-        const convertedRow = convertToDisplay(fetchedLeads)
-        if (convertedRow && convertedRow.length)
-          setLeads(convertedRow as LeadForDisplay[] | [])
-      }
+      if (fetchedLeads && fetchedLeads.length) setLeads(fetchedLeads)
     }
     f()
   }, [provider])

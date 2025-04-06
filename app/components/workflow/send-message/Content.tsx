@@ -1,7 +1,7 @@
 'use client'
 import { toolConfig } from './toolConfig'
 import AppInfo from '@/app/components/input/AppInfo'
-import SearchProfileInputCapture from './Input'
+import SendMessageInputCapture from './Input'
 import { IconPoint } from '@tabler/icons-react'
 import { useAtom } from 'jotai'
 import { userAtom } from '@/lib/atom'
@@ -10,7 +10,7 @@ import { getLeadsByWorkflowId } from '@/lib/db/queries/leadClient'
 import { LeadTable } from '@/app/components/dashboard/LeadTable'
 import { Lead } from '@/lib/types/supabase'
 
-export default function SearchProfileContent({
+export default function SendMessageContent({
   workflowId,
 }: {
   workflowId: string
@@ -28,7 +28,7 @@ export default function SearchProfileContent({
     <AppInfo title="概要" background="bg-accent/10">
       <ul className="mt-4 ml-4 text-sm space-y-2 flex flex-col mb-4 relative xs:leading-7">
         <li className="text-l flex mb-2">
-          <span className="ml-2">プロフィール検索を行います。</span>
+          <span className="ml-2">メッセージ送信を行います。</span>
         </li>
         <li className="text-l flex">
           <span className="w-4 h-4 mt-1">
@@ -60,7 +60,7 @@ export default function SearchProfileContent({
           <span className="w-4 h-4 mt-1">
             <IconPoint className="w-4 h-4" />
           </span>
-          <span className="ml-2">1回毎の検索数は、現在500件まで可能です。</span>
+          <span className="ml-2">1回毎の申請数は、現在20件まで可能です。</span>
         </li>
         <li className="text-l flex">
           <span className="w-4 h-4 mt-1">
@@ -88,8 +88,8 @@ export default function SearchProfileContent({
   // If the tool is not paywalled or the user has a valid purchase, render the page
   return (
     <div className="space-y-12">
-      <h2 className="text-3xl font-bold">プロフィール検索</h2>
-      <SearchProfileInputCapture
+      <h2 className="text-3xl font-bold">DM送信</h2>
+      <SendMessageInputCapture
         workflowId={workflowId}
         toolConfig={toolConfig}
         userEmail={user ? user.email : undefined}
@@ -100,4 +100,3 @@ export default function SearchProfileContent({
     </div>
   )
 }
-// TODO: sort like and updated_at
