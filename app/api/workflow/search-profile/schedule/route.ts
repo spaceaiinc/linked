@@ -129,6 +129,10 @@ export async function POST(req: Request) {
         third_message_days: 0,
         scheduled_months: [],
         target_public_identifiers: [],
+
+        last_updated_user_id: workflow.last_updated_user_id,
+        run_limit_count: workflow.run_limit_count,
+        agent_type: workflow.agent_type,
       }
       const url = `${env.NEXT_PUBLIC_PRODUCTION_URL}/api/workflow/search-profile`
       const searchProfileRequest = new Request(url, {

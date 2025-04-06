@@ -376,6 +376,7 @@ export async function upsertLead({
         {
           status: leadStatus,
           lead_id: upsertLead?.id,
+          workflow_id: workflowId,
           company_id: companyId,
         },
       ]
@@ -776,6 +777,7 @@ export async function updateLeadStatusByTargetWorkflowId({
       const leadStatuses: PublicSchemaTables['lead_statuses']['Insert'] = {
         status: targetStatus,
         lead_id: lead.id,
+        workflow_id: workflowId,
         company_id: companyId,
       }
 
@@ -989,6 +991,7 @@ export async function upsertLeadByUnipileUserProfileApiResponse({
           {
             status: leadStatus,
             lead_id: upsertLeadData?.id,
+            workflow_id: workflowId,
             company_id: companyId,
           },
         ]
@@ -1661,6 +1664,7 @@ export async function upsertLeadByUnipilePerformSearchProfile({
         {
           status: leadStatus,
           lead_id: upsertLead?.id,
+          workflow_id: workflowId,
           company_id: companyId,
         },
       ]
