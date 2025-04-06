@@ -7,7 +7,7 @@ import {
   unipilePeformSearchProfileWithStatus,
   fetchLeadsWithLatestStatusAndWorkflow,
   updateLeadStatusByTargetWorkflowId,
-} from '@/lib/db/queries/leadServer'
+} from '@/lib/db/queries/lead'
 import { LeadStatus, WorkflowStatus, WorkflowType } from '@/lib/types/master'
 import { Database, Lead, Provider } from '@/lib/types/supabase'
 import { unipileClient } from '@/lib/unipile'

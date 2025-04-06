@@ -898,6 +898,7 @@ export type Database = {
           updated_at: string
           deleted_at: string
           lead_id: string
+          workflow_id: string
           status: number
         }
         Insert: {
@@ -907,6 +908,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string
           lead_id: string
+          workflow_id: string
           status: number
         }
         Update: {
@@ -916,6 +918,7 @@ export type Database = {
           updated_at?: string
           deleted_at?: string
           lead_id?: string
+          workflow_id?: string
           status: number
         }
         Relationships: [
