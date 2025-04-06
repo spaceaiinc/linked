@@ -66,7 +66,7 @@ export const convertToDisplay = (
   inputData: Lead[] | LeadInsert[]
 ): LeadForDisplay[] => {
   if (!inputData || inputData.length === 0 || !Array.isArray(inputData)) {
-    console.log('No data to convert')
+    // console.log('No data to convert')
     return []
   }
   const rows = inputData.map((profile: Lead | LeadInsert): LeadForDisplay => {

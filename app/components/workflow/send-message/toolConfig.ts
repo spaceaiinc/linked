@@ -4,7 +4,7 @@ import { ToolConfig } from '@/lib/types/toolconfig'
 export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
-    name: 'つながり申請',
+    name: 'メッセージ送信',
     theme: 'default',
     homeUrl: '/dashboard',
     appUrl: '/dashboard',
@@ -172,20 +172,42 @@ export const toolConfig: ToolConfig = {
       min: 1,
     },
     {
-      label: '申請時メッセージ',
-      name: 'invitation_message',
+      label: '送信条件',
+      name: 'first_message_trigger_type',
+      type: 'select',
+      options: [
+        { label: '全員に送信', value: '0' },
+        { label: '最後のメッセージが受信者からの場合のみ送信', value: '1' },
+        { label: '最後のメッセージが自分からの場合のみ送信', value: '2' },
+        {
+          label:
+            '最後のメッセージが受信者からの場合か、メッセージがない場合のみ送信',
+          value: '3',
+        },
+        {
+          label:
+            '最後のメッセージが自分からの場合か、メッセージがない場合のみ送信',
+          value: '4',
+        },
+        { label: 'メッセージがない場合のみ送信', value: '5' },
+        { label: '受信者からメッセージが一度もない場合のみ送信', value: '6' },
+      ],
+      required: false,
+    },
+    {
+      label: '送信メッセージ',
+      name: 'first_message',
       type: 'textarea',
       placeholder: '',
       required: false,
     },
     {
-      label: '申請時メッセージ Dify API Key',
-      name: 'invitation_message_dify_api_key',
+      label: '送信メッセージ Dify API Key',
+      name: 'first_message_dify_api_key',
       type: 'input',
       inputType: 'string',
       placeholder: '',
       required: false,
-      custom: true,
     },
     {
       label: '求人ポジション',
@@ -194,7 +216,6 @@ export const toolConfig: ToolConfig = {
       inputType: 'string',
       placeholder: '',
       required: false,
-      custom: true,
     },
     {
       label: '時間(JST)',
