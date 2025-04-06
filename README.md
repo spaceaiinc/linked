@@ -103,7 +103,5 @@ Please read the [official documentation to get started.](https://docs.spaceai.jp
 
 ## TODO
 
-- Batch / Time Scheduler
-- Like
-- Reaction
+- Reconnect Mailer
 - Stripe

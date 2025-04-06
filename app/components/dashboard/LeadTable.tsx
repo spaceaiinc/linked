@@ -10,6 +10,7 @@ import {
   SortingState,
   getSortedRowModel,
 } from '@tanstack/react-table'
+import { LeadReport } from './LeadReport'
 import { ArrowUpDown, Calendar } from 'lucide-react'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
@@ -25,19 +26,28 @@ import { useDebounce } from '@/lib/hooks/useDebounce'
 import { format } from 'date-fns'
 import { Badge } from '../ui/badge'
 import Papa from 'papaparse'
-import { LeadForDisplay } from '@/lib/csv'
+import { convertToDisplay, LeadForDisplay } from '@/lib/csv'
 import { useState } from 'react'
 import { LeadDetailModal } from './LeadDialog'
 import { LeadStatusBadge } from './LeadBatch'
+import { Lead, PublicSchemaTables } from '@/lib/types/supabase'
 
 interface LeadTableProps {
-  leads: LeadForDisplay[]
+  leads: Lead[]
 }
 
 export function LeadTable({ leads }: LeadTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [filterValue, setFilterValue] = React.useState('')
   const debouncedFilterValue = useDebounce(filterValue, 300)
+  const [activeTab, setActiveTab] = React.useState<'leads' | 'report'>('leads')
+  const leadsForDisplay = convertToDisplay(leads)
+  const leadStatuses: PublicSchemaTables['lead_statuses']['Row'][] = []
+  leads.forEach((lead) => {
+    lead.lead_statuses.forEach((status) => {
+      leadStatuses.push(status)
+    })
+  })
 
   const columns: ColumnDef<LeadForDisplay>[] = React.useMemo(
     () => [
@@ -566,7 +576,7 @@ export function LeadTable({ leads }: LeadTableProps) {
   )
 
   const filteredLeads = React.useMemo(() => {
-    return leads.filter(
+    return leadsForDisplay.filter(
       (gen) =>
         gen.public_identifier
           ?.toLowerCase()
@@ -739,103 +749,137 @@ export function LeadTable({ leads }: LeadTableProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-3xl font-bold">リード</h2>
-      <div className="flex items-center py-4 space-x-4">
-        <Input
-          placeholder="Search"
-          value={filterValue}
-          onChange={handleFilterChange}
-          className="max-w-sm"
-        />
-        <Button
-          // disabled={loading}
-          onClick={() => handleExport()}
-          className="bg-accent hover:bg-accent/80 text-white"
+      <h2 className="text-3xl font-bold">リード管理</h2>
+
+      <div className="flex border-b mb-6">
+        <button
+          onClick={() => setActiveTab('leads')}
+          className={`px-4 py-2 font-medium ${
+            activeTab === 'leads'
+              ? 'text-primary border-b-2 border-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
         >
-          エクスポート
-        </Button>
+          Leads
+        </button>
+        <button
+          onClick={() => setActiveTab('report')}
+          className={`px-4 py-2 font-medium ${
+            activeTab === 'report'
+              ? 'text-primary border-b-2 border-primary'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Report
+        </button>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  // 長さに関係なく一行に 文字量に合わせて
-                  <TableHead key={header.id} className="whitespace-nowrap">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows
-                .slice(visibleRange.start, visibleRange.end)
-                .map((row, index) => (
-                  <TableRow
-                    key={row.id}
-                    ref={
-                      index === visibleRange.end - visibleRange.start - 1
-                        ? lastRowRef
-                        : null
-                    }
-                    onClick={() => openLeadDetails(row.original)}
-                    data-state={row.getIsSelected() && 'selected'}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
+
+      {activeTab === 'leads' ? (
+        <>
+          <div className="flex items-center py-4 space-x-4">
+            <Input
+              placeholder="Search"
+              value={filterValue}
+              onChange={handleFilterChange}
+              className="max-w-sm"
+            />
+            <Button
+              // disabled={loading}
+              onClick={() => handleExport()}
+              className="bg-accent hover:bg-accent/80 text-white"
+            >
+              エクスポート
+            </Button>
+          </div>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      // 長さに関係なく一行に 文字量に合わせて
+                      <TableHead key={header.id} className="whitespace-nowrap">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-            )}
-          </TableBody>
-        </Table>
-        <LeadDetailModal
-          lead={selectedLead}
-          open={modalOpen}
-          onOpenChange={setModalOpen}
+                ))}
+              </TableHeader>
+              <TableBody>
+                {rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  rows
+                    .slice(visibleRange.start, visibleRange.end)
+                    .map((row, index) => (
+                      <TableRow
+                        key={row.id}
+                        ref={
+                          index === visibleRange.end - visibleRange.start - 1
+                            ? lastRowRef
+                            : null
+                        }
+                        onClick={() => openLeadDetails(row.original)}
+                        data-state={row.getIsSelected() && 'selected'}
+                        className="cursor-pointer hover:bg-muted/50"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+            <LeadDetailModal
+              lead={selectedLead}
+              open={modalOpen}
+              onOpenChange={setModalOpen}
+            />
+          </div>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </>
+      ) : (
+        <LeadReport
+          leadStatuses={
+            leadStatuses as PublicSchemaTables['lead_statuses']['Row'][]
+          }
         />
-      </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+      )}
     </div>
   )
 }

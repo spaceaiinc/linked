@@ -7,24 +7,20 @@ import { useAtom } from 'jotai'
 import { userAtom } from '@/lib/atom'
 import { useEffect, useState } from 'react'
 import { getLeadsByWorkflowId } from '@/lib/db/queries/leadClient'
-import { convertToDisplay, LeadForDisplay } from '@/lib/csv'
 import { LeadTable } from '@/app/components/dashboard/LeadTable'
+import { Lead } from '@/lib/types/supabase'
 
 export default function SearchProfileContent({
   workflowId,
 }: {
   workflowId: string
 }) {
-  const [leads, setLeads] = useState<LeadForDisplay[]>([])
+  const [leads, setLeads] = useState<Lead[]>([])
   const [user, _] = useAtom(userAtom)
   useEffect(() => {
     const f = async () => {
       const fetchedLeads = await getLeadsByWorkflowId({ workflowId })
-      if (fetchedLeads && fetchedLeads.length) {
-        const convertedRow = convertToDisplay(fetchedLeads)
-        if (convertedRow && convertedRow.length)
-          setLeads(convertedRow as LeadForDisplay[] | [])
-      }
+      if (fetchedLeads && fetchedLeads.length) setLeads(fetchedLeads)
     }
     f()
   }, [])

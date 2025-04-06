@@ -16,13 +16,13 @@ export const tools = [
     description:
       'キーワードまたは、ユーザーIDのCSVからつながり申請を行います。',
   },
-  {
-    title: 'DM送信',
-    type: WorkflowType.SEND_MESSAGE,
-    tags: [WorkflowType[WorkflowType.SEND_MESSAGE]],
-    image: '/apps/linkedin-logo.jpg',
-    description: 'リードリストからメッセージ送信を行います。',
-  },
+  // {
+  //   title: 'DM送信',
+  //   type: WorkflowType.SEND_MESSAGE,
+  //   tags: [WorkflowType[WorkflowType.SEND_MESSAGE]],
+  //   image: '/apps/linkedin-logo.jpg',
+  //   description: 'リードリストからメッセージ送信を行います。',
+  // },
   // {
   //   title: '類似候補者検索',
   //   type: WorkflowType.SIMILAR_SEARCH,

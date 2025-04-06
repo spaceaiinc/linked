@@ -220,6 +220,7 @@ export async function POST(req: Request) {
               status: LeadStatus.IN_QUEUE,
               lead_id: leadDataId,
               company_id: provider.company_id,
+              workflow_id: param.workflow_id,
             }
             const { error: insertLeadStatusError } = await supabase
               .from('lead_statuses')
