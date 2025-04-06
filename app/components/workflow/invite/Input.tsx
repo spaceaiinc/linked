@@ -19,7 +19,7 @@ import {
 import { useDropzone } from 'react-dropzone'
 import { Input } from '@/app/components/ui/input'
 import { IconBrandLinkedin, IconFile } from '@tabler/icons-react'
-import { providerAtom, workflowsAtom } from '@/lib/atom'
+import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
 import { useAtom } from 'jotai'
 import { extractColumnData } from '@/lib/csv'
 import CheckboxGroup from '@/app/components/ui/checkbox-group'
@@ -81,9 +81,10 @@ export default function InviteInputCapture({
 }: InviteInputCaptureProps) {
   const [generateResponse, loading] = searchProfileResponse(toolConfig)
 
-  const [formData, handleChange, customHandleChange] = useFormData(
+  const [formData, handleChange, customHandleChange, reset] = useFormData(
     toolConfig.fields!
   )
+  const [user] = useAtom(userAtom)
 
   const [activeTab, setActiveTab] = useState<string>('0')
   const [fileUrl, setFileUrl] = useState<string>('')
@@ -109,8 +110,18 @@ export default function InviteInputCapture({
       if (workflowData) {
         const workflow: Workflow = workflowData
         setWorkflowInDb(workflow)
+        // TODO: コード煩雑すぎる　useFormを使う　toolConfigをyupに統一
         customHandleChange(workflowId, 'workflow_id')
         customHandleChange(workflow.name, 'name')
+        customHandleChange(
+          workflow.run_limit_count.toString(),
+          'run_limit_count'
+        )
+        customHandleChange(workflow.agent_type.toString(), 'agent_type')
+        customHandleChange(
+          workflow.invitation_message_dify_api_key,
+          'invitation_message_dify_api_key'
+        )
         if (workflow.search_url) {
           customHandleChange(workflow.search_url, 'search_url')
           setActiveTab('0')
@@ -158,6 +169,7 @@ export default function InviteInputCapture({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!provider?.account_id) return alert('Provider not connected')
+    formData['last_updated_user_id'] = user?.id || ''
     formData['active_tab'] = activeTab
     formData['account_id'] = provider?.account_id
     formData['workflow_id'] = workflowId
