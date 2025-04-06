@@ -261,6 +261,7 @@ export async function POST(req: Request) {
               param.type === WorkflowType.INVITE &&
               'provider_id' in getProfileResponse
             ) {
+              leadStatus = LeadStatus.INVITED
               const sendInvitationParam: {
                 account_id: string
                 provider_id: string
@@ -276,7 +277,7 @@ export async function POST(req: Request) {
                 .sendInvitation(sendInvitationParam)
                 .then((sendInvitationResponse) => {
                   if (sendInvitationResponse.invitation_id) {
-                    leadStatus = LeadStatus.INVITED
+                    // leadStatus = LeadStatus.INVITED
                   } else {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
@@ -384,6 +385,7 @@ export async function POST(req: Request) {
               param.type === WorkflowType.INVITE &&
               'provider_id' in getProfileResponse
             ) {
+              leadStatus = LeadStatus.INVITED
               const sendInvitationParam: {
                 account_id: string
                 provider_id: string
@@ -400,7 +402,7 @@ export async function POST(req: Request) {
 
                 .then((sendInvitationResponse) => {
                   if (sendInvitationResponse.invitation_id) {
-                    leadStatus = LeadStatus.INVITED
+                    // leadStatus = LeadStatus.INVITED
                   } else {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
@@ -428,6 +430,7 @@ export async function POST(req: Request) {
           } else {
             let leadStatus = LeadStatus.SEARCHED
             if (param.type === WorkflowType.INVITE) {
+              leadStatus = LeadStatus.INVITED
               const sendInvitationParam: {
                 account_id: string
                 provider_id: string
@@ -442,7 +445,7 @@ export async function POST(req: Request) {
                 .sendInvitation(sendInvitationParam)
                 .then((sendInvitationResponse) => {
                   if (sendInvitationResponse.invitation_id) {
-                    leadStatus = LeadStatus.INVITED
+                    // leadStatus = LeadStatus.INVITED
                   } else {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
@@ -759,6 +762,8 @@ export async function POST(req: Request) {
               if (!profile || profile === undefined) return null
               let leadStatus = LeadStatus.SEARCHED
               if (param.type === WorkflowType.INVITE && 'id' in profile) {
+                console.log('profile', profile)
+                leadStatus = LeadStatus.INVITED
                 const sendInvitationParam: {
                   account_id: string
                   provider_id: string
@@ -775,7 +780,7 @@ export async function POST(req: Request) {
 
                   .then((sendInvitationResponse) => {
                     if (sendInvitationResponse.invitation_id) {
-                      leadStatus = LeadStatus.INVITED
+                      // leadStatus = LeadStatus.INVITED
                     } else {
                       leadStatus = LeadStatus.INVITED_FAILED
                     }
@@ -796,6 +801,7 @@ export async function POST(req: Request) {
                 await new Promise((resolve) => setTimeout(resolve, 500))
               }
 
+              console.log('status', leadStatus)
               unipiePerformSearchProfilesWithStatus.push({
                 unipileProfile: profile,
                 leadStatus: leadStatus,
