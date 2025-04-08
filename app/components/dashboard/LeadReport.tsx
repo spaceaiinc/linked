@@ -19,8 +19,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
 } from 'recharts'
 import { PublicSchemaTables } from '@/lib/types/supabase'
 
@@ -327,7 +327,7 @@ export function LeadReport({
               </div>
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
+                  <BarChart
                     data={dailyStatusCounts}
                     margin={{
                       top: 10,
@@ -342,16 +342,14 @@ export function LeadReport({
                     <Tooltip />
                     <Legend />
                     {statusCounts.map((status) => (
-                      <Area
+                      <Bar
                         key={status.status}
-                        type="monotone"
                         dataKey={status.statusName}
                         stackId="1"
-                        stroke={status.color}
                         fill={status.color}
                       />
                     ))}
-                  </AreaChart>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
