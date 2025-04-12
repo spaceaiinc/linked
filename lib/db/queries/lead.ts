@@ -1492,6 +1492,9 @@ export type searchProfileBodyType = {
   api: string
   category: string
   url?: string
+  search_id?: string
+  saved_search_id?: string
+  recent_search_id?: string
   keywords?: string
   company?: string[]
   network_distance?: number[]
