@@ -4,6 +4,9 @@ import {
   IconCurrencyDollar,
   IconHome,
   IconLayoutDashboard,
+  IconSubtask,
+  IconIcons,
+  IconTable,
 } from '@tabler/icons-react'
 import { IconMessage } from '../ui/icons'
 
@@ -41,7 +44,8 @@ export const overviewLinks: NavLink[] = [
 
 export const navlinks: NavLink[] = [
   { href: '/dashboard', label: 'ダッシュボード', icon: IconHome },
-  { href: '/leads', label: 'リード', icon: IconFileText },
+  { href: '/workflow/create', label: 'フロー作成', icon: IconSubtask },
+  { href: '/leads', label: 'リード', icon: IconTable },
   // { href: '/similar-leads', label: '類似候補者リスト', icon: IconFileText },
   // { href: '/chat', label: 'チャット', icon: IconMessage },
 ]

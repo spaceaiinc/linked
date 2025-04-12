@@ -623,12 +623,46 @@ export async function POST(req: Request) {
             i
           )
 
+          //www.linkedin.com/sales/search/people?recentSearchId=4603213788&sessionId=Q%2Bw5Sj3ITBaUC4KlLZqw0g%3D%3D
+          // sales/search/peopleを含む場合は　api: 'salesnavigator' で search_urlではなく、search_idを指定する
+          let searchProfileApiType: 'classic' | 'sales_navigator' = 'classic'
+          if (param.search_url?.includes('sales/search/people'))
+            searchProfileApiType = 'sales_navigator'
+
           const searchProfileBody: searchProfileBodyType = {
-            api: 'classic',
+            api: searchProfileApiType,
             category: 'people',
           }
 
-          if (param.search_url) searchProfileBody.url = param.search_url
+          if (param.search_url && searchProfileApiType === 'classic')
+            searchProfileBody.url = param.search_url
+          else if (
+            param.search_url &&
+            searchProfileApiType === 'sales_navigator'
+          ) {
+            console.log('sales navigator search url', param.search_url)
+            if (param.search_url.includes('recentSearchId')) {
+              const splitedSearchUrl = param.search_url.split('recentSearchId=')
+              if (splitedSearchUrl.length < 2) {
+                return NextResponse.json(
+                  { error: 'Invalid search url' },
+                  { status: 400 }
+                )
+              }
+              const searchId = splitedSearchUrl[1].split('&')[0]
+              searchProfileBody.recent_search_id = searchId
+            } else if (param.search_url.includes('savedSearchId')) {
+              const splitedSearchUrl = param.search_url.split('savedSearchId=')
+              if (splitedSearchUrl.length < 2) {
+                return NextResponse.json(
+                  { error: 'Invalid search url' },
+                  { status: 400 }
+                )
+              }
+              const searchId = splitedSearchUrl[1].split('&')[0]
+              searchProfileBody.saved_search_id = searchId
+            }
+          }
           if (param.keywords) searchProfileBody.keywords = param.keywords
           if (param?.company_private_identifiers?.length)
             searchProfileBody.company = param.company_private_identifiers
@@ -649,10 +683,17 @@ export async function POST(req: Request) {
             },
             body: JSON.stringify(searchProfileBody),
           })
+          console.log(await performSearchResponse.text())
+          const searchProfileError =
+            'An error occurred while searching:\nstatusText:' +
+            performSearchResponse.statusText
+          console.log(searchProfileError)
 
           if (performSearchResponse.status !== 200) {
             return NextResponse.json(
-              { error: 'An error occurred while searching' },
+              {
+                error: searchProfileError,
+              },
               { status: 500 }
             )
           }
