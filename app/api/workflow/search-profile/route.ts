@@ -10,6 +10,7 @@ import {
   fetchLeadsWithLatestStatusFilter,
   fetchLeadsWithLatestStatusAndWorkflow,
   updateLeadStatusByTargetWorkflowId,
+  searchProfileSalesNavigatorBodyType,
 } from '@/lib/db/queries/lead'
 import {
   ActiveTab,
@@ -614,54 +615,78 @@ export async function POST(req: Request) {
             nowLimitCount =
               param.limit_count - 50 * i > 50 ? 50 : param.limit_count - 50 * i
           if (nowLimitCount === undefined || nowLimitCount <= 0) break
-          console.log(
-            'excuteSearchCount',
-            excuteSearchCount,
-            'nowLimitCount',
-            nowLimitCount,
-            'i',
-            i
-          )
+          // console.log(
+          //   'excuteSearchCount',
+          //   excuteSearchCount,
+          //   'nowLimitCount',
+          //   nowLimitCount,
+          //   'i',
+          //   i
+          // )
 
           //www.linkedin.com/sales/search/people?recentSearchId=4603213788&sessionId=Q%2Bw5Sj3ITBaUC4KlLZqw0g%3D%3D
           // sales/search/peopleを含む場合は　api: 'salesnavigator' で search_urlではなく、search_idを指定する
-          let searchProfileApiType: 'classic' | 'sales_navigator' = 'classic'
-          if (param.search_url?.includes('sales/search/people'))
-            searchProfileApiType = 'sales_navigator'
+          let searchProfileBody:
+            | searchProfileBodyType
+            | searchProfileSalesNavigatorBodyType
+            | null = null
 
-          const searchProfileBody: searchProfileBodyType = {
-            api: searchProfileApiType,
-            category: 'people',
+          if (param.search_url) {
+            if (param.search_url.includes('sales/search/people')) {
+              console.log('sales navigator search url', param.search_url)
+              if (param.search_url.includes('recentSearchId')) {
+                const splitedSearchUrl =
+                  param.search_url.split('recentSearchId=')
+                if (splitedSearchUrl.length < 2) {
+                  return NextResponse.json(
+                    { error: 'Invalid search url' },
+                    { status: 400 }
+                  )
+                }
+                const searchId = splitedSearchUrl[1].split('&')[0]
+                searchProfileBody = {
+                  api: 'sales_navigator',
+                  category: 'people',
+                  recent_search_id: searchId,
+                }
+              } else if (param.search_url.includes('savedSearchId')) {
+                const splitedSearchUrl =
+                  param.search_url.split('savedSearchId=')
+                if (splitedSearchUrl.length < 2) {
+                  return NextResponse.json(
+                    { error: 'Invalid search url' },
+                    { status: 400 }
+                  )
+                }
+                const searchId = splitedSearchUrl[1].split('&')[0]
+                searchProfileBody = {
+                  api: 'sales_navigator',
+                  category: 'people',
+                  saved_search_id: searchId,
+                }
+              } else {
+                // Handle other sales navigator URLs that don't have specific IDs
+                searchProfileBody = {
+                  api: 'sales_navigator',
+                  category: 'people',
+                  url: param.search_url,
+                }
+              }
+            } else {
+              searchProfileBody = {
+                api: 'classic',
+                category: 'people',
+                url: param.search_url,
+              }
+            }
           }
 
-          if (param.search_url && searchProfileApiType === 'classic')
-            searchProfileBody.url = param.search_url
-          else if (
-            param.search_url &&
-            searchProfileApiType === 'sales_navigator'
-          ) {
-            console.log('sales navigator search url', param.search_url)
-            if (param.search_url.includes('recentSearchId')) {
-              const splitedSearchUrl = param.search_url.split('recentSearchId=')
-              if (splitedSearchUrl.length < 2) {
-                return NextResponse.json(
-                  { error: 'Invalid search url' },
-                  { status: 400 }
-                )
-              }
-              const searchId = splitedSearchUrl[1].split('&')[0]
-              searchProfileBody.recent_search_id = searchId
-            } else if (param.search_url.includes('savedSearchId')) {
-              const splitedSearchUrl = param.search_url.split('savedSearchId=')
-              if (splitedSearchUrl.length < 2) {
-                return NextResponse.json(
-                  { error: 'Invalid search url' },
-                  { status: 400 }
-                )
-              }
-              const searchId = splitedSearchUrl[1].split('&')[0]
-              searchProfileBody.saved_search_id = searchId
-            }
+          console.log('searchProfileBody', searchProfileBody)
+          if (!searchProfileBody) {
+            return NextResponse.json(
+              { error: 'Invalid search url' },
+              { status: 400 }
+            )
           }
           if (param.keywords) searchProfileBody.keywords = param.keywords
           if (param?.company_private_identifiers?.length)
@@ -674,37 +699,54 @@ export async function POST(req: Request) {
           }/api/v1/linkedin/search?${nextCursor && 'cursor=' + nextCursor + '&'}account_id=${param.account_id}&limit=${nowLimitCount}`
           console.log('url', url, 'body', searchProfileBody)
 
-          const performSearchResponse = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
-              accept: 'application/json',
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify(searchProfileBody),
-          })
-          console.log(await performSearchResponse.text())
-          const searchProfileError =
-            'An error occurred while searching:\nstatusText:' +
-            performSearchResponse.statusText
-          console.log(searchProfileError)
-
-          if (performSearchResponse.status !== 200) {
-            return NextResponse.json(
-              {
-                error: searchProfileError,
+          try {
+            // レスポンスを一度だけ取得して処理
+            const performSearchResponse = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'X-API-KEY': env.UNIPILE_ACCESS_TOKEN,
+                accept: 'application/json',
+                'content-type': 'application/json',
               },
+              body: JSON.stringify(searchProfileBody),
+            })
+
+            // ステータスをチェック
+            if (performSearchResponse.status !== 200) {
+              const errorText = await performSearchResponse.text()
+              console.log(
+                'An error occurred while searching:\nstatusText:' +
+                  performSearchResponse.statusText
+              )
+              console.log('Error details:', errorText)
+              return NextResponse.json(
+                {
+                  error:
+                    'An error occurred while searching: ' +
+                    performSearchResponse.statusText,
+                  details: errorText,
+                },
+                { status: 500 }
+              )
+            }
+
+            // 成功時のみJSONとして処理
+            const dataOfSearch = await performSearchResponse.json()
+            nextCursor = dataOfSearch.cursor || ''
+            if (
+              dataOfSearch !== undefined &&
+              dataOfSearch.items &&
+              dataOfSearch.items.length
+            )
+              dataOfSearchList.push(...dataOfSearch.items)
+          } catch (error) {
+            console.error('Search profile fetch error:', error)
+            return NextResponse.json(
+              { error: 'Failed to process search request: ' + error },
               { status: 500 }
             )
           }
-          const dataOfSearch = await performSearchResponse.json()
-          nextCursor = dataOfSearch.cursor || ''
-          if (
-            dataOfSearch !== undefined &&
-            dataOfSearch.items &&
-            dataOfSearch.items.length
-          )
-            dataOfSearchList.push(...dataOfSearch.items)
+
           await new Promise((resolve) => setTimeout(resolve, 500))
           if (nextCursor === '') break
         }
