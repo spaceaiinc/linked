@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useAtom } from 'jotai'
 import { providerAtom } from '@/lib/atom'
 import LoadingPage from '@/app/components/Loading'
-import { createClient } from '@/lib/utils/supabase/client'
 import { LeadStatus } from '@/lib/types/master'
 import {
   Card,
@@ -23,6 +22,7 @@ import {
   Bar,
 } from 'recharts'
 import { PublicSchemaTables } from '@/lib/types/supabase'
+import { createClient } from '@/lib/utils/supabase/client'
 
 // Helper function to get status name
 const getStatusName = (status: number) => {
@@ -92,6 +92,18 @@ type DailyStatusCount = {
   [key: string]: string | number
 }
 
+type WeeklyInsight = {
+  week: string
+  follower_count: number
+  connections_count: number
+}
+
+type DailyInsight = {
+  date: string
+  follower_count: number
+  connections_count: number
+}
+
 export function LeadReport({
   leadStatuses,
 }: {
@@ -104,6 +116,9 @@ export function LeadReport({
     DailyStatusCount[]
   >([])
   const [totalLeads, setTotalLeads] = useState(0)
+  const [weeklyInsights, setWeeklyInsights] = useState<WeeklyInsight[]>([])
+  const [dailyInsights, setDailyInsights] = useState<DailyInsight[]>([])
+  const [isLoadingInsights, setIsLoadingInsights] = useState(true)
 
   useEffect(() => {
     const fetchLeadStatuses = async () => {
@@ -238,6 +253,122 @@ export function LeadReport({
     fetchLeadStatuses()
   }, [leadStatuses])
 
+  const supabase = createClient()
+
+  useEffect(() => {
+    const fetchInsights = async () => {
+      if (!provider) return
+
+      setIsLoadingInsights(true)
+
+      try {
+        // Fetch provider_daily_insights data for the current provider
+        const { data, error } = await supabase
+          .from('provider_daily_insights')
+          .select('*')
+          .eq('provider_id', provider.id)
+          .eq('deleted_at', '-infinity')
+          // created_atが3ヶ月前より新しいデータを取得 utc
+          .gt(
+            'created_at',
+            new Date(
+              new Date().getTime() - 3 * 30 * 24 * 60 * 60 * 1000
+            ).toISOString()
+          )
+          .order('created_at', { ascending: true })
+
+        if (error) {
+          console.error('Error fetching provider insights:', error)
+          setIsLoadingInsights(false)
+          return
+        }
+
+        if (!data || data.length === 0) {
+          setIsLoadingInsights(false)
+          return
+        }
+
+        // Process daily insights data
+        const dailyInsightsArray: DailyInsight[] = data
+          .map((insight: any) => ({
+            date: new Date(insight.created_at).toISOString().split('T')[0],
+            follower_count: insight.follower_count || 0,
+            connections_count: insight.connections_count || 0,
+          }))
+          .sort(
+            (a: DailyInsight, b: DailyInsight) =>
+              new Date(a.date).getTime() - new Date(b.date).getTime()
+          )
+
+        // Get the last 30 days of data
+        const last30DaysData = dailyInsightsArray.slice(-30)
+        setDailyInsights(last30DaysData)
+
+        // Group data by week
+        const weeklyData: Record<
+          string,
+          {
+            follower_count: number
+            connections_count: number
+            count: number
+          }
+        > = {}
+
+        data.forEach(
+          (insight: {
+            created_at: string | number | Date
+            follower_count: any
+            connections_count: any
+          }) => {
+            // Parse the created_at date
+            const date = new Date(insight.created_at)
+
+            // Get the start of the week (Sunday)
+            const startOfWeek = new Date(date)
+            startOfWeek.setDate(date.getDate() - date.getDay())
+            startOfWeek.setHours(0, 0, 0, 0)
+
+            // Format as YYYY-MM-DD
+            const weekKey = startOfWeek.toISOString().split('T')[0]
+
+            if (!weeklyData[weekKey]) {
+              weeklyData[weekKey] = {
+                follower_count: 0,
+                connections_count: 0,
+                count: 0,
+              }
+            }
+
+            // Sum up the values for the week
+            weeklyData[weekKey].follower_count += insight.follower_count || 0
+            weeklyData[weekKey].connections_count +=
+              insight.connections_count || 0
+            weeklyData[weekKey].count += 1
+          }
+        )
+
+        // Calculate averages and convert to array format for chart
+        const weeklyInsightsArray: WeeklyInsight[] = Object.entries(weeklyData)
+          .map(([week, data]) => ({
+            week,
+            follower_count: Math.round(data.follower_count / data.count),
+            connections_count: Math.round(data.connections_count / data.count),
+          }))
+          .sort(
+            (a, b) => new Date(a.week).getTime() - new Date(b.week).getTime()
+          )
+
+        setWeeklyInsights(weeklyInsightsArray)
+      } catch (error) {
+        console.error('Error processing weekly insights:', error)
+      } finally {
+        setIsLoadingInsights(false)
+      }
+    }
+
+    fetchInsights()
+  }, [provider])
+
   // Show loading spinner while data is being fetched
   if (isLoading) {
     return (
@@ -307,7 +438,7 @@ export function LeadReport({
           {/* Flow Performance Progress Chart */}
           <Card className="shadow-sm mb-8">
             <CardHeader>
-              {/* <CardTitle>Flow performance progress</CardTitle> */}
+              <CardTitle>ワークフローレポート</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="mb-4 flex flex-wrap gap-2">
@@ -355,6 +486,120 @@ export function LeadReport({
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* Weekly Follower and Connection Count Chart */}
+      {weeklyInsights.length > 0 && (
+        <Card className="shadow-sm mb-8">
+          <CardHeader>
+            <CardTitle>週間フォロワー数・つながり数の推移</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-sm">フォロワー数</span>
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100">
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="text-sm">つながり数</span>
+              </div>
+            </div>
+            <div className="h-[400px]">
+              {isLoadingInsights ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <LoadingPage />
+                  <p className="mt-4 text-gray-600">データを読み込み中...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={weeklyInsights}
+                    margin={{
+                      top: 10,
+                      right: 30,
+                      left: 0,
+                      bottom: 0,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="week" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="follower_count"
+                      name="フォロワー数"
+                      fill="#3b82f6"
+                    />
+                    <Bar
+                      dataKey="connections_count"
+                      name="つながり数"
+                      fill="#22c55e"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Daily Follower and Connection Count Chart */}
+      {dailyInsights.length > 0 && (
+        <Card className="shadow-sm mb-8">
+          <CardHeader>
+            <CardTitle>日間フォロワー数・つながり数の推移</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-100">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-sm">フォロワー数</span>
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100">
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="text-sm">つながり数</span>
+              </div>
+            </div>
+            <div className="h-[400px]">
+              {isLoadingInsights ? (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <LoadingPage />
+                  <p className="mt-4 text-gray-600">データを読み込み中...</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={dailyInsights}
+                    margin={{
+                      top: 10,
+                      right: 30,
+                      left: 0,
+                      bottom: 0,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar
+                      dataKey="follower_count"
+                      name="フォロワー数"
+                      fill="#3b82f6"
+                    />
+                    <Bar
+                      dataKey="connections_count"
+                      name="つながり数"
+                      fill="#22c55e"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   )
