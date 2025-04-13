@@ -417,6 +417,55 @@ export type Database = {
           },
         ]
       }
+      provider_daily_insights: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          provider_id: string
+          follower_count: number
+          connections_count: number
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          provider_id: string
+          follower_count: number
+          connections_count: number
+        }
+        Update: {
+          id: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          provider_id: string
+          follower_count: number
+          connections_count: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'provider_daily_insights_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'provider_daily_insights_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'profiles'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+
       workflows: {
         Row: {
           id: string
@@ -1566,6 +1615,11 @@ export type Document = PublicSchemaTables['chat_documents']['Row']
 export type Chat = PublicSchemaTables['chats']['Row']
 export type Profile = PublicSchemaTables['profiles']['Row']
 export type Provider = PublicSchemaTables['providers']['Row']
+
+export type ProviderWithChild = PublicSchemaTables['providers']['Row'] & {
+  provider_daily_insights?: PublicSchemaTables['provider_daily_insights']['Row'][]
+}
+
 export type Workflow = PublicSchemaTables['workflows']['Row'] & {
   workflow_histories: WorkflowHistory[]
 }
