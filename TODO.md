@@ -1,8 +1,14 @@
 ## TODO
 
+### Done
 - Add LP reports
+
+### Pending
 - Display last workflow run and updated user name
-- Reconnect Mailer
+
+### Required
+- Debug Max Flow Count Logic
+- Reconnect Mailer If Workflow missed
 
 - Send DM debug
 
