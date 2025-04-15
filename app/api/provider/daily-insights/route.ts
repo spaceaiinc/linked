@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { Provider } from '@/lib/types/supabase'
 import { supabase } from '@/lib/utils/supabase/service'
 import { unipileClient } from '@/lib/unipile'
-
+// Import the email sending function (assuming path and name)
 // request param
 export type ProviderSearchProfilePostScheduleParam = {
   schedule_id?: string
@@ -97,40 +97,110 @@ export async function POST(req: Request) {
         return
       }
       // providersのfollower_countとconnecttion_countを取得してprovider_daily_insightsにinsert
-      const getProfileResponse = await unipileClient.users.getProfile({
-        account_id: provider.account_id,
-        identifier: provider.public_identifier,
-      })
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      if (!getProfileResponse || getProfileResponse === undefined) return
-      if (
-        'follower_count' in getProfileResponse &&
-        'connections_count' in getProfileResponse
-      ) {
-        console.log('getProfileResponse:', getProfileResponse)
-        // provider_idが存在する場合は、provider_daily_insightsにinsert
-        const {
-          data: insertProviderDailyInsightsData,
-          error: insertProviderDailyInsightsError,
-        } = await supabase.from('provider_daily_insights').insert([
-          {
-            company_id: provider.company_id,
-            provider_id: provider.id,
-            follower_count: getProfileResponse.follower_count,
-            connections_count: getProfileResponse.connections_count,
-          },
-        ])
-        if (insertProviderDailyInsightsError) {
-          console.error(
-            'Error inserting provider_daily_insights:',
-            insertProviderDailyInsightsError
-          )
-          return
+      try {
+        const getProfileResponse = await unipileClient.users.getProfile({
+          account_id: provider.account_id,
+          identifier: provider.public_identifier,
+        })
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        if (!getProfileResponse || getProfileResponse === undefined) return
+        if (
+          'follower_count' in getProfileResponse &&
+          'connections_count' in getProfileResponse
+        ) {
+          console.log('getProfileResponse:', getProfileResponse)
+          // provider_idが存在する場合は、provider_daily_insightsにinsert
+          const {
+            data: insertProviderDailyInsightsData,
+            error: insertProviderDailyInsightsError,
+          } = await supabase.from('provider_daily_insights').insert([
+            {
+              company_id: provider.company_id,
+              provider_id: provider.id,
+              follower_count: getProfileResponse.follower_count,
+              connections_count: getProfileResponse.connections_count,
+            },
+          ])
+          if (insertProviderDailyInsightsError) {
+            console.error(
+              'Error inserting provider_daily_insights:',
+              insertProviderDailyInsightsError
+            )
+            return
+          }
+          if (!insertProviderDailyInsightsData) {
+            console.error('insertProviderDailyInsightsData is null')
+            return
+          }
         }
-        if (!insertProviderDailyInsightsData) {
-          console.error('insertProviderDailyInsightsData is null')
-          return
-        }
+      } catch (error: any) {
+        // Add type 'any' or a more specific error type
+        console.error('Error in getProfileResponse:', error)
+        // Check for disconnected account error
+        // The error structure might vary, adjust the check as needed based on actual Unipile errors
+        // if (
+        //   error?.body?.type === 'errors/disconnected_account' ||
+        //   (error instanceof Error && error.message.includes('disconnected'))
+        // ) {
+        //   console.log(
+        //     `Account disconnected for provider ${provider.id}, sending reconnection email.`
+        //   )
+        //   try {
+        //     // Assuming provider object has user_id or similar identifier
+        //     // Adjust the identifier based on your actual Provider type definition
+        //     const userId = provider.user_id // Or provider.email, etc.
+        //     if (userId) {
+        //       const { data: profileData, error: profileError } = await supabase
+        //         .from('profiles')
+        //         .select('email')
+        //         .eq('id', userId)
+        //       if (profileError) {
+        //         console.error(
+        //           `Error fetching profile for user ${userId}:`,
+        //           profileError
+        //         )
+        //         return
+        //       }
+        //       if (!profileData || profileData.length === 0) {
+        //         console.error(
+        //           `No profile found for user ${userId}. Cannot send reconnection email.`
+        //         )
+        //         return
+        //       }
+        //       const profile = profileData[0] as Profile // Assuming email is a field in profiles
+        //       // Ensure sendReconnectionEmail is awaited if it's async
+        //       if (!profile.email) {
+        //         console.error(
+        //           `No email found for user ${userId}. Cannot send reconnection email.`
+        //         )
+        //         return
+        //       }
+        //       await sendReconnectionEmail({
+        //         toEmail: profile.email,
+        //         userName: profile.full_name,
+        //       })
+        //       console.log(
+        //         `Reconnection email sent for provider ${provider.id}.`
+        //       )
+        //     } else {
+        //       console.error(
+        //         `Could not send reconnection email: User identifier not found for provider ${provider.id}.`
+        //       )
+        //     }
+        //   } catch (emailError) {
+        //     console.error(
+        //       `Failed to send reconnection email for provider ${provider.id}:`,
+        //       emailError
+        //     )
+        //   }
+        //   // Continue to the next provider after handling the disconnected account
+        //   return // Use return inside forEach to skip to the next iteration
+        // }
+        // // Log other errors for debugging, but don't necessarily stop the loop unless critical
+        // console.error(
+        //   `Unhandled error processing provider ${provider.id}:`,
+        //   error
+        // )
       }
     })
 
