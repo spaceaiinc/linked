@@ -69,7 +69,7 @@ export async function POST(req: Request) {
           // utc
           .gt(
             'created_at',
-            new Date(new Date().getTime() - 24 * 60 * 60 * 1000).toISOString()
+            new Date(new Date().getTime() - 23 * 60 * 60 * 1000).toISOString()
           )
           .order('created_at', { ascending: false })
           .limit(1)
