@@ -20,6 +20,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  LineChart,
+  Line,
 } from 'recharts'
 import { PublicSchemaTables } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
@@ -220,7 +222,7 @@ export function LeadReport({
           Object.entries(statuses).forEach(([status, count]) => {
             // Make sure status is a valid number before parsing
             const statusNum = Number(status)
-            console.log('Status:', status, 'Count:', count)
+            // console.log('Status:', status, 'Count:', count)
             // Check if statusNum is a valid number
             if (!isNaN(statusNum)) {
               const statusName = getStatusName(statusNum)
@@ -305,12 +307,13 @@ export function LeadReport({
         setDailyInsights(last30DaysData)
 
         // Group data by week
+        // Group data by week, keeping only the latest entry for each week
         const weeklyData: Record<
           string,
           {
+            weekDate: Date // Store the actual date of the latest entry in the week
             follower_count: number
             connections_count: number
-            count: number
           }
         > = {}
 
@@ -331,28 +334,28 @@ export function LeadReport({
             // Format as YYYY-MM-DD
             const weekKey = startOfWeek.toISOString().split('T')[0]
 
-            if (!weeklyData[weekKey]) {
-              weeklyData[weekKey] = {
-                follower_count: 0,
-                connections_count: 0,
-                count: 0,
-              }
+            const currentInsightData = {
+              weekDate: date, // Store the actual date for comparison
+              follower_count: insight.follower_count || 0,
+              connections_count: insight.connections_count || 0,
             }
 
-            // Sum up the values for the week
-            weeklyData[weekKey].follower_count += insight.follower_count || 0
-            weeklyData[weekKey].connections_count +=
-              insight.connections_count || 0
-            weeklyData[weekKey].count += 1
+            // If this week isn't recorded yet, or if the current insight's date is later than the stored one for this week, update it.
+            if (
+              !weeklyData[weekKey] ||
+              date.getTime() > weeklyData[weekKey].weekDate.getTime()
+            ) {
+              weeklyData[weekKey] = currentInsightData
+            }
           }
         )
 
-        // Calculate averages and convert to array format for chart
+        // Convert to array format for chart using the latest data point of each week
         const weeklyInsightsArray: WeeklyInsight[] = Object.entries(weeklyData)
-          .map(([week, data]) => ({
-            week,
-            follower_count: Math.round(data.follower_count / data.count),
-            connections_count: Math.round(data.connections_count / data.count),
+          .map(([week, latestInsightData]) => ({
+            week, // 'week' is the weekKey (YYYY-MM-DD of the start of the week)
+            follower_count: latestInsightData.follower_count,
+            connections_count: latestInsightData.connections_count,
           }))
           .sort(
             (a, b) => new Date(a.week).getTime() - new Date(b.week).getTime()
@@ -513,7 +516,7 @@ export function LeadReport({
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
+                  <LineChart
                     data={weeklyInsights}
                     margin={{
                       top: 10,
@@ -527,17 +530,25 @@ export function LeadReport({
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="follower_count"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
                       name="フォロワー数"
-                      fill="#3b82f6"
+                      dot={false}
+                      activeDot={{ r: 8 }}
                     />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="connections_count"
+                      stroke="#22c55e" // Keep the green color from the original Bar
+                      strokeWidth={2}
                       name="つながり数"
-                      fill="#22c55e"
+                      dot={false}
+                      activeDot={{ r: 8 }}
                     />
-                  </BarChart>
+                  </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
@@ -570,7 +581,7 @@ export function LeadReport({
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
+                  <LineChart
                     data={dailyInsights}
                     margin={{
                       top: 10,
@@ -584,17 +595,25 @@ export function LeadReport({
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="follower_count"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
                       name="フォロワー数"
-                      fill="#3b82f6"
+                      dot={false}
+                      activeDot={{ r: 8 }}
                     />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="connections_count"
+                      stroke="#22c55e" // Keep the green color from the original Bar
+                      strokeWidth={2}
                       name="つながり数"
-                      fill="#22c55e"
+                      dot={false}
+                      activeDot={{ r: 8 }}
                     />
-                  </BarChart>
+                  </LineChart>
                 </ResponsiveContainer>
               )}
             </div>
