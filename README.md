@@ -36,7 +36,7 @@ TypeScript, React, Next.js, Page Router, jotai, Supabase, Postgresql, Google Clo
 　サービスの成長において、ミニマムでコア機能のみを開発してユーザーに使っていただいてフィードバックからPDCAを回すことが特に重要であると感じたため、ログイン、LinkedInのユーザーリスト抽出、つながり申請機能のみをとにかくシンプルな構成で開発してリリースすることを意識しました。そのため、技術スタックにおいてもTypescriptでフロント/バックエンドを作成、デプロイにはGoogleCloudのCloud Run、認証・DBにSupabaseといった低価格かつシンプルにデプロイが可能、FirebaseなどのNoSQLよりもRDBのため拡張性があるといった点で採用いたしました。
  
 ## URL
--サービス: https://linked.spaceai.jp
+- サービス: https://linked.spaceai.jp
 - 公開用ソースコード: https://github.com/spaceaiinc/linked
 - 開発記事: https://note.com/hideyuda/n/n3cbd468c4829
 - 開発詳細: https://docs.google.com/presentation/d/1FgKZEIrEXmmQzAU-ZXmPiYFbVX2Bh3nj7MXuzL2AjnQ/edit?usp=sharing
