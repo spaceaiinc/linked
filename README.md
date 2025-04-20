@@ -1,6 +1,45 @@
-# Linked
+# Linked - LinkedInリード獲得支援サービス
 
 ※Closedで開発しておりましたが、選考用に臨時でPublicにしております。データ・コードの悪用などご容赦ください。
+
+## 概要
+要件定義からリリースまで1ヶ月ほどで個人で開発いたしました。現在も機能開発・営業など日々運用しております。LinkedIn運用代行をしている知人から既存サービスのデメリットを知り、ニーズがあると感じてスタートしました。目的である知人の課題解決に加えて、現在3社のLinkedIn運用事業者に導入いただく形で成果を出すことができました。営業・事業開発面を含め4人で役割を分担しながら業務を経験しております。
+
+## 利用技術
+TypeScript, React, Next.js, Page Router, jotai, Supabase, Postgresql, Google Cloud(Firebase, Cloud Run, Cloud Load Balancer, etc)
+
+## チーム構成 
+1人
+
+## 担当領域 
+設計から実装、運用まで全て。
+
+## 機能・要件
+・プロフィールリスト抽出
+　→条件検索、特定企業・職種、投稿にいいねしたユーザーなどから抽出可能、指定時間に実行可能、500ユーザー/1回まで検索可能、CSVエクスポート
+
+・自動つながり申請
+　→指定時間に実行可能, 20ユーザー/1回まで検索可能
+
+・メッセージ送信
+　→AIエージェントでユーザーにパーソナライズしたDMを送信 
+　→各企業の要件に合わせたパーソナライズをするエージェントを開発
+
+## 頑張ったところ/工夫したところ
+　・ドメイン知識のキャッチアップ
+　ベンチマークにしたサービス(phantombuster、elay)のUI/UX、DB設計を徹底的に真似することを意識しました。また、LinkedIn運用にどのような機能が必要であるかが不透明であったため、運用をしている方からヒアリングすることや、実際に自ら手を動かしてキャッチアップしました。
+
+・拡張性のあるコーディング
+　サービスの要件定義を予め決めていたわけではなかったため、ベンチマークのサービスやヒアリングの意見から推測して今後必要そうな機能(複数LinkedInアカウントの連携、自動投稿下書き作成、定期実行でのいいねなど)に合わせたテーブル構成や、UI/UXを意識しました。
+
+・スピード性
+　サービスの成長において、ミニマムでコア機能のみを開発してユーザーに使っていただいてフィードバックからPDCAを回すことが特に重要であると感じたため、ログイン、LinkedInのユーザーリスト抽出、つながり申請機能のみをとにかくシンプルな構成で開発してリリースすることを意識しました。そのため、技術スタックにおいてもTypescriptでフロント/バックエンドを作成、デプロイにはGoogleCloudのCloud Run、認証・DBにSupabaseといった低価格かつシンプルにデプロイが可能、FirebaseなどのNoSQLよりもRDBのため拡張性があるといった点で採用いたしました。
+ 
+## URL
+-サービス: https://linked.spaceai.jp
+- 公開用ソースコード: https://github.com/spaceaiinc/linked
+- 開発記事: https://note.com/hideyuda/n/n3cbd468c4829
+- 開発詳細: https://docs.google.com/presentation/d/1FgKZEIrEXmmQzAU-ZXmPiYFbVX2Bh3nj7MXuzL2AjnQ/edit?usp=sharing
 
 ## Prerequisites
 
@@ -30,7 +69,12 @@ git clone https://github.com/spaceaiinc/linked.git
 npm install
 ```
 
-4. Run the development server:
+3. Run Suoabase
+```
+supabase start
+```
+
+5. Run the development server:
 
 ```bash
 npm run dev
