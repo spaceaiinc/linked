@@ -42,6 +42,7 @@ export default function Renderer({ children }: Props) {
         .from('profiles')
         .select('*')
         .eq('id', user?.id)
+        .eq('deleted_at', '-infinity')
         .single()
       if (selectProfileError) {
         console.error('Error selecting profile:', selectProfileError)
@@ -68,6 +69,7 @@ export default function Renderer({ children }: Props) {
         .from('providers')
         .select('*')
         .eq('company_id', profile?.company_id)
+        .eq('deleted_at', '-infinity')
         .order('updated_at', { ascending: false })
       if (selectProviderError) {
         console.error('Error selecting providers:', selectProviderError)
