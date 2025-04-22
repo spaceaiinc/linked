@@ -9,7 +9,7 @@
 要件定義からリリースまで1ヶ月ほどで個人で開発いたしました。現在も機能開発・営業など日々運用しております。LinkedIn運用代行をしている知人から既存サービスのデメリットを知り、ニーズがあると感じてスタートしました。目的である知人の課題解決に加えて、現在3社のLinkedIn運用事業者に導入いただく形で成果を出すことができました。営業・事業開発面を含め4人で役割を分担しながら業務を経験しております。
 
 ## 利用技術
-TypeScript, React, Next.js, Page Router, jotai, Supabase, Postgresql, Google Cloud(Firebase, Cloud Run, Cloud Load Balancer, etc)
+TypeScript, React, Next.js, Page Router, jotai, Supabase, Postgresql, Google Cloud(Firebase, Cloud Run, Cloud Load Balancer, etc), Vercel
 
 ## チーム構成 
 1人
