@@ -679,6 +679,11 @@ export async function POST(req: Request) {
                 url: param.search_url,
               }
             }
+          } else {
+            searchProfileBody = {
+              api: 'classic',
+              category: 'people',
+            }
           }
 
           console.log('searchProfileBody', searchProfileBody)
