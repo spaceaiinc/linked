@@ -1,6 +1,4 @@
 import { SupabaseClient } from '@supabase/supabase-js'
-import { LeadStatus } from './master'
-import { run } from 'node:test'
 
 export type Json =
   | string
