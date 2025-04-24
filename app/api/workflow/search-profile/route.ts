@@ -254,7 +254,7 @@ export async function POST(req: Request) {
               identifier: publicIdentifier,
               linkedin_sections: '*',
             })
-            await new Promise((resolve) => setTimeout(resolve, 500))
+            await new Promise((resolve) => setTimeout(resolve, 700))
             if (!getProfileResponse || getProfileResponse === undefined) return
 
             let leadStatus = LeadStatus.SEARCHED
@@ -271,7 +271,7 @@ export async function POST(req: Request) {
                 account_id: param.account_id,
                 provider_id: getProfileResponse.provider_id,
               }
-              await new Promise((resolve) => setTimeout(resolve, 500))
+              await new Promise((resolve) => setTimeout(resolve, 700))
               if (param.invitation_message)
                 sendInvitationParam.message = param.invitation_message
               unipileClient.users
@@ -283,19 +283,30 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-                .catch((error) => {
+                .catch(async (error) => {
                   // error type ref: https://developer.unipile.com/reference/userscontroller_adduserbyidentifier
-                  if (error?.body?.type === 'errors/already_invited_recently') {
+                  if (
+                    error?.body?.type === 'errors/already_invited_recently' ||
+                    error?.body?.type === 'errors/cannot_invite_attendee'
+                  ) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
                     leadStatus = LeadStatus.ALREADY_INVITED
+                  } else if (
+                    error?.body?.type === 'errors/invalid_recipient' ||
+                    error?.body?.type === 'errors/cannot_resend_yet' ||
+                    error?.body?.type === 'errors/provider_error'
+                  ) {
+                    // wait for 5 seconds
+                    console.log('provider rate limit error' + error)
+                    await new Promise((resolve) => setTimeout(resolve, 5000))
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 500))
+              await new Promise((resolve) => setTimeout(resolve, 700))
             }
 
             const unipileProfile: unipileProfileWithStatus = {
@@ -380,7 +391,7 @@ export async function POST(req: Request) {
               linkedin_sections: '*',
             })
 
-            await new Promise((resolve) => setTimeout(resolve, 500))
+            await new Promise((resolve) => setTimeout(resolve, 700))
             let leadStatus = LeadStatus.SEARCHED
             if (
               param.type === WorkflowType.INVITE &&
@@ -408,18 +419,26 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-                .catch((error) => {
+                .catch(async (error) => {
                   if (error?.body?.type === 'errors/already_invited_recently') {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
                     leadStatus = LeadStatus.ALREADY_INVITED
+                  } else if (
+                    error?.body?.type === 'errors/invalid_recipient' ||
+                    error?.body?.type === 'errors/cannot_resend_yet' ||
+                    error?.body?.type === 'errors/provider_error'
+                  ) {
+                    // wait for 5 seconds
+                    console.log('provider rate limit error' + error)
+                    await new Promise((resolve) => setTimeout(resolve, 5000))
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 500))
+              await new Promise((resolve) => setTimeout(resolve, 700))
             }
 
             unipileProfilesWithStatus.push({
@@ -451,18 +470,26 @@ export async function POST(req: Request) {
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-                .catch((error) => {
+                .catch(async (error) => {
                   if (error?.body?.type === 'errors/already_invited_recently') {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
                     leadStatus = LeadStatus.ALREADY_INVITED
+                  } else if (
+                    error?.body?.type === 'errors/invalid_recipient' ||
+                    error?.body?.type === 'errors/cannot_resend_yet' ||
+                    error?.body?.type === 'errors/provider_error'
+                  ) {
+                    // wait for 5 seconds
+                    console.log('provider rate limit error' + error)
+                    await new Promise((resolve) => setTimeout(resolve, 5000))
                   } else {
                     console.error('Error in send invitation:', error)
                     leadStatus = LeadStatus.INVITED_FAILED
                   }
                 })
-              await new Promise((resolve) => setTimeout(resolve, 500))
+              await new Promise((resolve) => setTimeout(resolve, 700))
             }
 
             leadsWithStatus.push({
@@ -752,7 +779,7 @@ export async function POST(req: Request) {
             )
           }
 
-          await new Promise((resolve) => setTimeout(resolve, 500))
+          await new Promise((resolve) => setTimeout(resolve, 700))
           if (nextCursor === '') break
         }
 
@@ -818,7 +845,7 @@ export async function POST(req: Request) {
             }
 
             // 各リクエスト前に5秒待機
-            await new Promise((resolve) => setTimeout(resolve, 500))
+            await new Promise((resolve) => setTimeout(resolve, 700))
 
             // プロファイル取得
             try {
@@ -860,7 +887,7 @@ export async function POST(req: Request) {
                   account_id: param.account_id,
                   provider_id: profile.id,
                 }
-                await new Promise((resolve) => setTimeout(resolve, 500))
+                await new Promise((resolve) => setTimeout(resolve, 700))
                 if (param.invitation_message)
                   sendInvitationParam.message = param.invitation_message
                 unipileClient.users
@@ -873,7 +900,7 @@ export async function POST(req: Request) {
                       leadStatus = LeadStatus.INVITED_FAILED
                     }
                   })
-                  .catch((error) => {
+                  .catch(async (error) => {
                     if (
                       error?.body?.type === 'errors/already_invited_recently'
                     ) {
@@ -881,12 +908,20 @@ export async function POST(req: Request) {
                         'Skipping lead - invitation was already sent recently'
                       )
                       leadStatus = LeadStatus.ALREADY_INVITED
+                    } else if (
+                      error?.body?.type === 'errors/invalid_recipient' ||
+                      error?.body?.type === 'errors/cannot_resend_yet' ||
+                      error?.body?.type === 'errors/provider_error'
+                    ) {
+                      // wait for 5 seconds
+                      console.log('provider rate limit error' + error)
+                      await new Promise((resolve) => setTimeout(resolve, 5000))
                     } else {
                       console.error('Error in send invitation:', error)
                       leadStatus = LeadStatus.INVITED_FAILED
                     }
                   })
-                await new Promise((resolve) => setTimeout(resolve, 500))
+                await new Promise((resolve) => setTimeout(resolve, 700))
               }
 
               console.log('status', leadStatus)
@@ -954,7 +989,7 @@ export async function POST(req: Request) {
           account_id: param.account_id,
           identifier: param.search_reaction_profile_public_identifier,
         })
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        await new Promise((resolve) => setTimeout(resolve, 700))
         if (!getProfileResponse || getProfileResponse === undefined) return
         if ('provider_id' in getProfileResponse) {
           searchReactionProfilePrivateIdentifier =
@@ -968,7 +1003,7 @@ export async function POST(req: Request) {
         limit: param.limit_count * 3,
       })
       if (!getAllPostsResponse || getAllPostsResponse === undefined) return
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 700))
 
       const getAllPostCommentsPromises = getAllPostsResponse.items.map(
         async (post) => {
@@ -1023,7 +1058,7 @@ export async function POST(req: Request) {
             })
           })
 
-          await new Promise((resolve) => setTimeout(resolve, 500))
+          await new Promise((resolve) => setTimeout(resolve, 700))
         }
       )
 

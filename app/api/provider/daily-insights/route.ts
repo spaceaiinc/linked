@@ -114,7 +114,7 @@ export async function POST(req: Request) {
           console.log('getProfileResponse:', getProfileResponse)
           // provider_idが存在する場合は、provider_daily_insightsにinsert
           const {
-            data: insertProviderDailyInsightsData,
+            // data: insertProviderDailyInsightsData,
             error: insertProviderDailyInsightsError,
           } = await supabase.from('provider_daily_insights').insert([
             {
@@ -131,10 +131,10 @@ export async function POST(req: Request) {
             )
             return
           }
-          if (!insertProviderDailyInsightsData) {
-            console.error('insertProviderDailyInsightsData is null')
-            return
-          }
+          // if (!insertProviderDailyInsightsData) {
+          //   console.error('insertProviderDailyInsightsData is null')
+          //   return
+          // }
         }
       } catch (error: any) {
         // Add type 'any' or a more specific error type
