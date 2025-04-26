@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     const { data: providersData, error } = await supabase
       .from('providers')
       .select('*')
-    // .eq('deleted_at', '-infinity')
+      .eq('deleted_at', '-infinity')
     if (error) {
       return new Response(error.message, { status: 500 })
     }
