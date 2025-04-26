@@ -420,7 +420,10 @@ export async function POST(req: Request) {
                   }
                 })
                 .catch(async (error) => {
-                  if (error?.body?.type === 'errors/already_invited_recently') {
+                  if (
+                    error?.body?.type === 'errors/already_invited_recently' ||
+                    error?.body?.type === 'errors/cannot_invite_attendee'
+                  ) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
@@ -471,7 +474,10 @@ export async function POST(req: Request) {
                   }
                 })
                 .catch(async (error) => {
-                  if (error?.body?.type === 'errors/already_invited_recently') {
+                  if (
+                    error?.body?.type === 'errors/already_invited_recently' ||
+                    error?.body?.type === 'errors/cannot_invite_attendee'
+                  ) {
                     console.log(
                       'Skipping lead - invitation was already sent recently'
                     )
@@ -863,9 +869,18 @@ export async function POST(req: Request) {
                 })
                 unipileProfileList.push(getProfileResponse)
               }
-            } catch (error) {
+            } catch (getProfileErrorUnknown) {
+              const error = getProfileErrorUnknown as any
               console.error('Error fetching profile:', error)
               // エラーが発生しても処理を続行
+              if (
+                'body' in error &&
+                error?.body?.type === 'errors/invalid_recipient'
+              ) {
+                console.log('skip lead - invalid recipient')
+              } else {
+                console.error('Error in send invitation:', error)
+              }
             }
           }
 
@@ -902,7 +917,8 @@ export async function POST(req: Request) {
                   })
                   .catch(async (error) => {
                     if (
-                      error?.body?.type === 'errors/already_invited_recently'
+                      error?.body?.type === 'errors/already_invited_recently' ||
+                      error?.body?.type === 'errors/cannot_invite_attendee'
                     ) {
                       console.log(
                         'Skipping lead - invitation was already sent recently'

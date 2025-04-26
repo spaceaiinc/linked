@@ -16,19 +16,16 @@ export async function POST(req: Request) {
     // if (env.NEXT_PUBLIC_APP_ENV === 'production') {
     //   // Google-Cloud-Schedulerからのリクエストかどうかを確認
     //   const headers = req.headers
-    //   if (!headers.has('X-Appengine-Cron')) {
-    //   return NextResponse.json(
-    //     { error: 'Unauthorized request' },
-    //     { status: 401 }
-    //   )
-    // }
-    // Google-Cloud-Schedulerからのリクエストかどうかを確認
-    // const headers = req.headers
-    // if (!headers.has('X-Appengine-Cron')) {
-    //   return NextResponse.json(
-    //     { error: 'Unauthorized request' },
-    //     { status: 401 }
-    //   )
+    //   // User-Agent: Google-Cloud-Scheduler
+    //   if (
+    //     headers.get('User-Agent') !== 'Google-Cloud-Scheduler' ||
+    //     headers.get('application/octet-stream') !== 'application/octet-stream'
+    //   ) {
+    //     return NextResponse.json(
+    //       { error: 'Unauthorized request' },
+    //       { status: 401 }
+    //     )
+    //   }
     // }
     // param
     const rawParam = await req.json()
