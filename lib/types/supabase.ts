@@ -1450,6 +1450,128 @@ export type Database = {
           },
         ]
       }
+      scout_screenings: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          user_id: string
+          company_name: string
+          job_title: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          user_id: string
+          company_name?: string
+          job_title?: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          user_id?: string
+          company_name?: string
+          job_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'scout_screenings_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'scout_screenings_user_id_fkey'
+            columns: ['user_id']
+            isOneToOne: false
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      scout_screening_patterns: {
+        Row: {
+          id: string
+          company_id: string
+          created_at: string
+          updated_at: string
+          deleted_at: string
+          scout_screening_id: string
+          name: string
+          age_min: number
+          age_max: number
+          exclude_job_changes: number
+          has_management_experience: boolean
+          work_location_prefectures: string[]
+          other_conditions: string
+          subject: string
+          body: string
+          resend_subject: string
+          resend_body: string
+          re_resend_subject: string
+          re_resend_body: string
+        }
+        Insert: {
+          id?: string
+          company_id: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          scout_screening_id: string
+          name: string
+          age_min: number
+          age_max: number
+          exclude_job_changes: number
+          has_management_experience: boolean
+          work_location_prefectures: string[]
+          other_conditions: string
+          subject: string
+          body: string
+          resend_subject: string
+          resend_body: string
+          re_resend_subject: string
+          re_resend_body: string
+        }
+        Update: {
+          id?: string
+          company_id?: string
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string
+          scout_screening_id?: string
+          name?: string
+          age_min?: number
+          age_max?: number
+          exclude_job_changes?: number
+          has_management_experience?: boolean
+          work_location_prefectures?: string[]
+          other_conditions?: string
+          subject?: string
+          body?: string
+          resend_subject?: string
+          resend_body?: string
+          re_resend_subject?: string
+          re_resend_body?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'scout_screenings_company_id_fkey'
+            columns: ['company_id']
+            isOneToOne: false
+            referencedRelation: 'companies'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1660,6 +1782,13 @@ export type Lead = PublicSchemaTables['leads']['Row'] & {
   status?: number
   workflow_id?: string
 }
+
+export type ScoutScreening = PublicSchemaTables['scout_screenings']['Row'] & {
+  scout_screening_patterns: PublicSchemaTables['scout_screening_patterns']['Row'][]
+}
+
+export type ScoutScreeningPattern =
+  PublicSchemaTables['scout_screening_patterns']['Row']
 
 export type Tables<
   PublicTableNameOrOptions extends

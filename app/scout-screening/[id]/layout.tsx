@@ -1,5 +1,5 @@
 import { DashboardLayout } from '@/app/components/dashboard/Layout'
-import { toolConfig } from '@/app/scout-screening/toolConfig'
+import { toolConfig } from '@/app/scout-screening/[id]/toolConfig'
 
 export const metadata = {
   title: toolConfig.metadata.title,
@@ -8,7 +8,7 @@ export const metadata = {
     images: [toolConfig.metadata.og_image],
   },
   alternates: {
-    canonical: `${toolConfig.metadata.canonical}/app`,
+    canonical: `${toolConfig.metadata.canonical}`,
   },
 }
 
@@ -17,5 +17,5 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <DashboardLayout toolConfig={toolConfig}>{children}</DashboardLayout>
+  return <>{children}</>
 }

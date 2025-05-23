@@ -7,6 +7,7 @@ import {
   profileAtom,
   workflowsAtom,
   loadingAtom,
+  scoutScreeningsAtom,
 } from '@/lib/atom'
 import { Provider } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
@@ -23,6 +24,7 @@ export default function Renderer({ children }: Props) {
   const [, setProvider] = useAtom(providerAtom)
   const [, setProviders] = useAtom(providersAtom)
   const [, setWorkflows] = useAtom(workflowsAtom)
+  const [, setScoutScreenings] = useAtom(scoutScreeningsAtom)
   const [loading] = useAtom(loadingAtom)
   useEffect(() => {
     const f = async () => {
@@ -146,6 +148,29 @@ export default function Renderer({ children }: Props) {
       }
 
       setWorkflows(workflows)
+
+      const { data: scoutScreenings, error: selectScoutScreeningsError } =
+        await supabase
+          .from('scout_screenings') // Assuming the table name is 'scout_screenings'
+          .select('*')
+          .eq('company_id', profile?.company_id)
+          // .eq('provider_id', profile?.selected_provider_id) // Remove if provider_id is not relevant for scout_screenings
+          .eq('deleted_at', '-infinity')
+          .order('updated_at', { ascending: false })
+
+      if (selectScoutScreeningsError) {
+        console.error(
+          'Error selecting scout screenings:',
+          selectScoutScreeningsError
+        )
+        return <>{children}</>
+      }
+
+      if (!scoutScreenings) {
+        console.error('Scout screenings not found')
+        return <>{children}</>
+      }
+      setScoutScreenings(scoutScreenings)
     }
     f()
   }, [])
