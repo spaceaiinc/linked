@@ -118,6 +118,7 @@ export default function ScoutScreeningPage() {
       },
       condition: {
         hasManagementExperience: false,
+        workLocationPrefectures: [],
       },
     },
   ])
@@ -136,6 +137,7 @@ export default function ScoutScreeningPage() {
       },
       condition: {
         hasManagementExperience: false,
+        workLocationPrefectures: [],
       },
     }
     setPassPatterns([...passPatterns, newPattern])
@@ -197,10 +199,10 @@ export default function ScoutScreeningPage() {
 
       <Tabs defaultValue={passPatterns[0]?.id} className="space-y-4">
         <div className="flex items-center justify-between mb-4">
-          <TabsList className="grid grid-cols-auto gap-2 w-auto">
-            {passPatterns.map((pattern, index) => (
+          <TabsList className="flex flex-wrap gap-2 h-auto w-auto">
+            {passPatterns.map((pattern) => (
               <TabsTrigger key={pattern.id} value={pattern.id}>
-                パターン{index + 1}
+                {pattern.name}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -229,10 +231,10 @@ export default function ScoutScreeningPage() {
                     <Button
                       onClick={() => removePassPattern(pattern.id)}
                       size="sm"
-                      variant="destructive"
+                      variant="outline"
+                      className="text-gray-600 hover:text-gray-800 hover:bg-gray-100"
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      削除
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
@@ -351,7 +353,7 @@ export default function ScoutScreeningPage() {
                                 : undefined
                             )
                           }}
-                          className="w-4 h-4 border-gray-300 rounded text-blue-600 focus:ring-blue-500"
+                          className="w-4 h-4 border-gray-300 rounded text-gray-600 focus:ring-gray-500 accent-gray-400"
                         />
                         <label
                           htmlFor={`${pattern.id}-${prefecture}`}
@@ -402,7 +404,7 @@ export default function ScoutScreeningPage() {
                   <div className="space-y-2">
                     <Label>件名</Label>
                     <Input
-                      placeholder="例: 【重要】選考通過のお知らせ"
+                      placeholder="例: 【重要】面談日程調整のお知らせ"
                       value={pattern.emailTemplate.subject}
                       onChange={(e) =>
                         updateEmailTemplate(
@@ -431,7 +433,7 @@ export default function ScoutScreeningPage() {
                   <div className="space-y-2">
                     <Label>件名</Label>
                     <Input
-                      placeholder="例: 【再送】選考通過のお知らせ"
+                      placeholder="例: 【再送】面談日程調整のお知らせ"
                       value={pattern.emailTemplate.resendSubject}
                       onChange={(e) =>
                         updateEmailTemplate(
@@ -464,7 +466,7 @@ export default function ScoutScreeningPage() {
                   <div className="space-y-2">
                     <Label>件名</Label>
                     <Input
-                      placeholder="例: 【最終確認】選考通過のお知らせ"
+                      placeholder="例: 【最終確認】面談日程調整のお知らせ"
                       value={pattern.emailTemplate.reResendSubject}
                       onChange={(e) =>
                         updateEmailTemplate(
@@ -498,7 +500,11 @@ export default function ScoutScreeningPage() {
       </Tabs>
 
       <div className="mt-8 flex justify-end">
-        <Button onClick={handleSave} size="lg" className="text-white">
+        <Button
+          onClick={handleSave}
+          size="lg"
+          className="bg-primary text-white hover:bg-primary/90"
+        >
           設定を保存
         </Button>
       </div>
