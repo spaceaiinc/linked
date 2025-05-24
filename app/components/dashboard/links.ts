@@ -7,6 +7,7 @@ import {
   IconSubtask,
   IconIcons,
   IconTable,
+  IconSend,
 } from '@tabler/icons-react'
 import { IconMessage } from '../ui/icons'
 
@@ -46,6 +47,11 @@ export const navlinks: NavLink[] = [
   { href: '/dashboard', label: 'ダッシュボード', icon: IconHome },
   { href: '/workflow/create', label: 'フロー作成', icon: IconSubtask },
   { href: '/leads', label: 'リード', icon: IconTable },
+  {
+    href: '/scout-screening',
+    label: 'スカウト',
+    icon: IconSend,
+  },
   // { href: '/similar-leads', label: '類似候補者リスト', icon: IconFileText },
   // { href: '/chat', label: 'チャット', icon: IconMessage },
 ]

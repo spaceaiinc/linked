@@ -4,25 +4,24 @@ import { ToolConfig } from '@/lib/types/toolconfig'
 export const toolConfig: ToolConfig = {
   ////// Base config
   company: {
-    name: 'Dashboard',
+    name: 'Scout Screening',
     theme: '',
     homeUrl: '/',
-    appUrl: '/dashboard',
-    description: 'Linked',
+    appUrl: '/scout-screening',
+    description: 'Scout Screening Automation',
     logo: 'https://cdn2.iconfinder.com/data/icons/privacy-policy/512/privacy-data-policy-security-05-512.png',
     navbarLinks: [
-      { label: 'App', href: `/dashboard` },
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Scout Screening', href: '/scout-screening' },
       { label: 'Home', href: '/' },
-      // { label: 'Other apps', href: '/apps' },
-      // { label: 'Blog', href: '/blog' },
     ],
   },
   ////// SEO stuff
   metadata: {
-    title: 'Linked | Space AI',
-    description: 'Linked',
+    title: 'Scout Screening | Linked',
+    description: '候補者の自動スクリーニング設定',
     og_image: 'https://linked.spaceai.jp/og.png',
-    canonical: 'https://linked.spaceai.jp/dashboard',
+    canonical: 'https://linked.spaceai.jp/scout-screening',
   },
 
   ////// Paywall
@@ -30,7 +29,7 @@ export const toolConfig: ToolConfig = {
   credits: 5,
 
   ////// Location
-  toolPath: '(apps)/linkedin',
+  toolPath: 'scout-screening',
 
   ////// AI config
   aiModel: '',
@@ -39,9 +38,9 @@ export const toolConfig: ToolConfig = {
   ////// Form input
   type: 'groq',
   fields: [],
-  submitText: '実行',
-  submitTextGenerating: '実行中',
-  responseTitle: '処理が完了しました',
+  submitText: '保存',
+  submitTextGenerating: '保存中',
+  responseTitle: '設定を保存しました',
   responseSubTitle: '',
 
   ////// UI config

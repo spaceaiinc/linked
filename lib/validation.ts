@@ -110,6 +110,15 @@ export const createWorkflowSchema = yup.object({
 export type CreateWorkflowParam = yup.InferType<typeof createWorkflowSchema>
 
 // yupのスキーマ定義
+export const createScoutScreeningSchema = yup.object({
+  account_id: yup.string().required('Account ID is required'),
+})
+
+export type CreateScoutScreeningParam = yup.InferType<
+  typeof createScoutScreeningSchema
+>
+
+// yupのスキーマ定義
 export const searchProfileSchema = yup
   .object({
     // 必須フィールド
