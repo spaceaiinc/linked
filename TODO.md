@@ -5,17 +5,17 @@
 - Add LP reports
 - Scout Screening Page
   - debug delete flow
+  - Scout Pattern update
 
 ### Required (High -> Low)
 
 - Scout Screening Page
+  - Open AI API key
   - run batch query at renderer
-  - create tables scout_companies
-  - debug delete flow
-  - update pattern name increment
   - Drizzle ORM
-  - Scout Pattern update
   - GPT Prompt
+  - create tables scout_companies
+
 - Debug Max Flow Count Logic
 
 - Send DM debug
