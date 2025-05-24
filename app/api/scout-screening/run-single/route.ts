@@ -107,15 +107,6 @@ export async function POST(req: Request) {
       let reason = ''
       try {
         console.log('pattern', pattern)
-        // condition内の条件ごとにAIで評価する
-        // 1. 年齢ごと行職種経験などをAIによって分ける
-        const { text: conditions } = await generateText({
-          model: customModel('gpt-o3'),
-          system: `You are a strict JSON evaluator. Return JSON "+{ \"passed\": true|false, \"reason\": string }+" where passed is true only when the candidate fully satisfies ALL conditions. Do not provide any additional keys.`,
-          prompt: `candidate_info:\n${JSON.stringify(infoObj, null, 2)}\n\nconditions:\n${pattern.conditions}`,
-        })
-        // 2. それぞれの条件をAIによって評価する
-
         const { text } = await generateText({
           model: customModel('gpt-o3'),
           system: `You are a strict JSON evaluator. Return JSON "+{ \"passed\": true|false, \"reason\": string }+" where passed is true only when the candidate fully satisfies ALL conditions. Do not provide any additional keys.`,
