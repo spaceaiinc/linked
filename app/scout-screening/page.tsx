@@ -8,6 +8,9 @@ import LoadingPage from '@/app/components/Loading'
 import Login from '@/app/components/input/login'
 import { createClient } from '@/lib/utils/supabase/client'
 import { ScoutScreening } from '@/lib/atom'
+import Link from 'next/link'
+import { IconShare } from '@/app/components/ui/icons'
+import { IconChevronRight, IconSend, IconEdit } from '@tabler/icons-react'
 
 export default function ScoutScreeningsPage() {
   // 縦並びのレイアウトを返す関数
@@ -19,8 +22,6 @@ export default function ScoutScreeningsPage() {
     {
       type: 0,
       title: 'スカウトスクリーニング',
-      tags: [],
-      image: '/apps/linkedin-logo.jpg',
       description: 'スカウトスクリーニングを作成します。',
     },
   ]
@@ -141,67 +142,76 @@ export default function ScoutScreeningsPage() {
                       //   return null
                       // }
                       return (
-                        <a
+                        <Link
                           key={index}
                           href={`/scout-screening/${screening.id}`}
                           className="w-full"
                         >
                           <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
-                            {/* 左側：画像 */}
-                            <div className="w-1/3 pr-4">
-                              <img
-                                src={'/apps/linkedin-logo.jpg'}
-                                alt={screening.name}
-                                className="w-full h-auto border border-base-200 rounded-md"
-                              />
+                            {/* 左側：アイコン */}
+                            <div className="w-1/3 pr-4 flex justify-center items-center">
+                              <div className="w-16 h-16 rounded-md flex items-center justify-center">
+                                <IconSend className="h-8 w-8" />
+                              </div>
                             </div>
                             {/* 右側：テキスト情報 */}
                             <div className="w-2/3 flex flex-col">
                               <div className="flex justify-between items-start">
                                 <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                                  {screening.name}
+                                  {screening.company_name}
                                 </h3>
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                    if (
-                                      confirm(
-                                        `スカウトスクリーニング「${screening.name}」を削除しますか？`
-                                      )
-                                    ) {
-                                      deleteScoutScreening(screening.id)
-                                    }
-                                  }}
-                                  className="text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md"
-                                  aria-label="Delete scout screening"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+
+                                <div className="flex flex-col gap-1">
+                                  <Link
+                                    href={`/scout-screening/${screening.id}/edit`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md flex items-center justify-center"
+                                    aria-label="Edit scout screening"
                                   >
-                                    <path d="M3 6h18" />
-                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                    <line x1="10" y1="11" x2="10" y2="17" />
-                                    <line x1="14" y1="11" x2="14" y2="17" />
-                                  </svg>
-                                </button>
+                                    <IconEdit size={16} />
+                                  </Link>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      if (
+                                        confirm(
+                                          `スカウトスクリーニング「${screening.name}」を削除しますか？`
+                                        )
+                                      ) {
+                                        deleteScoutScreening(screening.id)
+                                      }
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md"
+                                    aria-label="Delete scout screening"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M3 6h18" />
+                                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                      <line x1="10" y1="11" x2="10" y2="17" />
+                                      <line x1="14" y1="11" x2="14" y2="17" />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
-                              <p className="text-sm text-neutral-500 mt-1">
-                                {screening.company_name}
-                              </p>
                               <p className="text-sm text-neutral-500 mt-1">
                                 {screening.job_title}
                               </p>
-                              <div className="mt-4 flex gap-y-1 flex-wrap">
+                              {/* <div className="mt-4 flex gap-y-1 flex-wrap">
                                 <span
                                   key={screening.type}
                                   className="border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl"
@@ -212,10 +222,10 @@ export default function ScoutScreeningsPage() {
                                     ]
                                   }
                                 </span>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
-                        </a>
+                        </Link>
                       )
                     })}
                   </div>
@@ -239,15 +249,11 @@ export default function ScoutScreeningsPage() {
                       className="w-full cursor-pointer"
                     >
                       <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
-                        {/* 左側：画像 */}
-                        <div className="w-1/3 pr-4">
-                          {toolItem.image && (
-                            <img
-                              src={toolItem.image}
-                              alt={toolItem.title}
-                              className="w-full h-auto border border-base-200 rounded-md"
-                            />
-                          )}
+                        {/* 左側：アイコン */}
+                        <div className="w-1/3 pr-4 flex justify-center items-center">
+                          <div className="w-16 h-16 rounded-md flex items-center justify-center">
+                            <IconSend className="h-8 w-8" />
+                          </div>
                         </div>
                         {/* 右側：テキスト情報 */}
                         <div className="w-2/3 flex flex-col">
@@ -258,14 +264,14 @@ export default function ScoutScreeningsPage() {
                             {toolItem.description}
                           </p>
                           <div className="mt-4 flex gap-2 flex-wrap">
-                            {toolItem.tags.map((tag, index) => (
+                            {/* {toolItem.tags.map((tag, index) => (
                               <span
                                 key={tag}
                                 className="border bg-base-100 text-base-content py-1 px-3 text-sm rounded-xl"
                               >
                                 {tag}
                               </span>
-                            ))}
+                            ))} */}
                           </div>
                         </div>
                       </div>

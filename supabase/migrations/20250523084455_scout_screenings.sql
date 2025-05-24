@@ -26,7 +26,7 @@ CREATE TABLE public.scout_screening_patterns (
   exclude_job_changes SMALLINT NOT NULL DEFAULT 0,
   has_management_experience BOOLEAN NOT NULL DEFAULT FALSE,
   work_location_prefectures SMALLINT[] NOT NULL DEFAULT '{}',
-  other_conditions TEXT NOT NULL DEFAULT '',
+  conditions TEXT NOT NULL DEFAULT '',
   subject TEXT NOT NULL DEFAULT '',
   body TEXT NOT NULL DEFAULT '',
   resend_subject TEXT NOT NULL DEFAULT '',
@@ -61,6 +61,18 @@ INSERT WITH CHECK (
     )
   );
 
+CREATE POLICY "user can update scout_screenings for their company" ON public.scout_screenings FOR
+UPDATE USING (
+    (user_id = auth.uid())
+    AND (
+      company_id = (
+        SELECT p.company_id
+        FROM public.profiles p
+        WHERE p.id = auth.uid()
+      )
+    )
+  );
+
 
 CREATE POLICY "user can insert scout_screening_patterns for their company" ON public.scout_screening_patterns FOR
 INSERT WITH CHECK (
@@ -82,6 +94,24 @@ INSERT WITH CHECK (
         )
     )
   );
+
+CREATE POLICY "user can update scout_screening_patterns for their company" ON public.scout_screening_patterns FOR
+UPDATE USING (
+  company_id = (
+    SELECT p.company_id
+    FROM public.profiles p
+    WHERE p.id = auth.uid()
+  )
+  AND scout_screening_id IN (
+    SELECT ss.id
+    FROM public.scout_screenings ss
+    WHERE ss.company_id = (
+      SELECT p2.company_id
+      FROM public.profiles p2
+      WHERE p2.id = auth.uid()
+    )
+  )
+);
 
 CREATE POLICY "user can select scout_screenings their company has" ON public.scout_screenings FOR
 SELECT USING (

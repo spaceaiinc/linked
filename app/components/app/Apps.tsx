@@ -8,6 +8,7 @@ import { Button } from '../ui/button'
 import LoadingPage from '../Loading'
 import Login from '../input/login'
 import { createClient } from '@/lib/utils/supabase/client'
+import Link from 'next/link'
 
 export default function Apps() {
   // 縦並びのレイアウトを返す関数
@@ -131,7 +132,7 @@ export default function Apps() {
                         return null
                       }
                       return (
-                        <a
+                        <Link
                           key={index}
                           href={'/workflow/' + workflow.id}
                           className="w-full"
@@ -195,7 +196,7 @@ export default function Apps() {
                               </div>
                             </div>
                           </div>
-                        </a>
+                        </Link>
                       )
                     })}
                   </div>

@@ -1,18 +1,32 @@
 ## TODO
 
 ### Done
+
 - Add LP reports
+- Scout Screening Page
+  - debug delete flow
 
-### Pending
-- Display last workflow run and updated user name
+### Required (High -> Low)
 
-### Required
+- Scout Screening Page
+  - run batch query at renderer
+  - create tables scout_companies
+  - debug delete flow
+  - update pattern name increment
+  - Drizzle ORM
+  - Scout Pattern update
+  - GPT Prompt
 - Debug Max Flow Count Logic
-- Reconnect Mailer If Workflow missed
 
 - Send DM debug
-
+- Migrate Batch API flows to Supabase functions
 - Draft Posts
-- Chrome Extension to send message
+- Reconnect Mailer If Workflow missed
 
-- Stripe
+### Pending
+
+- Display last workflow run and updated user name
+
+### Archived
+
+- Chrome Extension to send message

@@ -154,7 +154,6 @@ export default function Renderer({ children }: Props) {
           .from('scout_screenings') // Assuming the table name is 'scout_screenings'
           .select('*')
           .eq('company_id', profile?.company_id)
-          // .eq('provider_id', profile?.selected_provider_id) // Remove if provider_id is not relevant for scout_screenings
           .eq('deleted_at', '-infinity')
           .order('updated_at', { ascending: false })
 

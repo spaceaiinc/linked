@@ -1511,8 +1511,8 @@ export type Database = {
           age_max: number
           exclude_job_changes: number
           has_management_experience: boolean
-          work_location_prefectures: string[]
-          other_conditions: string
+          work_location_prefectures: number[]
+          conditions: string
           subject: string
           body: string
           resend_subject: string
@@ -1532,8 +1532,8 @@ export type Database = {
           age_max: number
           exclude_job_changes: number
           has_management_experience: boolean
-          work_location_prefectures: string[]
-          other_conditions: string
+          work_location_prefectures: number[]
+          conditions: string
           subject: string
           body: string
           resend_subject: string
@@ -1553,8 +1553,8 @@ export type Database = {
           age_max?: number
           exclude_job_changes?: number
           has_management_experience?: boolean
-          work_location_prefectures?: string[]
-          other_conditions?: string
+          work_location_prefectures?: number[]
+          conditions?: string
           subject?: string
           body?: string
           resend_subject?: string
