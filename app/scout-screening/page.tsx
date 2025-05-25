@@ -9,10 +9,10 @@ import Login from '@/app/components/input/login'
 import { createClient } from '@/lib/utils/supabase/client'
 import { ScoutScreening } from '@/lib/atom'
 import Link from 'next/link'
-import { IconShare } from '@/app/components/ui/icons'
-import { IconChevronRight, IconSend, IconEdit } from '@tabler/icons-react'
+import { IconSend, IconEdit } from '@tabler/icons-react'
 
 export default function ScoutScreeningsPage() {
+  // setScoutScreenings(scoutScreenings)
   // 縦並びのレイアウトを返す関数
   const getGridClass = () => {
     return 'flex flex-col gap-6 w-full max-w-4xl mx-auto'
@@ -28,7 +28,7 @@ export default function ScoutScreeningsPage() {
 
   const [user, _] = useAtom(userAtom)
   const [provider, __] = useAtom(providerAtom)
-  const [scoutScreenings, ___] = useAtom(scoutScreeningsAtom)
+  const [scoutScreenings, setScoutScreenings] = useState<ScoutScreening[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -43,6 +43,35 @@ export default function ScoutScreeningsPage() {
     }, 5000)
     return () => clearTimeout(timeoutId)
   }, [user, provider])
+
+  useEffect(() => {
+    const fetchScoutScreenings = async () => {
+      if (!provider || !provider.company_id) {
+        return
+      }
+      const supabase = createClient()
+      const { data: scoutScreenings, error: selectScoutScreeningsError } =
+        await supabase
+          .from('scout_screenings') // Assuming the table name is 'scout_screenings'
+          .select('*')
+          .eq('company_id', provider?.company_id)
+          .eq('deleted_at', '-infinity')
+          .order('updated_at', { ascending: false })
+      if (selectScoutScreeningsError) {
+        console.error(
+          'Error selecting scout screenings:',
+          selectScoutScreeningsError
+        )
+      }
+
+      if (!scoutScreenings) {
+        console.error('Scout screenings not found')
+      }
+
+      setScoutScreenings(scoutScreenings as ScoutScreening[])
+    }
+    fetchScoutScreenings()
+  }, [provider])
 
   const createScoutScreening = useCallback(
     async (type: WorkflowType) => {
@@ -129,11 +158,11 @@ export default function ScoutScreeningsPage() {
         </div>
       ) : provider ? (
         <>
-          {scoutScreenings.length > 0 && (
+          {scoutScreenings?.length > 0 && (
             <section id="scout-screenings">
               <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
                 <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                  保存済みスカウト判定条件
+                  スカウト判定条件
                 </h2>
                 <div className="py-10 w-full flex justify-center">
                   <div className={getGridClass()}>
@@ -157,9 +186,14 @@ export default function ScoutScreeningsPage() {
                             {/* 右側：テキスト情報 */}
                             <div className="w-2/3 flex flex-col">
                               <div className="flex justify-between items-start">
-                                <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                                  {screening.company_name}
-                                </h3>
+                                <div className=" mt-0.8">
+                                  <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
+                                    {screening.job_title}
+                                  </h3>
+                                  <p className="text-sm text-neutral-500 mt-1">
+                                    {screening.company_name}
+                                  </p>
+                                </div>
 
                                 <div className="flex flex-col gap-1">
                                   <Link
@@ -208,9 +242,7 @@ export default function ScoutScreeningsPage() {
                                   </button>
                                 </div>
                               </div>
-                              <p className="text-sm text-neutral-500 mt-1">
-                                {screening.job_title}
-                              </p>
+
                               {/* <div className="mt-4 flex gap-y-1 flex-wrap">
                                 <span
                                   key={screening.type}

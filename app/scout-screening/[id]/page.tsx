@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { IconSend } from '@tabler/icons-react'
 
@@ -16,6 +16,7 @@ import {
 import { Label } from '@/app/components/ui/label'
 import { IconCopy, IconCheck } from '@/app/components/ui/icons'
 import { useCopyToClipboard } from '@/lib/hooks/copyToClipboard'
+import { createClient } from '@/lib/utils/supabase/client'
 
 interface ScreeningResult {
   passed: 'ok' | 'ng'
@@ -33,6 +34,11 @@ interface ScreeningResult {
     original_conditions: string | null
     reason: string
   }[]
+}
+
+type ScreeningInfo = {
+  job_title: string
+  company_name: string
 }
 
 function CopyButton({ text }: { text?: string }) {
@@ -63,6 +69,39 @@ export default function ScoutScreeningRunPage() {
   const [candidateInfo, setCandidateInfo] = useState('')
   const [result, setResult] = useState<ScreeningResult | null>(null)
   const [loading, setLoading] = useState(false)
+  const [screening, setScreening] = useState<ScreeningInfo | null>(null)
+
+  // Fetch scout screening details (job_title and company_name)
+  useEffect(() => {
+    const fetchScreening = async () => {
+      if (!id) return
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase
+          .from('scout_screenings')
+          .select('job_title, company_name')
+          .eq('id', id)
+          .eq('deleted_at', '-infinity')
+          .single()
+
+        if (error) {
+          console.error('Error fetching scout screening', error)
+          return
+        }
+
+        if (data) {
+          setScreening({
+            job_title: data.job_title || '',
+            company_name: data.company_name || '',
+          })
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching scout screening', err)
+      }
+    }
+
+    fetchScreening()
+  }, [id])
 
   const handleExecute = async () => {
     if (!id) return
@@ -95,7 +134,14 @@ export default function ScoutScreeningRunPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-4">スカウト判定</h1>
+      <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
+        スカウト判定
+        {screening && (
+          <span className="text-lg font-normal text-gray-600 whitespace-nowrap">
+            {screening.job_title} / {screening.company_name}
+          </span>
+        )}
+      </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Input side */}
