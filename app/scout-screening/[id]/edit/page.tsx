@@ -54,7 +54,7 @@ const createDefaultScoutScreeningPattern = (
   scoutScreeningId?: string,
   priority: number = 0
 ): PatternWithPriority => ({
-  id: '',
+  id: `${Date.now().toString()}-${Math.random().toString(36).substring(2, 9)}`,
   name: `合格パターン${Math.floor(Math.random() * 100) + 1}`,
   company_id: companyId || '',
   scout_screening_id: scoutScreeningId || '',
@@ -84,6 +84,8 @@ export default function ScoutScreeningPage() {
   const [isLoading, setIsLoading] = useState(true)
   // ドラッグ＆ドロップ用にドラッグ開始インデックスを保持
   const [dragStartIndex, setDragStartIndex] = useState<number | null>(null)
+  // アクティブなタブを管理
+  const [activeTab, setActiveTab] = useState<string>('')
 
   useEffect(() => {
     const fetchScreeningData = async () => {
@@ -256,6 +258,13 @@ export default function ScoutScreeningPage() {
     fetchScreeningData()
   }, [id])
 
+  // patternsが更新されたときにactiveTabを設定
+  useEffect(() => {
+    if (patterns.length > 0 && !activeTab) {
+      setActiveTab(patterns[0].id)
+    }
+  }, [patterns, activeTab])
+
   const renumberPriorities = (list: PatternWithPriority[]) =>
     list.map((p, idx) => ({ ...p, priority: idx }))
 
@@ -268,13 +277,21 @@ export default function ScoutScreeningPage() {
       patterns.length
     )
     newPattern.name = `合格${patterns.length + 1}`
-    setScoutScreeningPatterns(renumberPriorities([...patterns, newPattern]))
+    const updatedPatterns = renumberPriorities([...patterns, newPattern])
+    setScoutScreeningPatterns(updatedPatterns)
+    setActiveTab(newPattern.id)
   }
 
   const removeScoutScreeningPattern = (patternId: string) => {
-    setScoutScreeningPatterns(
-      renumberPriorities(patterns.filter((pattern) => pattern.id !== patternId))
+    const updatedPatterns = renumberPriorities(
+      patterns.filter((pattern) => pattern.id !== patternId)
     )
+    setScoutScreeningPatterns(updatedPatterns)
+
+    // 削除されたパターンがアクティブタブだった場合、最初のパターンをアクティブにする
+    if (activeTab === patternId && updatedPatterns.length > 0) {
+      setActiveTab(updatedPatterns[0].id)
+    }
   }
 
   const updateScoutScreeningPattern = (
@@ -407,8 +424,10 @@ export default function ScoutScreeningPage() {
     const updated = [...patterns]
     const [removed] = updated.splice(dragStartIndex, 1)
     updated.splice(dropIndex, 0, removed)
-    setScoutScreeningPatterns(renumberPriorities(updated))
+    const renumberedPatterns = renumberPriorities(updated)
+    setScoutScreeningPatterns(renumberedPatterns)
     setDragStartIndex(null)
+    // アクティブタブは変更しない（現在選択されているパターンを維持）
   }
 
   return (
@@ -454,7 +473,8 @@ export default function ScoutScreeningPage() {
           </Card>
 
           <Tabs
-            defaultValue={patterns[0]?.id || 'new_pattern_placeholder'}
+            value={activeTab}
+            onValueChange={setActiveTab}
             className="space-y-4"
           >
             {/* 優先順位の説明 */}
@@ -565,7 +585,7 @@ export default function ScoutScreeningPage() {
                             original_conditions: e.target.value,
                           })
                         }
-                        rows={4}
+                        rows={20}
                       />
                     </div>
                   </CardContent>
