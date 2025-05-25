@@ -10,6 +10,7 @@
 ### Required (High -> Low)
 
 - Scout Screening Page
+
   - Open AI API key
   - run batch query at renderer
   - Drizzle ORM
@@ -30,3 +31,7 @@
 ### Archived
 
 - Chrome Extension to send message
+
+採用のスカウト送信文のスクリーニングを自動化するAIエージェントを作成するサービスを作りたいと考えています。
+
+プロト開発なのでLinked上に追加してます

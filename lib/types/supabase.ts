@@ -1507,12 +1507,7 @@ export type Database = {
           deleted_at: string
           scout_screening_id: string
           name: string
-          age_min: number
-          age_max: number
-          exclude_job_changes: number
-          has_management_experience: boolean
-          work_location_prefectures: number[]
-          conditions: string
+          original_conditions: string
           subject: string
           body: string
           resend_subject: string
@@ -1528,12 +1523,7 @@ export type Database = {
           deleted_at?: string
           scout_screening_id: string
           name: string
-          age_min: number
-          age_max: number
-          exclude_job_changes: number
-          has_management_experience: boolean
-          work_location_prefectures: number[]
-          conditions: string
+          original_conditions: string
           subject: string
           body: string
           resend_subject: string
@@ -1549,12 +1539,7 @@ export type Database = {
           deleted_at?: string
           scout_screening_id?: string
           name?: string
-          age_min?: number
-          age_max?: number
-          exclude_job_changes?: number
-          has_management_experience?: boolean
-          work_location_prefectures?: number[]
-          conditions?: string
+          original_conditions?: string
           subject?: string
           body?: string
           resend_subject?: string

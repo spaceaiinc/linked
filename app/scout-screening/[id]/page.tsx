@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
+import { IconSend } from '@tabler/icons-react'
 
 import { Textarea } from '@/app/components/ui/textarea'
 import { Button } from '@/app/components/ui/button'
@@ -27,6 +28,11 @@ interface ScreeningResult {
   resend_body?: string
   re_resend_subject?: string
   re_resend_body?: string
+  original_conditions?: string | null
+  failedPatterns?: {
+    original_conditions: string | null
+    reason: string
+  }[]
 }
 
 function CopyButton({ text }: { text?: string }) {
@@ -89,30 +95,35 @@ export default function ScoutScreeningRunPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-4">スカウトスクリーニング実行</h1>
+      <h1 className="text-3xl font-bold mb-4">スカウト判定</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Input side */}
         <Card className="h-fit">
           <CardHeader>
             <CardTitle>候補者情報</CardTitle>
-            <CardDescription>
-              候補者の情報を入力してください。JSON形式でも自由形式でも構いません。
-            </CardDescription>
+            <CardDescription>候補者の情報を入力してください。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
               value={candidateInfo}
               onChange={(e) => setCandidateInfo(e.target.value)}
-              placeholder='{"candidate_name_id":"河村 太郎 123","current_position":"フロントエンドエンジニア","age":"28","achievement":"React歴5年"}'
+              placeholder=""
               className="min-h-[200px]"
             />
-            <Button
-              onClick={handleExecute}
-              disabled={loading || !candidateInfo}
-            >
-              {loading ? '実行中...' : 'Execute'}
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                onClick={handleExecute}
+                disabled={loading || !candidateInfo}
+                className="flex items-center gap-2"
+              >
+                {loading ? (
+                  '実行中...'
+                ) : (
+                  <IconSend className="h-4 w-4 text-white" />
+                )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -131,12 +142,21 @@ export default function ScoutScreeningRunPage() {
                   <CardTitle>スクリーニングを通過しました</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {result.original_conditions && (
+                    <div>
+                      <Label>条件</Label>
+                      <p className="whitespace-pre-wrap text-sm mt-1">
+                        {result.original_conditions}
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <Label>理由</Label>
                     <p className="whitespace-pre-wrap text-sm mt-1">
                       {result.reason || '全ての条件を満たしました'}
                     </p>
                   </div>
+
                   <div>
                     <div className="flex items-center gap-2">
                       <Label>件名</Label>
@@ -201,18 +221,57 @@ export default function ScoutScreeningRunPage() {
                   )}
                 </CardContent>
               </Card>
+
+              {result.failedPatterns && result.failedPatterns.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>不合格となったパターンと理由</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {result.failedPatterns.map((fp, idx) => (
+                      <div key={idx}>
+                        <Label>条件</Label>
+                        <p className="whitespace-pre-wrap text-sm mt-1">
+                          {fp.original_conditions || 'N/A'}
+                        </p>
+                        <Label className="mt-2">理由</Label>
+                        <p className="whitespace-pre-wrap text-sm mt-1">
+                          {fp.reason}
+                        </p>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
             </>
           )}
 
           {result && result.passed === 'ng' && (
             <Card>
               <CardHeader>
-                <CardTitle>スクリーニングに失敗しました</CardTitle>
+                <CardTitle>お見送り理由</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-wrap text-sm mt-1">
-                  {result.reason || '条件を満たしていません'}
-                </p>
+                {result.failedPatterns && result.failedPatterns.length > 0 ? (
+                  <div className="space-y-4 mt-4">
+                    {result.failedPatterns.map((fp, idx) => (
+                      <div key={idx}>
+                        <Label>条件</Label>
+                        <p className="whitespace-pre-wrap text-sm mt-1">
+                          {fp.original_conditions || 'N/A'}
+                        </p>
+                        <Label className="mt-2">理由</Label>
+                        <p className="whitespace-pre-wrap text-sm mt-1">
+                          {fp.reason}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="whitespace-pre-wrap text-sm mt-1">
+                    条件を満たしていません
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}

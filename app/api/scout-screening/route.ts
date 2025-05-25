@@ -6,7 +6,6 @@ import {
 import { createClient } from '@/lib/utils/supabase/server'
 import { createScoutScreeningSchema } from '@/lib/validation'
 import { NextResponse } from 'next/server'
-import { PREFECTURES } from '@/lib/utils/prefectures'
 
 export async function POST(req: Request) {
   const requestBody = await req.json()
@@ -108,13 +107,6 @@ export async function POST(req: Request) {
 
       // Map incoming patterns to DB schema, converting prefectures to indices
       const patternsPayload = (patterns as any[]).map((p) => {
-        const prefectureIndices = (p.work_location_prefectures || [])
-          .map((name: string | number) => {
-            const idx = PREFECTURES.indexOf(String(name))
-            return idx !== -1 ? idx : null
-          })
-          .filter((idx: number | null) => idx !== null)
-
         const isNew = !p.scout_screening_id || p.scout_screening_id === ''
 
         const payload: ScoutScreeningPattern = {
@@ -122,12 +114,7 @@ export async function POST(req: Request) {
           company_id: companyId,
           scout_screening_id: scout_screening_id,
           name: p.name ?? '',
-          age_min: p.age_min ?? 0,
-          age_max: p.age_max ?? 0,
-          exclude_job_changes: p.exclude_job_changes ?? 0,
-          has_management_experience: p.has_management_experience ?? false,
-          work_location_prefectures: prefectureIndices as number[],
-          conditions: p.conditions ?? '',
+          original_conditions: p.original_conditions ?? '',
           subject: p.subject ?? '',
           body: p.body ?? '',
           resend_subject: p.resend_subject ?? '',
@@ -135,9 +122,13 @@ export async function POST(req: Request) {
           re_resend_subject: p.re_resend_subject ?? '',
           re_resend_body: p.re_resend_body ?? '',
           updated_at: new Date().toISOString(),
-          created_at: '',
-          deleted_at: '',
+          created_at: new Date().toISOString(),
+          deleted_at: '-infinity',
         }
+
+        // Add priority (not yet included in generated types)
+        ;(payload as any).priority =
+          typeof p.priority === 'number' ? p.priority : 0
 
         // Include deleted_at only if defined and non-empty
         if (p.deleted_at && p.deleted_at !== '') {

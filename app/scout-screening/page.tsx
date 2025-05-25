@@ -21,8 +21,8 @@ export default function ScoutScreeningsPage() {
   const tools = [
     {
       type: 0,
-      title: 'スカウトスクリーニング',
-      description: 'スカウトスクリーニングを作成します。',
+      title: 'スカウト判定条件',
+      description: 'スカウト判定条件を作成します。',
     },
   ]
 
@@ -66,7 +66,7 @@ export default function ScoutScreeningsPage() {
       const createScoutScreeningResponse = await response.json()
       createScoutScreeningResponse.scout_screening_id
         ? window.location.replace(
-            `/scout-screening/${createScoutScreeningResponse.scout_screening_id}`
+            `/scout-screening/${createScoutScreeningResponse.scout_screening_id}/edit`
           )
         : alert('Failed to create scout screening')
     },
@@ -133,7 +133,7 @@ export default function ScoutScreeningsPage() {
             <section id="scout-screenings">
               <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
                 <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                  マイスカウトスクリーニング
+                  保存済みスカウト判定条件
                 </h2>
                 <div className="py-10 w-full flex justify-center">
                   <div className={getGridClass()}>
@@ -179,7 +179,7 @@ export default function ScoutScreeningsPage() {
                                       e.stopPropagation()
                                       if (
                                         confirm(
-                                          `スカウトスクリーニング「${screening.name}」を削除しますか？`
+                                          `スカウト判定条件「${screening.name}」を削除しますか？`
                                         )
                                       ) {
                                         deleteScoutScreening(screening.id)
@@ -236,7 +236,7 @@ export default function ScoutScreeningsPage() {
           <section id="suggested_scout_screenings">
             <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
               <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                スカウトスクリーニングを作成
+                スカウト判定条件を作成
               </h2>
               <div className="py-10 w-full flex justify-center">
                 <div className={getGridClass()}>

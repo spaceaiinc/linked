@@ -17,6 +17,33 @@ import { customModel } from '@/lib/ai/ai-utils'
  * such as {{candidate_name_id}}, {{current_position}}, {{age}}, {{achievement}}
  * with the provided candidate information and returns the populated patterns.
  */
+
+// Utility to robustly parse AI-generated JSON that may be wrapped in markdown
+// fences (``` or ```json) or have stray leading/trailing characters such as '+'.
+// It extracts the first JSON object substring and parses it.
+const safeJsonParse = <T = any>(raw: string): T => {
+  const trimmed = raw
+    .trim()
+    // remove leading markdown code fences
+    .replace(/^```[a-z]*\s*\n?/i, '')
+    // remove trailing markdown code fences
+    .replace(/```\s*$/i, '')
+    .replace(/^\+/g, '') // strip leading '+' symbols that models sometimes add
+
+  // Attempt direct parse first
+  try {
+    return JSON.parse(trimmed)
+  } catch (_) {
+    // Fallback: extract substring between first '{' and last '}'
+    const first = trimmed.indexOf('{')
+    const last = trimmed.lastIndexOf('}')
+    if (first !== -1 && last !== -1 && last > first) {
+      return JSON.parse(trimmed.slice(first, last + 1))
+    }
+    throw _
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const { scout_screening_id, candidate_info } = await req.json()
@@ -46,7 +73,7 @@ export async function POST(req: Request) {
       .select('*')
       .eq('scout_screening_id', scout_screening_id)
       .eq('deleted_at', '-infinity')
-      .order('updated_at', { ascending: true })
+      .order('priority', { ascending: true })
 
     if (error) {
       console.error('Error fetching patterns', error)
@@ -100,37 +127,71 @@ export async function POST(req: Request) {
     }
 
     let passedPattern: any = null
+    const failedPatterns: Array<{
+      original_conditions: string | null
+      reason: string
+    }> = []
 
     for (const pattern of patterns || []) {
       // Use AI to judge if candidate_info satisfies pattern.conditions
-      let isPassed = false
+      // Assume the candidate passes until a condition fails
+      let isPassed = true
       let reason = ''
       try {
-        console.log('pattern', pattern)
         // condition内の条件ごとにAIで評価する
         // 1. 年齢ごと行職種経験などをAIによって分ける
-        const { text: splited_conditions } = await generateText({
-          model: customModel('gpt-o3'),
+        const { text: conditions } = await generateText({
+          model: customModel('gpt-4o'),
+          temperature: 0,
+          topP: 0.5,
+          frequencyPenalty: 0,
+          presencePenalty: 0,
           system: `
           You are a strict JSON evaluator.
-          Return JSON "+{ \"splited_conditions\": [\"splited_condition\": string ] }+"
-          where conditions is an array of conditions that the candidate must satisfy.
+          Return JSON "+{ \"conditions\": [\"condition\": string ] }+"
           条件をキリのいい箇所でsplitしてください。5 conditionsくらいにしてください。
           Do not provide any additional keys.`,
-          prompt: `candidate_info:\n${JSON.stringify(infoObj, null, 2)}\n\nconditions:\n${pattern.conditions}`,
+          prompt: `conditions:\n${pattern.original_conditions}`,
         })
         // 2. それぞれの条件をAIによって評価する
-        const parsed_splited_conditions = JSON.parse(splited_conditions.trim())
-        for (const condition of parsed_splited_conditions.splited_conditions) {
+        // Some AI models may wrap JSON in markdown code fences like ```json. Remove these if present before parsing.
+        const cleanSplitted = conditions
+          .trim()
+          .replace(/^```[a-z]*\s*\n?/i, '') // remove leading ``` or ```json
+          .replace(/```\s*$/i, '') // remove trailing ```
+
+        const parsed_conditions = safeJsonParse(cleanSplitted)
+        console.log('parsed_conditions', parsed_conditions)
+        for (const condition of parsed_conditions.conditions) {
+          console.log('condition', condition)
+          const prompt = `condition: ${condition}\n\ncandidate_info:\n${JSON.stringify(infoObj, null, 2)}`
           const { text: passed } = await generateText({
-            model: customModel('gpt-o3'),
-            system: `You are a strict JSON evaluator. Return JSON "+{ \"passed\": true|false, \"reason\": string }+" where passed is true only when the candidate fully satisfies ALL conditions. Do not provide any additional keys.`,
-            prompt: `candidate_info:\n${JSON.stringify(infoObj, null, 2)}\n\nconditions:\n${condition}`,
+            model: customModel('gpt-4o'),
+            temperature: 0,
+            topP: 0.5,
+            frequencyPenalty: 0,
+            presencePenalty: 0,
+            system: `
+            You are a strict JSON evaluator. Return JSON "+{ \"passed\": true|false, \"reason\": string }+" 
+            Do not provide any additional keys.
+            candidate_infoの内容がconditionの中の値を満たしているかどうかを判断してください。
+            reason must be in Japanese. reason includes quotation marks in condition and candidate_info.
+            `,
+            prompt: prompt,
           })
-          const parsed_passed = JSON.parse(passed.trim())
+          // Some AI models may wrap JSON in markdown code fences like ```json. Remove these if present before parsing.
+          const cleanPassed = passed
+            .trim()
+            .replace(/^```[a-z]*\s*\n?/i, '')
+            .replace(/```\s*$/i, '')
+          const parsed_passed = safeJsonParse(cleanPassed)
+          console.log('parsed_passed', parsed_passed)
+          reason +=
+            parsed_passed.reason
+              .replace('candidate_info', '候補者情報')
+              .replace('condition', '指定条件') + '\n'
           if (parsed_passed.passed === false) {
             isPassed = false
-            reason += parsed_passed.reason + '\n'
             break
           }
         }
@@ -142,6 +203,7 @@ export async function POST(req: Request) {
         passedPattern = {
           passed: 'ok',
           reason: reason,
+          original_conditions: pattern.original_conditions,
           pattern_id: pattern.id,
           subject: replaceVars(pattern.subject),
           body: replaceVars(pattern.body),
@@ -151,16 +213,33 @@ export async function POST(req: Request) {
           re_resend_body: replaceVars(pattern.re_resend_body),
         }
         break
+      } else {
+        failedPatterns.push({
+          original_conditions: pattern.original_conditions,
+          reason: reason,
+        })
       }
     }
 
     console.log('passedPattern', passedPattern)
 
     if (passedPattern) {
-      return NextResponse.json(passedPattern, { status: 200 })
+      return NextResponse.json(
+        {
+          ...passedPattern,
+          failedPatterns,
+        },
+        { status: 200 }
+      )
     }
 
-    return NextResponse.json({ passed: 'ng' }, { status: 200 })
+    return NextResponse.json(
+      {
+        passed: 'ng',
+        failedPatterns,
+      },
+      { status: 200 }
+    )
   } catch (err) {
     console.error('Unexpected error in POST /api/scout-screening/run', err)
     return NextResponse.json(

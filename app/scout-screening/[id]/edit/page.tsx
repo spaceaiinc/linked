@@ -34,37 +34,41 @@ const VARIABLE_CHIPS = [
 
 // 条件入力でワンクリック挿入できるキーワードチップ
 const CONDITION_KEYWORDS = [
-  { label: '年齢', value: '年齢: 歳~歳, ' },
-  { label: '転職回数', value: '転職回数: 回以内, ' },
-  { label: '社会人経験', value: '社会人経験: 年以上, ' },
-  { label: '業職種経験', value: '業界: , 職種: , 経験年数: 年以上, ' },
-  { label: 'マネジメント経験', value: 'マネジメント経験: あり' },
+  { label: '年齢', value: '年齢: ~ 歳の間である。 ' },
+  { label: '転職回数', value: '転職回数: 回以上の記載がある場合は除く。 ' },
+  { label: '業職種経験', value: ' として 年以上の経験記載がない場合は除く。 ' },
+  {
+    label: 'マネジメント経験',
+    value: 'マネジメント経験の記載がない場合は除く。 ',
+  },
 ]
+
+// Define extended pattern type that includes optional priority
+interface PatternWithPriority extends ScoutScreeningPattern {
+  priority?: number
+}
 
 // Helper function to create a default pass pattern
 const createDefaultScoutScreeningPattern = (
   companyId?: string,
-  scoutScreeningId?: string
-): ScoutScreeningPattern => ({
+  scoutScreeningId?: string,
+  priority: number = 0
+): PatternWithPriority => ({
   id: '',
   name: `合格パターン${Math.floor(Math.random() * 100) + 1}`,
   company_id: companyId || '',
   scout_screening_id: scoutScreeningId || '',
-  created_at: '',
-  updated_at: '',
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
   deleted_at: '-infinity',
-  age_min: 0,
-  age_max: 0,
-  exclude_job_changes: 0,
-  has_management_experience: false,
-  work_location_prefectures: [],
-  conditions: '',
+  original_conditions: '',
   subject: '',
   body: '',
   resend_subject: '',
   resend_body: '',
   re_resend_subject: '',
   re_resend_body: '',
+  priority,
 })
 
 export default function ScoutScreeningPage() {
@@ -74,9 +78,9 @@ export default function ScoutScreeningPage() {
 
   const [companyName, setCompanyName] = useState('')
   const [jobTitle, setJobTitle] = useState('')
-  const [patterns, setScoutScreeningPatterns] = useState<
-    ScoutScreeningPattern[]
-  >([])
+  const [patterns, setScoutScreeningPatterns] = useState<PatternWithPriority[]>(
+    []
+  )
   const [isLoading, setIsLoading] = useState(true)
   // ドラッグ＆ドロップ用にドラッグ開始インデックスを保持
   const [dragStartIndex, setDragStartIndex] = useState<number | null>(null)
@@ -121,6 +125,7 @@ export default function ScoutScreeningPage() {
                 .select('*')
                 .eq('company_id', companyId)
                 .eq('deleted_at', '-infinity')
+                .order('priority', { ascending: true })
 
             if (patternError) {
               console.error(
@@ -131,7 +136,7 @@ export default function ScoutScreeningPage() {
                 createDefaultScoutScreeningPattern(companyId),
               ])
             } else if (companyPatternsData && companyPatternsData.length > 0) {
-              const mappedPatterns: ScoutScreeningPattern[] =
+              const mappedPatterns: PatternWithPriority[] =
                 companyPatternsData.map((p: any) => ({
                   id: `${Date.now().toString()}-${Math.random().toString(36).substring(2, 9)}`,
                   name: p.name || '無名パターン',
@@ -140,36 +145,23 @@ export default function ScoutScreeningPage() {
                   created_at: p.created_at || new Date().toISOString(),
                   updated_at: p.updated_at || new Date().toISOString(),
                   deleted_at: p.deleted_at || '',
-                  age_min: p.age_min || 0,
-                  age_max: p.age_max || 0,
-                  exclude_job_changes: p.exclude_job_changes || 0,
-                  has_management_experience:
-                    p.has_management_experience || false,
-                  work_location_prefectures: (
-                    p.work_location_prefectures || []
-                  ).map((item: string | number) => {
-                    const num = Number(item)
-                    if (
-                      !isNaN(num) &&
-                      num >= 0 &&
-                      num < PREFECTURES.length &&
-                      String(item).match(/^\d+$/)
-                    ) {
-                      return PREFECTURES[num]
-                    }
-                    return String(item)
-                  }),
-                  conditions: p.conditions || '',
+                  original_conditions: p.original_conditions || '',
                   subject: p.subject || '',
                   body: p.body || '',
                   resend_subject: p.resend_subject || '',
                   resend_body: p.resend_body || '',
                   re_resend_subject: p.re_resend_subject || '',
                   re_resend_body: p.re_resend_body || '',
+                  priority: p.priority || 0,
                 }))
+
               setScoutScreeningPatterns(
                 mappedPatterns.length > 0
-                  ? mappedPatterns
+                  ? renumberPriorities(
+                      mappedPatterns.sort(
+                        (a, b) => (a.priority || 0) - (b.priority || 0)
+                      )
+                    )
                   : [createDefaultScoutScreeningPattern(companyId)]
               )
             } else {
@@ -246,7 +238,11 @@ export default function ScoutScreeningPage() {
           setCompanyName(data.company_name || '')
           setJobTitle(data.job_title || '')
           setScoutScreeningPatterns(
-            mappedPatternsForLoad as ScoutScreeningPattern[]
+            renumberPriorities(
+              (mappedPatternsForLoad as PatternWithPriority[]).sort(
+                (a, b) => (a.priority || 0) - (b.priority || 0)
+              )
+            )
           )
         }
       } catch (error) {
@@ -260,24 +256,30 @@ export default function ScoutScreeningPage() {
     fetchScreeningData()
   }, [id])
 
+  const renumberPriorities = (list: PatternWithPriority[]) =>
+    list.map((p, idx) => ({ ...p, priority: idx }))
+
   const addScoutScreeningPattern = () => {
     const companyId = patterns[0]?.company_id || ''
     const currentScreeningId = id
-    const newPattern: ScoutScreeningPattern =
-      createDefaultScoutScreeningPattern(companyId, currentScreeningId)
+    const newPattern: PatternWithPriority = createDefaultScoutScreeningPattern(
+      companyId,
+      currentScreeningId,
+      patterns.length
+    )
     newPattern.name = `合格${patterns.length + 1}`
-    setScoutScreeningPatterns([...patterns, newPattern])
+    setScoutScreeningPatterns(renumberPriorities([...patterns, newPattern]))
   }
 
   const removeScoutScreeningPattern = (patternId: string) => {
     setScoutScreeningPatterns(
-      patterns.filter((pattern) => pattern.id !== patternId)
+      renumberPriorities(patterns.filter((pattern) => pattern.id !== patternId))
     )
   }
 
   const updateScoutScreeningPattern = (
     id: string,
-    updates: Partial<ScoutScreeningPattern>
+    updates: Partial<PatternWithPriority>
   ) => {
     setScoutScreeningPatterns(
       patterns.map((pattern) =>
@@ -334,7 +336,7 @@ export default function ScoutScreeningPage() {
     const pattern = patterns.find((p) => p.id === patternId)
     if (!pattern) return
 
-    const currentValue = pattern.conditions || ''
+    const currentValue = pattern.original_conditions || ''
     const textarea = document.getElementById(
       `${patternId}-conditions`
     ) as HTMLTextAreaElement
@@ -345,7 +347,7 @@ export default function ScoutScreeningPage() {
       const newValue =
         currentValue.substring(0, start) + keyword + currentValue.substring(end)
 
-      updateScoutScreeningPattern(patternId, { conditions: newValue })
+      updateScoutScreeningPattern(patternId, { original_conditions: newValue })
 
       setTimeout(() => {
         textarea.focus()
@@ -381,7 +383,7 @@ export default function ScoutScreeningPage() {
       }
 
       if (result.updated_patterns) {
-        router.push(`/scout-screening/${id}/run`)
+        router.push(`/scout-screening/${id}`)
         // setScoutScreeningPatterns(
         //   result.updated_patterns as ScoutScreeningPattern[]
         // )
@@ -405,7 +407,7 @@ export default function ScoutScreeningPage() {
     const updated = [...patterns]
     const [removed] = updated.splice(dragStartIndex, 1)
     updated.splice(dropIndex, 0, removed)
-    setScoutScreeningPatterns(updated)
+    setScoutScreeningPatterns(renumberPriorities(updated))
     setDragStartIndex(null)
   }
 
@@ -426,7 +428,7 @@ export default function ScoutScreeningPage() {
             <CardHeader>
               <CardTitle>基本情報</CardTitle>
               <CardDescription>
-                スカウトスクリーニングの基本情報を入力します
+                スカウト判定条件の基本情報を入力します
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -557,10 +559,10 @@ export default function ScoutScreeningPage() {
                       <Textarea
                         id={`${pattern.id}-conditions`}
                         placeholder="例: 年齢 35 以下 かつ 経験年数 3 以上"
-                        value={pattern.conditions || ''}
+                        value={pattern.original_conditions || ''}
                         onChange={(e) =>
                           updateScoutScreeningPattern(pattern.id, {
-                            conditions: e.target.value,
+                            original_conditions: e.target.value,
                           })
                         }
                         rows={4}
