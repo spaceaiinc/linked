@@ -1,24 +1,34 @@
 'use client'
-import { tools } from '@/lib/apps'
-import { providerAtom, userAtom, workflowsAtom } from '@/lib/atom'
+import { providerAtom, userAtom, scoutScreeningsAtom } from '@/lib/atom'
 import { WorkflowType } from '@/lib/types/master'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
-import { Button } from '../ui/button'
-import LoadingPage from '../Loading'
-import Login from '../input/login'
+import { Button } from '@/app/components/ui/button'
+import LoadingPage from '@/app/components/Loading'
+import Login from '@/app/components/input/login'
 import { createClient } from '@/lib/utils/supabase/client'
+import { ScoutScreening } from '@/lib/atom'
 import Link from 'next/link'
+import { IconShare } from '@/app/components/ui/icons'
+import { IconChevronRight, IconSend, IconEdit } from '@tabler/icons-react'
 
-export default function Apps() {
+export default function ScoutScreeningsPage() {
   // 縦並びのレイアウトを返す関数
   const getGridClass = () => {
     return 'flex flex-col gap-6 w-full max-w-4xl mx-auto'
   }
 
+  const tools = [
+    {
+      type: 0,
+      title: 'スカウト判定条件',
+      description: 'スカウト判定条件を作成します。',
+    },
+  ]
+
   const [user, _] = useAtom(userAtom)
   const [provider, __] = useAtom(providerAtom)
-  const [workflows, ___] = useAtom(workflowsAtom)
+  const [scoutScreenings, ___] = useAtom(scoutScreeningsAtom)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -34,10 +44,10 @@ export default function Apps() {
     return () => clearTimeout(timeoutId)
   }, [user, provider])
 
-  const createWorkflow = useCallback(
+  const createScoutScreening = useCallback(
     async (type: WorkflowType) => {
-      console.log('createWorkflow', type)
-      const response = await fetch(`/api/workflow`, {
+      console.log('createScoutScreening', type)
+      const response = await fetch(`/api/scout-screening`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,32 +63,32 @@ export default function Apps() {
         throw new Error('Network response was not ok')
       }
 
-      const createWorkflowResponse = await response.json()
-      createWorkflowResponse.workflow_id
+      const createScoutScreeningResponse = await response.json()
+      createScoutScreeningResponse.scout_screening_id
         ? window.location.replace(
-            `/workflow/${createWorkflowResponse.workflow_id}`
+            `/scout-screening/${createScoutScreeningResponse.scout_screening_id}/edit`
           )
-        : alert('Failed to create workflow')
+        : alert('Failed to create scout screening')
     },
     [provider]
   )
 
-  const deleteWorkflow = useCallback(
-    async (workflowId: string) => {
+  const deleteScoutScreening = useCallback(
+    async (scoutScreeningId: string) => {
       const supabase = createClient()
       const { error: deleteError } = await supabase
-        .from('workflows')
+        .from('scout_screenings')
         .update([{ deleted_at: new Date().toISOString() }])
         .eq('company_id', provider?.company_id)
-        .eq('id', workflowId)
+        .eq('id', scoutScreeningId)
 
       if (deleteError) {
         alert('削除に失敗しました')
-        console.error('Failed to delete workflow:', deleteError)
+        console.error('Failed to delete scout screening:', deleteError)
         return
       }
 
-      // Refresh the page to update the workflow list
+      // Refresh the page to update the scout screening list
       window.location.reload()
     },
     [provider]
@@ -119,81 +129,100 @@ export default function Apps() {
         </div>
       ) : provider ? (
         <>
-          {workflows.length > 0 && (
-            <section id="workflows">
+          {scoutScreenings.length > 0 && (
+            <section id="scout-screenings">
               <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
                 <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                  マイワークフロー
+                  保存済みスカウト判定条件
                 </h2>
                 <div className="py-10 w-full flex justify-center">
                   <div className={getGridClass()}>
-                    {workflows.map((workflow, index) => {
-                      if (workflow.type === WorkflowType.LEAD_LIST) {
-                        return null
-                      }
+                    {scoutScreenings.map((screening: ScoutScreening, index) => {
+                      // if (screening.type === WorkflowType.LEAD_LIST) {
+                      //   return null
+                      // }
                       return (
                         <Link
                           key={index}
-                          href={'/workflow/' + workflow.id}
+                          href={`/scout-screening/${screening.id}`}
                           className="w-full"
                         >
                           <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
-                            {/* 左側：画像 */}
-                            <div className="w-1/3 pr-4">
-                              <img
-                                src={'/apps/linkedin-logo.jpg'}
-                                alt={workflow.name}
-                                className="w-full h-auto border border-base-200 rounded-md"
-                              />
+                            {/* 左側：アイコン */}
+                            <div className="w-1/3 pr-4 flex justify-center items-center">
+                              <div className="w-16 h-16 rounded-md flex items-center justify-center">
+                                <IconSend className="h-8 w-8" />
+                              </div>
                             </div>
                             {/* 右側：テキスト情報 */}
                             <div className="w-2/3 flex flex-col">
                               <div className="flex justify-between items-start">
                                 <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                                  {workflow.name}
+                                  {screening.company_name}
                                 </h3>
-                                <button
-                                  onClick={(e) => {
-                                    e.preventDefault()
-                                    e.stopPropagation()
-                                    if (
-                                      confirm(
-                                        `ワークフロー「${workflow.name}」を削除しますか？`
-                                      )
-                                    ) {
-                                      deleteWorkflow(workflow.id)
-                                    }
-                                  }}
-                                  className="text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md"
-                                  aria-label="Delete workflow"
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+
+                                <div className="flex flex-col gap-1">
+                                  <Link
+                                    href={`/scout-screening/${screening.id}/edit`}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md flex items-center justify-center"
+                                    aria-label="Edit scout screening"
                                   >
-                                    <path d="M3 6h18" />
-                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                    <line x1="10" y1="11" x2="10" y2="17" />
-                                    <line x1="14" y1="11" x2="14" y2="17" />
-                                  </svg>
-                                </button>
+                                    <IconEdit size={16} />
+                                  </Link>
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      if (
+                                        confirm(
+                                          `スカウト判定条件「${screening.name}」を削除しますか？`
+                                        )
+                                      ) {
+                                        deleteScoutScreening(screening.id)
+                                      }
+                                    }}
+                                    className="text-gray-500 hover:text-gray-700 px-2 py-1 rounded-md"
+                                    aria-label="Delete scout screening"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M3 6h18" />
+                                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                      <line x1="10" y1="11" x2="10" y2="17" />
+                                      <line x1="14" y1="11" x2="14" y2="17" />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
-                              <div className="mt-4 flex gap-y-1 flex-wrap">
+                              <p className="text-sm text-neutral-500 mt-1">
+                                {screening.job_title}
+                              </p>
+                              {/* <div className="mt-4 flex gap-y-1 flex-wrap">
                                 <span
-                                  key={workflow.type}
+                                  key={screening.type}
                                   className="border bg-base-100 text-base-content py-1 px-4 text-sm rounded-xl"
                                 >
-                                  {WorkflowType[workflow.type]}
+                                  {
+                                    WorkflowType[
+                                      screening.type as keyof typeof WorkflowType
+                                    ]
+                                  }
                                 </span>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </Link>
@@ -204,49 +233,45 @@ export default function Apps() {
               </div>
             </section>
           )}{' '}
-          <section id="suggested_workflows">
+          <section id="suggested_scout_screenings">
             <div className="p-2 sm:p-6 xl:max-w-7xl xl:mx-auto relative isolate overflow-hidden pb-0 flex flex-col justify-center items-center">
               <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
-                ワークフローを作成
+                スカウト判定条件を作成
               </h2>
               <div className="py-10 w-full flex justify-center">
                 <div className={getGridClass()}>
-                  {tools.map((workflow, index) => (
+                  {tools.map((toolItem, index) => (
                     <a
                       key={index}
                       onClick={() => {
-                        createWorkflow(workflow.type)
+                        createScoutScreening(toolItem.type)
                       }}
                       className="w-full cursor-pointer"
                     >
                       <div className="w-full transition-all duration-500 ease-in-out bg-white border border-base-200 rounded-xl hover:-translate-y-1 p-4 flex flex-row items-center">
-                        {/* 左側：画像 */}
-                        <div className="w-1/3 pr-4">
-                          {workflow.image && (
-                            <img
-                              src={workflow.image}
-                              alt={workflow.title}
-                              className="w-full h-auto border border-base-200 rounded-md"
-                            />
-                          )}
+                        {/* 左側：アイコン */}
+                        <div className="w-1/3 pr-4 flex justify-center items-center">
+                          <div className="w-16 h-16 rounded-md flex items-center justify-center">
+                            <IconSend className="h-8 w-8" />
+                          </div>
                         </div>
                         {/* 右側：テキスト情報 */}
                         <div className="w-2/3 flex flex-col">
                           <h3 className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">
-                            {workflow.title}
+                            {toolItem.title}
                           </h3>
                           <p className="text-sm text-neutral-400 mt-2">
-                            {workflow.description}
+                            {toolItem.description}
                           </p>
                           <div className="mt-4 flex gap-2 flex-wrap">
-                            {workflow.tags.map((tag, index) => (
+                            {/* {toolItem.tags.map((tag, index) => (
                               <span
                                 key={tag}
                                 className="border bg-base-100 text-base-content py-1 px-3 text-sm rounded-xl"
                               >
                                 {tag}
                               </span>
-                            ))}
+                            ))} */}
                           </div>
                         </div>
                       </div>
