@@ -351,7 +351,7 @@ export function UnifiedSidebar({
             </>
           ) : null}
           <span className="text-xs text-neutral-400 text-center">
-            version@0.1.7
+            version@0.1.8
           </span>
           <button
             className="fixed lg:hidden bottom-4 right-4 h-8 w-8 border border-neutral-200 rounded-full backdrop-blur-sm flex items-center justify-center z-40"

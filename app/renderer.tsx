@@ -149,27 +149,27 @@ export default function Renderer({ children }: Props) {
 
       setWorkflows(workflows)
 
-      const { data: scoutScreenings, error: selectScoutScreeningsError } =
-        await supabase
-          .from('scout_screenings') // Assuming the table name is 'scout_screenings'
-          .select('*')
-          .eq('company_id', profile?.company_id)
-          .eq('deleted_at', '-infinity')
-          .order('updated_at', { ascending: false })
+      // const { data: scoutScreenings, error: selectScoutScreeningsError } =
+      //   await supabase
+      //     .from('scout_screenings') // Assuming the table name is 'scout_screenings'
+      //     .select('*')
+      //     .eq('company_id', profile?.company_id)
+      //     .eq('deleted_at', '-infinity')
+      //     .order('updated_at', { ascending: false })
 
-      if (selectScoutScreeningsError) {
-        console.error(
-          'Error selecting scout screenings:',
-          selectScoutScreeningsError
-        )
-        return <>{children}</>
-      }
+      // if (selectScoutScreeningsError) {
+      //   console.error(
+      //     'Error selecting scout screenings:',
+      //     selectScoutScreeningsError
+      //   )
+      //   return <>{children}</>
+      // }
 
-      if (!scoutScreenings) {
-        console.error('Scout screenings not found')
-        return <>{children}</>
-      }
-      setScoutScreenings(scoutScreenings)
+      // if (!scoutScreenings) {
+      //   console.error('Scout screenings not found')
+      //   return <>{children}</>
+      // }
+      // setScoutScreenings(scoutScreenings)
     }
     f()
   }, [])
