@@ -134,7 +134,7 @@ export default function ScoutScreeningRunPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-4 flex items-center gap-2">
+      <h1 className="text-2xl font-bold mb-4 flex items-center gap-2">
         スカウト判定
         {screening && (
           <span className="text-lg font-normal text-gray-600 whitespace-nowrap">
@@ -147,7 +147,7 @@ export default function ScoutScreeningRunPage() {
         {/* Input side */}
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>候補者情報</CardTitle>
+            {/* <CardTitle>候補者情報</CardTitle> */}
             <CardDescription>候補者の情報を入力してください。</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -156,12 +156,13 @@ export default function ScoutScreeningRunPage() {
               onChange={(e) => setCandidateInfo(e.target.value)}
               placeholder=""
               className="min-h-[200px]"
+              rows={16}
             />
-            <div className="flex justify-end">
+            <div className="">
               <Button
                 onClick={handleExecute}
                 disabled={loading || !candidateInfo}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 w-full"
               >
                 {loading ? (
                   '実行中...'
