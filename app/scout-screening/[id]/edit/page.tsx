@@ -560,7 +560,7 @@ export default function ScoutScreeningPage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Label>条件</Label>
+                        <Label>テキスト</Label>
                         <div className="flex gap-2">
                           {CONDITION_KEYWORDS.map((chip) => (
                             <Badge
@@ -813,11 +813,11 @@ export default function ScoutScreeningPage() {
             ))}
           </Tabs>
 
-          <div className="mt-8 flex justify-end">
+          <div className="mt-8 flex">
             <Button
               onClick={handleSave}
               size="lg"
-              className="bg-primary text-white hover:bg-primary/90"
+              className="bg-primary text-white hover:bg-primary/90 w-full"
             >
               更新する
             </Button>
