@@ -7,7 +7,6 @@ import {
   profileAtom,
   workflowsAtom,
   loadingAtom,
-  scoutScreeningsAtom,
 } from '@/lib/atom'
 import { Provider } from '@/lib/types/supabase'
 import { createClient } from '@/lib/utils/supabase/client'
@@ -24,7 +23,6 @@ export default function Renderer({ children }: Props) {
   const [, setProvider] = useAtom(providerAtom)
   const [, setProviders] = useAtom(providersAtom)
   const [, setWorkflows] = useAtom(workflowsAtom)
-  const [, setScoutScreenings] = useAtom(scoutScreeningsAtom)
   const [loading] = useAtom(loadingAtom)
   useEffect(() => {
     const f = async () => {

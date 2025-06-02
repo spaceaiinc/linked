@@ -1,0 +1,40 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Linked LinkedIn Lead Generation System - Cursor Rules  
+  
+## プロジェクト概要  
+- Next.js + TypeScript + Supabaseを使用したLinkedInリード生成システム  
+- Unipile APIを通じてLinkedInプロフィール検索・招待送信を実行  
+- ワークフロー管理とリードトラッキング機能を提供  
+  
+## ディレクトリ構造  
+- `/app/api/` - API エンドポイント  
+- `/app/components/` - React コンポーネント    
+- `/lib/db/queries/` - データベースクエリ関数  
+- `/lib/types/` - TypeScript型定義  
+- `/supabase/migrations/` - データベースマイグレーション  
+  
+## 主要なAPI設計パターン  
+- 全APIエンドポイントはSupabase認証を使用  
+- スケジュールタスクはservice roleクレデンシャルを使用してRLSをバイパス  
+- エラーハンドリングは標準HTTPステータスコードとJSONレスポンス形式を使用
+
+## データベース設計原則  
+- 全テーブルにcompany_idを含めてマルチテナント対応  
+- Row Level Security (RLS) ポリシーでデータアクセス制御  
+- created_at/updated_at/deleted_atカラムで監査ログ対応  
+- 外部キー制約でデータ整合性を保証
+
+
+## Unipile API統合  
+- 環境変数でDNSとアクセストークンを管理  
+- レート制限エラーの適切なハンドリング  
+- リトライロジックとエラー分類を実装  
+  
+## 招待送信処理  
+- 既存招待の重複チェック  
+- 失敗ケースの詳細な分類とログ出力  
+- プロバイダーエラーに対する待機処理
